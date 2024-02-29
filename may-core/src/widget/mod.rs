@@ -1,13 +1,14 @@
-pub mod widgets;
 pub mod interaction;
+pub mod widgets;
 
 #[cfg(feature = "canvas")]
 pub mod canvas;
 
+use crate::widget::interaction::Action;
 use femtovg::{Paint, Path};
+use may_theme::theme::Theme;
 use mint::Vector2;
 use taffy::{Layout, Style};
-use crate::widget::interaction::Action;
 
 pub trait Widget {
     fn render(&mut self, layout: &Layout) -> Vec<Sketch>;
@@ -17,14 +18,21 @@ pub trait Widget {
     fn style_mut(&mut self) -> &mut Style;
     fn interactive(&self) -> bool;
     fn interact(&mut self, actions: Vec<Action>);
+    fn apply_theme(&mut self, theme: Box<dyn Theme>);
 
-    fn with_children(mut self, new_children: Vec<Box<dyn Widget>>) -> Self where Self: Sized {
+    fn with_children(mut self, new_children: Vec<Box<dyn Widget>>) -> Self
+    where
+        Self: Sized,
+    {
         let children = self.children_mut();
         children.extend(new_children);
         self
     }
 
-    fn with_child(mut self, child: Box<dyn Widget>) -> Self where Self: Sized {
+    fn with_child(mut self, child: Box<dyn Widget>) -> Self
+    where
+        Self: Sized,
+    {
         let children = self.children_mut();
         children.push(child);
         self
@@ -41,7 +49,10 @@ pub trait Widget {
         children.extend(new_children);
     }
 
-    fn with_style(mut self, new_style: Style) -> Self where Self: Sized {
+    fn with_style(mut self, new_style: Style) -> Self
+    where
+        Self: Sized,
+    {
         let style = self.style_mut();
         *style = new_style;
         self
@@ -55,10 +66,10 @@ pub trait Widget {
 
 pub enum PathMode {
     Fill,
-    Stroke
+    Stroke,
 }
 
 pub enum Sketch {
     Path(Path, Paint, PathMode),
-    Text(String, Vector2<f32>, Paint, PathMode)
+    Text(String, Vector2<f32>, Paint, PathMode),
 }

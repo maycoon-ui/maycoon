@@ -1,30 +1,32 @@
-pub mod page;
 pub mod context;
+pub mod page;
 pub mod render;
 
-use std::num::NonZeroU32;
-use femtovg::Canvas;
+use crate::app::context::{AppCommand, AppContext};
+use crate::app::page::Page;
+use crate::app::render::{draw_root_widget, render_sketches};
+use crate::config::{AppConfig, Fullscreen};
+use crate::widget::interaction::{Action, InteractionInfo};
+use crate::widget::{PathMode, Sketch, Widget};
 use femtovg::renderer::OpenGl;
+use femtovg::Canvas;
 use glutin::config::{ConfigSurfaceTypes, ConfigTemplateBuilder};
 use glutin::context::{ContextAttributesBuilder, NotCurrentGlContext};
 use glutin::display::{Display, DisplayApiPreference, GlDisplay};
 use glutin::surface::{GlSurface, SurfaceAttributesBuilder, WindowSurface};
 use raw_window_handle::{HasRawDisplayHandle, HasRawWindowHandle};
+use std::num::NonZeroU32;
 use taffy::{Dimension, NodeId, PrintTree, Size, Style, TaffyTree};
 use winit::event::{Event, Modifiers, WindowEvent};
 use winit::event_loop::EventLoopBuilder;
-use winit::platform::windows::{EventLoopBuilderExtWindows, MonitorHandleExtWindows, WindowBuilderExtWindows};
+use winit::platform::windows::{
+    EventLoopBuilderExtWindows, MonitorHandleExtWindows, WindowBuilderExtWindows,
+};
 use winit::window::WindowBuilder;
-use crate::app::context::{AppCommand, AppContext};
-use crate::app::page::Page;
-use crate::app::render::{draw_root_widget, render_sketches};
-use crate::config::{AppConfig, Fullscreen};
-use crate::widget::{PathMode, Sketch, Widget};
-use crate::widget::interaction::{Action, InteractionInfo};
 
 pub struct MayApp {
     config: AppConfig,
-    page: Box<dyn Page>
+    page: Box<dyn Page>,
 }
 
 impl MayApp {
@@ -42,8 +44,10 @@ impl MayApp {
             .expect("Failed to create event loop");
 
         let monitor = event_loop.primary_monitor().unwrap_or_else(|| {
-            event_loop.available_monitors()
-                .next().expect("Failed to get any monitor")
+            event_loop
+                .available_monitors()
+                .next()
+                .expect("Failed to get any monitor")
         });
 
         let window = WindowBuilder::new()
@@ -55,9 +59,11 @@ impl MayApp {
             .with_fullscreen(self.config.window.fullscreen.map(|fullscreen| {
                 match fullscreen {
                     Fullscreen::Exclusive => winit::window::Fullscreen::Exclusive(
-                        monitor.clone().video_modes()
+                        monitor
+                            .clone()
+                            .video_modes()
                             .next()
-                            .expect("Failed to get any monitor's video mode")
+                            .expect("Failed to get any monitor's video mode"),
                     ),
                     Fullscreen::Borderless => {
                         winit::window::Fullscreen::Borderless(Some(monitor.clone()))
@@ -86,15 +92,11 @@ impl MayApp {
                 let pref = DisplayApiPreference::Cgl;
 
                 #[cfg(target_os = "windows")]
-                let pref = DisplayApiPreference::WglThenEgl(
-                    Some(window.raw_window_handle())
-                );
+                let pref = DisplayApiPreference::WglThenEgl(Some(window.raw_window_handle()));
 
-                Display::new(
-                    window.raw_display_handle(),
-                    pref
-                )
-            }.expect("Failed to create Gl display");
+                Display::new(window.raw_display_handle(), pref)
+            }
+            .expect("Failed to create Gl display");
 
             let gl_config = unsafe {
                 display.find_configs(
@@ -102,46 +104,47 @@ impl MayApp {
                         .compatible_with_native_window(window.raw_window_handle())
                         .prefer_hardware_accelerated(self.config.graphics.hardware_acceleration)
                         .with_api(self.config.graphics.gl)
-                        .prefer_hardware_accelerated(Some(
-                            true
-                        ))
+                        .prefer_hardware_accelerated(Some(true))
                         .with_surface_type(ConfigSurfaceTypes::WINDOW)
                         .with_multisampling(self.config.graphics.multisampling)
-                        .build()
+                        .build(),
                 )
-            }.expect("Failed to find Gl config").next().expect("Failed to get any Gl config");
+            }
+            .expect("Failed to find Gl config")
+            .next()
+            .expect("Failed to get any Gl config");
 
             let surface = unsafe {
                 display.create_window_surface(
                     &gl_config,
-                    &SurfaceAttributesBuilder::<WindowSurface>::new()
-                        .build(
-                            window.raw_window_handle(),
-                            NonZeroU32::new_unchecked(window.inner_size().width),
-                            NonZeroU32::new_unchecked(window.inner_size().height),
-                        )
+                    &SurfaceAttributesBuilder::<WindowSurface>::new().build(
+                        window.raw_window_handle(),
+                        NonZeroU32::new_unchecked(window.inner_size().width),
+                        NonZeroU32::new_unchecked(window.inner_size().height),
+                    ),
                 )
-            }.expect("Failed to create Gl surface");
+            }
+            .expect("Failed to create Gl surface");
 
             let context = unsafe {
                 display.create_context(
                     &gl_config,
-                    &ContextAttributesBuilder::new()
-                        .build(Some(
-                            window.raw_window_handle()
-                        ))
+                    &ContextAttributesBuilder::new().build(Some(window.raw_window_handle())),
                 )
-            }.expect("Failed to create Gl context")
-                .make_current(&surface)
-                .expect("Failed to make Gl context current");
+            }
+            .expect("Failed to create Gl context")
+            .make_current(&surface)
+            .expect("Failed to make Gl context current");
 
             let canvas = Canvas::new(
                 unsafe {
                     OpenGl::new_from_function_cstr(|cstr| {
                         display.get_proc_address(cstr) as *const _
                     })
-                }.expect("Failed to create OpenGl renderer")
-            ).expect("Failed to create OpenGl canvas");
+                }
+                .expect("Failed to create OpenGl renderer"),
+            )
+            .expect("Failed to create OpenGl canvas");
 
             (display, context, surface, canvas)
         };
@@ -160,9 +163,9 @@ impl MayApp {
 
         #[cfg(feature = "default-font")]
         {
-            canvas.add_font_mem(
-                include_bytes!("../../../assets/data/Roboto-Regular.ttf")
-            ).expect("Failed to add default font");
+            canvas
+                .add_font_mem(include_bytes!("../../../assets/data/Roboto-Regular.ttf"))
+                .expect("Failed to add default font");
         }
 
         {
@@ -177,172 +180,156 @@ impl MayApp {
 
             for commands in app_ctx.commands {
                 match commands {
-                    AppCommand::Exit => panic!("Command cannot be executed when initializing the first page"),
-                    AppCommand::SetControl(_) => panic!("Command cannot be executed when initializing the first page"),
+                    AppCommand::Exit => {
+                        panic!("Command cannot be executed when initializing the first page")
+                    }
+                    AppCommand::SetControl(_) => {
+                        panic!("Command cannot be executed when initializing the first page")
+                    }
                 }
             }
         }
 
-        event_loop.run(move |event, elwt| {
-            match event {
-                Event::WindowEvent {
-                    window_id,
-                    event: window_event
-                } if window_id == window.id() => {
-                    match window_event {
-                        WindowEvent::Resized(new_size) => {
-                            canvas.set_size(
-                                new_size.width,
-                                new_size.height,
-                                dpi as f32
-                            );
-                        }
-
-                        WindowEvent::CloseRequested => {
-                            if self.config.window.close_on_request {
-                                elwt.exit();
+        event_loop
+            .run(move |event, elwt| {
+                match event {
+                    Event::WindowEvent {
+                        window_id,
+                        event: window_event,
+                    } if window_id == window.id() => {
+                        match window_event {
+                            WindowEvent::Resized(new_size) => {
+                                canvas.set_size(new_size.width, new_size.height, dpi as f32);
                             }
-                        }
 
-                        WindowEvent::DroppedFile(file) => {
-                            update = true;
-                            // todo
-                        }
+                            WindowEvent::CloseRequested => {
+                                if self.config.window.close_on_request {
+                                    elwt.exit();
+                                }
+                            }
 
-                        WindowEvent::HoveredFile(file) => {
-                            update = true;
-                            // todo
-                        }
+                            WindowEvent::DroppedFile(file) => {
+                                update = true;
+                                // todo
+                            }
 
-                        WindowEvent::HoveredFileCancelled => {
-                            update = true;
-                            // todo
-                        }
+                            WindowEvent::HoveredFile(file) => {
+                                update = true;
+                                // todo
+                            }
 
-                        WindowEvent::KeyboardInput {
-                            event: key_event,
-                            ..
-                        } => {
-                            info.keys.push(key_event);
-                            update = true;
-                        }
+                            WindowEvent::HoveredFileCancelled => {
+                                update = true;
+                                // todo
+                            }
 
-                        WindowEvent::ModifiersChanged(mods) => {
-                            info.modifiers = mods;
-                            update = true;
-                        }
+                            WindowEvent::KeyboardInput {
+                                event: key_event, ..
+                            } => {
+                                info.keys.push(key_event);
+                                update = true;
+                            }
 
-                        WindowEvent::CursorMoved {
-                            position,
-                            ..
-                        } => {
-                            info.cursor = Some(position);
-                            update = true;
-                        }
+                            WindowEvent::ModifiersChanged(mods) => {
+                                info.modifiers = mods;
+                                update = true;
+                            }
 
-                        WindowEvent::CursorLeft { .. } => {
-                            info.cursor = None;
-                            update = true;
-                        }
+                            WindowEvent::CursorMoved { position, .. } => {
+                                info.cursor = Some(position);
+                                update = true;
+                            }
 
-                        WindowEvent::MouseWheel {
-                            delta,
-                            phase,
-                            ..
-                        } => {
-                            update = true;
-                            // todo
-                        }
+                            WindowEvent::CursorLeft { .. } => {
+                                info.cursor = None;
+                                update = true;
+                            }
 
-                        WindowEvent::MouseInput {
-                            state,
-                            button,
-                            ..
-                        } => {
-                            update = true;
-                            // todo
-                        }
+                            WindowEvent::MouseWheel { delta, phase, .. } => {
+                                update = true;
+                                // todo
+                            }
 
-                        WindowEvent::RedrawRequested => {
-                            taffy.clear();
+                            WindowEvent::MouseInput { state, button, .. } => {
+                                update = true;
+                                // todo
+                            }
 
-                            let size = (
-                                canvas.width().clone() as f32,
-                                canvas.height().clone() as f32
-                            );
+                            WindowEvent::RedrawRequested => {
+                                taffy.clear();
 
-                            let sketches = {
-                                let mut app_ctx = AppContext {
-                                    window: &window,
-                                    monitor: &monitor,
-                                    commands: Vec::new(),
-                                    dpi,
-                                    update: false,
-                                    canvas: &mut canvas,
-                                };
-
-                                let sketches = draw_root_widget(
-                                    &mut self.page,
-                                    &mut app_ctx,
-                                    size,
-                                    &mut taffy,
-                                    &mut info,
-                                    self.config.graphics.antialiasing,
+                                let size = (
+                                    canvas.width().clone() as f32,
+                                    canvas.height().clone() as f32,
                                 );
 
-                                // todo: wrap in single function
-                                for commands in app_ctx.commands {
-                                    match commands {
-                                        AppCommand::Exit => elwt.exit(),
-                                        AppCommand::SetControl(ctrl) => {
-                                            elwt.set_control_flow(ctrl);
+                                let sketches = {
+                                    let mut app_ctx = AppContext {
+                                        window: &window,
+                                        monitor: &monitor,
+                                        commands: Vec::new(),
+                                        dpi,
+                                        update: false,
+                                        canvas: &mut canvas,
+                                    };
+
+                                    let sketches = draw_root_widget(
+                                        &mut self.page,
+                                        &mut app_ctx,
+                                        size,
+                                        &mut taffy,
+                                        &mut info,
+                                        self.config.graphics.antialiasing,
+                                    );
+
+                                    // todo: wrap in single function
+                                    for commands in app_ctx.commands {
+                                        match commands {
+                                            AppCommand::Exit => elwt.exit(),
+                                            AppCommand::SetControl(ctrl) => {
+                                                elwt.set_control_flow(ctrl);
+                                            }
                                         }
                                     }
-                                }
 
-                                update = app_ctx.update;
+                                    update = app_ctx.update;
 
-                                sketches
-                            };
+                                    sketches
+                                };
 
-                            render_sketches(
-                                sketches,
-                                &mut canvas
-                            );
+                                render_sketches(sketches, &mut canvas);
 
-                            canvas.flush();
+                                canvas.flush();
 
-                            gl_surface.swap_buffers(
-                                &gl_ctx
-                            ).expect("Failed to swap buffers");
+                                gl_surface
+                                    .swap_buffers(&gl_ctx)
+                                    .expect("Failed to swap buffers");
+                            }
+
+                            WindowEvent::ScaleFactorChanged { scale_factor, .. } => {
+                                dpi = scale_factor;
+                                update = true;
+                            }
+
+                            _ => (),
                         }
-
-                        WindowEvent::ScaleFactorChanged {
-                            scale_factor,
-                            ..
-                        } => {
-                            dpi = scale_factor;
-                            update = true;
-                        }
-
-                        _ => (),
                     }
-                },
 
-                Event::LoopExiting => {
-                    // todo
+                    Event::LoopExiting => {
+                        // todo
+                    }
+
+                    Event::MemoryWarning => {
+                        // todo
+                    }
+
+                    _ => (),
                 }
 
-                Event::MemoryWarning => {
-                    // todo
+                if update {
+                    window.request_redraw();
                 }
-
-                _ => (),
-            }
-
-            if update {
-                window.request_redraw();
-            }
-        }).expect("Failed to run event loop");
+            })
+            .expect("Failed to run event loop");
     }
 }

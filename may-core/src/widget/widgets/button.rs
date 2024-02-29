@@ -1,7 +1,8 @@
-use femtovg::{Color, Paint, Path};
-use taffy::{Dimension, Layout, Size, Style};
-use crate::widget::{PathMode, Sketch, Widget};
 use crate::widget::interaction::Action;
+use crate::widget::{PathMode, Sketch, Widget};
+use femtovg::{Color, Paint, Path};
+use may_theme::theme::Theme;
+use taffy::{Dimension, Layout, Size, Style};
 
 pub struct Button {
     children: Vec<Box<dyn Widget>>,
@@ -33,16 +34,10 @@ impl Widget for Button {
             layout.location.y,
             layout.size.width,
             layout.size.height,
-            1.0
+            1.0,
         );
 
-        vec![
-            Sketch::Path(
-                path,
-                self.paint.clone(),
-                PathMode::Fill
-            )
-        ]
+        vec![Sketch::Path(path, self.paint.clone(), PathMode::Fill)]
     }
 
     fn children(&self) -> &Vec<Box<dyn Widget>> {
@@ -69,13 +64,13 @@ impl Widget for Button {
         for action in actions {
             match action {
                 Action::Hover => {
-                    self.paint.set_color(
-                        Color::rgb(65, 60, 120)
-                    );
-                },
+                    self.paint.set_color(Color::rgb(65, 60, 120));
+                }
 
                 _ => {}
             }
         }
     }
+
+    fn apply_theme(&mut self, theme: Box<dyn Theme>) {}
 }

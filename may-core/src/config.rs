@@ -1,9 +1,10 @@
+use may_theme::theme::{DummyTheme, Theme};
 use winit::dpi::{LogicalPosition, LogicalSize, Position, Size};
 use winit::window::{Icon, WindowLevel};
 
 use crate::Gl;
 
-#[derive(Debug, Clone)]
+#[derive(Debug)]
 pub struct AppConfig {
     pub window: WindowConfig,
     pub graphics: GraphicsConfig,
@@ -74,12 +75,13 @@ pub enum Fullscreen {
     Borderless,
 }
 
-#[derive(Debug, Copy, Clone, PartialEq)]
+#[derive(Debug)]
 pub struct GraphicsConfig {
     pub gl: Gl,
     pub multisampling: u8,
     pub hardware_acceleration: Option<bool>,
     pub antialiasing: bool,
+    pub theme: Box<dyn Theme>,
 }
 
 impl Default for GraphicsConfig {
@@ -89,6 +91,7 @@ impl Default for GraphicsConfig {
             multisampling: 1,
             hardware_acceleration: None,
             antialiasing: true,
+            theme: Box::new(DummyTheme),
         }
     }
 }

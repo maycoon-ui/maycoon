@@ -1,6 +1,6 @@
-use std::path::Path;
-use femtovg::{Canvas, FontId};
 use femtovg::renderer::OpenGl;
+use femtovg::{Canvas, FontId};
+use std::path::Path;
 use winit::dpi::{PhysicalPosition, PhysicalSize};
 use winit::error::ExternalError;
 use winit::event_loop::ControlFlow;
@@ -33,13 +33,10 @@ impl<'a> AppContext<'_> {
     }
 
     pub fn fullscreen(&self) -> Option<Fullscreen> {
-        self.window.fullscreen()
-            .map(|fs| {
-                match fs {
-                    winit::window::Fullscreen::Exclusive(_) => Fullscreen::Exclusive,
-                    winit::window::Fullscreen::Borderless(_) => Fullscreen::Borderless,
-                }
-            })
+        self.window.fullscreen().map(|fs| match fs {
+            winit::window::Fullscreen::Exclusive(_) => Fullscreen::Exclusive,
+            winit::window::Fullscreen::Borderless(_) => Fullscreen::Borderless,
+        })
     }
 
     pub fn is_visible(&self) -> Option<bool> {
@@ -87,21 +84,17 @@ impl<'a> AppContext<'_> {
             match fs {
                 Fullscreen::Exclusive => {
                     if let Some(mode) = self.monitor.video_modes().next() {
-                        self.window.set_fullscreen(
-                            Some(
-                                winit::window::Fullscreen::Exclusive(mode)
-                            )
-                        );
+                        self.window
+                            .set_fullscreen(Some(winit::window::Fullscreen::Exclusive(mode)));
                     } else {
                         return None;
                     }
-                },
+                }
                 Fullscreen::Borderless => {
-                    self.window.set_fullscreen(
-                        Some(
-                            winit::window::Fullscreen::Borderless(Some(self.monitor.clone()))
-                        )
-                    )
+                    self.window
+                        .set_fullscreen(Some(winit::window::Fullscreen::Borderless(Some(
+                            self.monitor.clone(),
+                        ))))
                 }
             }
         } else {

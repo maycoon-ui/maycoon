@@ -1,8 +1,9 @@
+use crate::widget::interaction::Action;
+use crate::widget::{PathMode, Sketch, Widget};
 use femtovg::{Color, FontId, Paint};
+use may_theme::theme::Theme;
 use mint::Vector2;
 use taffy::{Layout, Style};
-use crate::widget::{PathMode, Sketch, Widget};
-use crate::widget::interaction::Action;
 
 pub struct Text {
     text: String,
@@ -54,17 +55,15 @@ impl Text {
 
 impl Widget for Text {
     fn render(&mut self, layout: &Layout) -> Vec<Sketch> {
-        vec![
-            Sketch::Text(
-                self.text.clone(),
-                Vector2::<f32> {
-                    x: layout.location.x + layout.size.width,
-                    y: layout.location.y + layout.size.height,
-                },
-                self.paint.clone(),
-                PathMode::Fill
-            ),
-        ]
+        vec![Sketch::Text(
+            self.text.clone(),
+            Vector2::<f32> {
+                x: layout.location.x + layout.size.width,
+                y: layout.location.y + layout.size.height,
+            },
+            self.paint.clone(),
+            PathMode::Fill,
+        )]
     }
 
     fn children(&self) -> &Vec<Box<dyn Widget>> {
@@ -88,4 +87,6 @@ impl Widget for Text {
     }
 
     fn interact(&mut self, _: Vec<Action>) {}
+
+    fn apply_theme(&mut self, theme: Box<dyn Theme>) {}
 }

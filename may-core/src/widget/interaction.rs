@@ -1,7 +1,7 @@
 use winit::dpi::PhysicalPosition;
-use winit::event::{KeyEvent, Modifiers};
 pub use winit::event::ElementState;
-pub use winit::keyboard as keyboard;
+use winit::event::{KeyEvent, Modifiers};
+pub use winit::keyboard;
 use winit::keyboard::Key;
 
 #[derive(Debug)]
