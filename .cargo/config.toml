@@ -1,0 +1,8 @@
+[profile.release]
+lto = true
+codegen-units = 1
+
+[profile.bench]
+lto = "thin"
+codegen-units = 1
+opt-level = 3

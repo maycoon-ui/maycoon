@@ -1,0 +1,34 @@
+[workspace]
+members = ["may-core", "may-theme"]
+
+[workspace.dependencies]
+mint = "0.5.9"
+femtovg = "0.9.0"
+
+[package]
+name = "maycoon"
+version = "0.1.0"
+edition = "2021"
+description = "Lightning fast and modular UI framework."
+readme = "README.md"
+license = "MIT OR Apache-2.0"
+resolver = "2"
+authors = ["Mikail Plotzky <mp@ypon.com>", "Maycoon Contributors"]
+
+[dependencies]
+may-core = { path = "may-core" }
+may-theme = { path = "may-theme" }
+
+[features]
+default = ["canvas", "default-font"]
+canvas = ["may-core/canvas"]
+default-font = ["may-core/default-font"]
+
+[lib]
+name = "maycoon"
+path = "src/lib.rs"
+
+[[example]]
+name = "hello-world"
+path = "examples/hello-world.rs"
+harness = false

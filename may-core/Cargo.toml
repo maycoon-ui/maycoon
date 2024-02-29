@@ -1,0 +1,20 @@
+[package]
+name = "may-core"
+version = "0.1.0"
+edition = "2021"
+authors = ["Mikail Plotzky <mp@ypon.com>", "Maycoon Contributors"]
+description = "Core library for Maycoon => See `maycoon` crate"
+
+[dependencies]
+winit = { version = "0.29.2", default-features = false, features = ["rwh_05"] }
+raw-window-handle = "0.5.2"
+taffy = "0.4.0"
+glutin = "0.31.3"
+femtovg = { workspace = true }
+mint = { workspace = true }
+
+[features]
+default = ["default-font"]
+default-font = []
+
+canvas = []
