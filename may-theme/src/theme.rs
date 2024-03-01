@@ -1,6 +1,7 @@
-use crate::scheme::ColorScheme;
 use std::any::TypeId;
 use std::fmt::Debug;
+
+use crate::scheme::ColorScheme;
 
 pub trait Theme: Debug {
     fn default_scheme(&self) -> ColorScheme;
