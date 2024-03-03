@@ -4,20 +4,28 @@ members = ["may-core", "may-theme"]
 [workspace.dependencies]
 mint = "0.5.9"
 femtovg = "0.9.0"
+indexmap = "2.2.5"
 
 [package]
 name = "maycoon"
 version = "0.1.0"
 edition = "2021"
-description = "Lightning fast and modular UI framework."
+description = "Lightning fast and lightweight UI Framework for Rust."
 readme = "README.md"
 license = "MIT OR Apache-2.0"
 resolver = "2"
 authors = ["Mikail Plotzky <mp@ypon.com>", "Maycoon Contributors"]
+categories = ["gui", "graphics", "rendering"]
+keywords = ["ui", "gui", "interface", "graphics", "user-interface"]
+repository = "https://github.com/maycoon-dev/maycoon"
+homepage = "https://maycoon-dev.github.io"
 
 [dependencies]
 may-core = { path = "may-core" }
 may-theme = { path = "may-theme" }
+indexmap = { workspace = true }
+mint = { workspace = true }
+femtovg = { workspace = true }
 
 [features]
 default = ["canvas", "default-font"]
