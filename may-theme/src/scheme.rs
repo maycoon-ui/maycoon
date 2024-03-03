@@ -1,6 +1,7 @@
 use femtovg::Color;
+use indexmap::IndexMap;
 
-#[derive(Copy, Clone, Debug, PartialEq, PartialOrd)]
+#[derive(Clone, Debug, Default)]
 pub struct ColorScheme {
     pub primary: Color,
     pub secondary: Color,
@@ -10,7 +11,9 @@ pub struct ColorScheme {
     pub background_secondary: Color,
     pub background_tertiary: Color,
 
-    pub text_primary: Color,
-    pub text_secondary: Color,
-    pub text_tertiary: Color,
+    pub foreground_primary: Color,
+    pub foreground_secondary: Color,
+    pub foreground_tertiary: Color,
+
+    pub custom: IndexMap<String, Color>,
 }

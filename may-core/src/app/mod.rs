@@ -6,8 +6,8 @@ use crate::app::context::{AppCommand, AppContext};
 use crate::app::page::Page;
 use crate::app::render::{draw_root_widget, render_sketches};
 use crate::config::{AppConfig, Fullscreen};
-use crate::widget::interaction::{Action, InteractionInfo};
-use crate::widget::{PathMode, Sketch, Widget};
+use crate::widget::interaction::{InteractionInfo};
+use crate::widget::{DummyWidget, PathMode, Sketch, Widget};
 use femtovg::renderer::OpenGl;
 use femtovg::Canvas;
 use glutin::config::{ConfigSurfaceTypes, ConfigTemplateBuilder};
@@ -161,33 +161,13 @@ impl MayApp {
 
         let mut dpi = window.scale_factor();
 
+        let mut widget: Box<dyn Widget> = Box::new(DummyWidget::new());
+
         #[cfg(feature = "default-font")]
         {
             canvas
                 .add_font_mem(include_bytes!("../../../assets/data/Roboto-Regular.ttf"))
                 .expect("Failed to add default font");
-        }
-
-        {
-            let mut app_ctx = AppContext {
-                window: &window,
-                monitor: &monitor,
-                commands: Vec::new(),
-                dpi,
-                update,
-                canvas: &mut canvas,
-            };
-
-            for commands in app_ctx.commands {
-                match commands {
-                    AppCommand::Exit => {
-                        panic!("Command cannot be executed when initializing the first page")
-                    }
-                    AppCommand::SetControl(_) => {
-                        panic!("Command cannot be executed when initializing the first page")
-                    }
-                }
-            }
         }
 
         event_loop
@@ -256,54 +236,7 @@ impl MayApp {
                             }
 
                             WindowEvent::RedrawRequested => {
-                                taffy.clear();
-
-                                let size = (
-                                    canvas.width().clone() as f32,
-                                    canvas.height().clone() as f32,
-                                );
-
-                                let sketches = {
-                                    let mut app_ctx = AppContext {
-                                        window: &window,
-                                        monitor: &monitor,
-                                        commands: Vec::new(),
-                                        dpi,
-                                        update: false,
-                                        canvas: &mut canvas,
-                                    };
-
-                                    let sketches = draw_root_widget(
-                                        &mut self.page,
-                                        &mut app_ctx,
-                                        size,
-                                        &mut taffy,
-                                        &mut info,
-                                        self.config.graphics.antialiasing,
-                                    );
-
-                                    // todo: wrap in single function
-                                    for commands in app_ctx.commands {
-                                        match commands {
-                                            AppCommand::Exit => elwt.exit(),
-                                            AppCommand::SetControl(ctrl) => {
-                                                elwt.set_control_flow(ctrl);
-                                            }
-                                        }
-                                    }
-
-                                    update = app_ctx.update;
-
-                                    sketches
-                                };
-
-                                render_sketches(sketches, &mut canvas);
-
-                                canvas.flush();
-
-                                gl_surface
-                                    .swap_buffers(&gl_ctx)
-                                    .expect("Failed to swap buffers");
+                                update = true;
                             }
 
                             WindowEvent::ScaleFactorChanged { scale_factor, .. } => {
@@ -327,7 +260,63 @@ impl MayApp {
                 }
 
                 if update {
-                    window.request_redraw();
+                    taffy.clear();
+
+                    let size = (
+                        canvas.width().clone(),
+                        canvas.height().clone(),
+                    );
+
+                    canvas.clear_rect(
+                        0,
+                        0,
+                        size.0,
+                        size.1,
+                        self.config.graphics.theme.window_scheme().background_primary
+                    );
+
+                    let sketches = {
+                        let mut app_ctx = AppContext {
+                            window: &window,
+                            monitor: &monitor,
+                            commands: Vec::new(),
+                            dpi,
+                            update: false,
+                            canvas: &mut canvas,
+                        };
+
+                        widget = self.page.render(&mut app_ctx);
+
+                        let sketches = draw_root_widget(
+                            &mut widget,
+                            (size.0 as f32, size.1 as f32),
+                            &mut taffy,
+                            &mut info,
+                            self.config.graphics.antialiasing,
+                            &self.config.graphics.theme
+                        );
+
+                        for commands in app_ctx.commands {
+                            match commands {
+                                AppCommand::Exit => elwt.exit(),
+                                AppCommand::SetControl(ctrl) => {
+                                    elwt.set_control_flow(ctrl);
+                                }
+                            }
+                        }
+
+                        update = app_ctx.update;
+
+                        sketches
+                    };
+
+                    render_sketches(sketches, &mut canvas);
+
+                    canvas.flush();
+
+                    gl_surface
+                        .swap_buffers(&gl_ctx)
+                        .expect("Failed to swap buffers");
                 }
             })
             .expect("Failed to run event loop");

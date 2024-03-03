@@ -1,4 +1,4 @@
-use crate::widget::interaction::Action;
+use crate::widget::interaction::{InteractionInfo};
 use crate::widget::{PathMode, Sketch, Widget};
 use femtovg::{Color, FontId, Paint};
 use may_theme::theme::Theme;
@@ -54,7 +54,7 @@ impl Text {
 }
 
 impl Widget for Text {
-    fn render(&mut self, layout: &Layout) -> Vec<Sketch> {
+    fn render(&mut self, layout: &Layout, theme: &Box<dyn Theme>, _: &InteractionInfo) -> Vec<Sketch> {
         vec![Sketch::Text(
             self.text.clone(),
             Vector2::<f32> {
@@ -81,12 +81,4 @@ impl Widget for Text {
     fn style_mut(&mut self) -> &mut Style {
         &mut self.style
     }
-
-    fn interactive(&self) -> bool {
-        true
-    }
-
-    fn interact(&mut self, _: Vec<Action>) {}
-
-    fn apply_theme(&mut self, theme: Box<dyn Theme>) {}
 }

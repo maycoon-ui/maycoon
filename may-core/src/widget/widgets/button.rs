@@ -1,4 +1,4 @@
-use crate::widget::interaction::Action;
+use crate::widget::interaction::{InteractionInfo};
 use crate::widget::{PathMode, Sketch, Widget};
 use femtovg::{Color, Paint, Path};
 use may_theme::theme::Theme;
@@ -27,7 +27,7 @@ impl Button {
 }
 
 impl Widget for Button {
-    fn render(&mut self, layout: &Layout) -> Vec<Sketch> {
+    fn render(&mut self, layout: &Layout, theme: &Box<dyn Theme>, info: &InteractionInfo) -> Vec<Sketch> {
         let mut path = Path::new();
         path.rounded_rect(
             layout.location.x,
@@ -55,22 +55,4 @@ impl Widget for Button {
     fn style_mut(&mut self) -> &mut Style {
         &mut self.style
     }
-
-    fn interactive(&self) -> bool {
-        true
-    }
-
-    fn interact(&mut self, actions: Vec<Action>) {
-        for action in actions {
-            match action {
-                Action::Hover => {
-                    self.paint.set_color(Color::rgb(65, 60, 120));
-                }
-
-                _ => {}
-            }
-        }
-    }
-
-    fn apply_theme(&mut self, theme: Box<dyn Theme>) {}
 }

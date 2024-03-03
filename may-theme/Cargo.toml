@@ -7,3 +7,4 @@ description = "Theme & Styling for Maycoon => See `maycoon` crate"
 
 [dependencies]
 femtovg = { workspace = true }
+indexmap = { workspace = true }

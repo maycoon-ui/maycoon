@@ -4,21 +4,18 @@ pub mod widgets;
 #[cfg(feature = "canvas")]
 pub mod canvas;
 
-use crate::widget::interaction::Action;
+use crate::widget::interaction::{InteractionInfo};
 use femtovg::{Paint, Path};
 use may_theme::theme::Theme;
 use mint::Vector2;
 use taffy::{Layout, Style};
 
 pub trait Widget {
-    fn render(&mut self, layout: &Layout) -> Vec<Sketch>;
+    fn render(&mut self, layout: &Layout, theme: &Box<dyn Theme>, interaction: &InteractionInfo) -> Vec<Sketch>;
     fn children(&self) -> &Vec<Box<dyn Widget>>;
     fn children_mut(&mut self) -> &mut Vec<Box<dyn Widget>>;
     fn style(&self) -> &Style;
     fn style_mut(&mut self) -> &mut Style;
-    fn interactive(&self) -> bool;
-    fn interact(&mut self, actions: Vec<Action>);
-    fn apply_theme(&mut self, theme: Box<dyn Theme>);
 
     fn with_children(mut self, new_children: Vec<Box<dyn Widget>>) -> Self
     where
@@ -61,6 +58,42 @@ pub trait Widget {
     fn set_style(&mut self, new_style: Style) {
         let style = self.style_mut();
         *style = new_style;
+    }
+}
+
+pub struct DummyWidget {
+    children: Vec<Box<dyn Widget>>,
+    style: Style,
+}
+
+impl DummyWidget {
+    pub fn new() -> Self {
+        Self {
+            children: Vec::new(),
+            style: Style::default(),
+        }
+    }
+}
+
+impl Widget for DummyWidget {
+    fn render(&mut self, _: &Layout, _: &Box<dyn Theme>, _: &InteractionInfo) -> Vec<Sketch> {
+        Vec::new()
+    }
+
+    fn children(&self) -> &Vec<Box<dyn Widget>> {
+        &self.children
+    }
+
+    fn children_mut(&mut self) -> &mut Vec<Box<dyn Widget>> {
+        &mut self.children
+    }
+
+    fn style(&self) -> &Style {
+        &self.style
+    }
+
+    fn style_mut(&mut self) -> &mut Style {
+        &mut self.style
     }
 }
 

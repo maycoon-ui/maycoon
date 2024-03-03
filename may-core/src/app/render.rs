@@ -1,10 +1,11 @@
 use crate::app::context::AppContext;
 use crate::app::page::Page;
-use crate::widget::interaction::{Action, InteractionInfo};
+use crate::widget::interaction::{InteractionInfo};
 use crate::widget::{PathMode, Sketch, Widget};
 use femtovg::renderer::OpenGl;
 use femtovg::Canvas;
 use taffy::{Dimension, NodeId, Size, Style, TaffyTree};
+use may_theme::theme::Theme;
 
 pub fn render_sketches(sketches: Vec<Sketch>, canvas: &mut Canvas<OpenGl>) {
     for sketch in sketches {
@@ -25,14 +26,13 @@ pub fn render_sketches(sketches: Vec<Sketch>, canvas: &mut Canvas<OpenGl>) {
     }
 }
 pub fn draw_root_widget(
-    page: &mut Box<dyn Page>,
-    ctx: &mut AppContext,
+    widget: &mut Box<dyn Widget>,
     size: (f32, f32),
     taffy: &mut TaffyTree,
     info: &mut InteractionInfo,
     antialiasing: bool,
+    theme: &Box<dyn Theme>,
 ) -> Vec<Sketch> {
-    let mut widget = page.render(ctx);
     let mut sketches: Vec<Sketch> = Vec::with_capacity(16);
 
     let window = taffy
@@ -52,13 +52,14 @@ pub fn draw_root_widget(
         .expect("Failed to compute layout");
 
     draw_widget(
-        &mut widget,
+        widget,
         taffy,
         window,
         0,
         info,
         antialiasing,
         &mut sketches,
+        theme,
     );
 
     // cleanup interactions
@@ -89,6 +90,7 @@ pub fn draw_widget(
     info: &mut InteractionInfo,
     antialiasing: bool,
     sketches: &mut Vec<Sketch>,
+    theme: &Box<dyn Theme>,
 ) {
     let layout = taffy
         .layout(
@@ -98,31 +100,9 @@ pub fn draw_widget(
         )
         .expect("Failed to get layout");
 
-    if widget.interactive() {
-        let mut actions = Vec::new();
-
-        if let Some(cursor) = info.cursor {
-            if cursor.x as f32 >= layout.location.x
-                && cursor.y as f32 >= layout.location.y
-                && cursor.x as f32 <= layout.location.x + layout.size.width
-                && cursor.y as f32 <= layout.location.y + layout.size.height
-            {
-                actions.push(Action::Hover);
-            }
-        }
-
-        for key in &info.keys {
-            actions.push(Action::Key(&key.logical_key, &key.state));
-        }
-
-        actions.push(Action::Modifiers(&info.modifiers));
-
-        widget.interact(actions);
-    }
-
-    sketches.append(&mut widget.render(layout));
+    sketches.append(&mut widget.render(layout, &theme, info));
 
     for (idx, child) in widget.children_mut().iter_mut().enumerate() {
-        draw_widget(child, taffy, parent, idx, info, antialiasing, sketches);
+        draw_widget(child, taffy, parent, idx, info, antialiasing, sketches, &theme);
     }
 }
