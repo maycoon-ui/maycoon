@@ -1,0 +1,12 @@
+[package]
+name = "may-widgets"
+version = "0.1.0"
+edition = "2021"
+authors = ["Mikail Plotzky <mp@ypon.com>", "Maycoon Contributors"]
+description = "Widgets for Maycoon => See `maycoon` crate"
+repository = "https://github.com/maycoon-ui/maycoon"
+homepage = "https://maycoon-ui.github.io"
+
+[dependencies]
+may-core = { path = "../may-core" }
+may-theme = { path = "../may-theme" }
