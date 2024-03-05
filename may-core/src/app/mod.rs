@@ -1,28 +1,31 @@
-pub mod context;
-pub mod page;
-pub mod render;
+use std::num::NonZeroU32;
 
-use crate::app::context::{AppCommand, AppContext};
-use crate::app::page::Page;
-use crate::app::render::{draw_root_widget, render_sketches};
-use crate::config::{AppConfig, Fullscreen};
-use crate::widget::interaction::{InteractionInfo};
-use crate::widget::{DummyWidget, PathMode, Sketch, Widget};
 use femtovg::renderer::OpenGl;
 use femtovg::Canvas;
 use glutin::config::{ConfigSurfaceTypes, ConfigTemplateBuilder};
 use glutin::context::{ContextAttributesBuilder, NotCurrentGlContext};
-use glutin::display::{Display, DisplayApiPreference, GlDisplay};
+use glutin::display::{AsRawDisplay, Display, DisplayApiPreference, GlDisplay};
 use glutin::surface::{GlSurface, SurfaceAttributesBuilder, WindowSurface};
 use raw_window_handle::{HasRawDisplayHandle, HasRawWindowHandle};
-use std::num::NonZeroU32;
-use taffy::{Dimension, NodeId, PrintTree, Size, Style, TaffyTree};
+use taffy::{PrintTree, TaffyTree};
 use winit::event::{Event, Modifiers, WindowEvent};
 use winit::event_loop::EventLoopBuilder;
 use winit::platform::windows::{
     EventLoopBuilderExtWindows, MonitorHandleExtWindows, WindowBuilderExtWindows,
 };
 use winit::window::WindowBuilder;
+
+use crate::app::context::{AppCommand, AppContext};
+use crate::app::page::Page;
+use crate::app::render::{draw_root_widget, render_sketches, update_root_widget};
+use crate::config::{AppConfig, Fullscreen};
+use crate::widget::interaction::InteractionInfo;
+use crate::widget::update::UpdateMode;
+use crate::widget::{DummyWidget, Widget};
+
+pub mod context;
+pub mod page;
+pub mod render;
 
 pub struct MayApp {
     config: AppConfig,
@@ -84,7 +87,7 @@ impl MayApp {
         window.set_min_inner_size(self.config.window.min_size);
         window.set_max_inner_size(self.config.window.max_size);
 
-        let (gl_display, gl_ctx, gl_surface, mut canvas) = {
+        let (gl_ctx, gl_surface, mut canvas) = {
             let display = unsafe {
                 let pref = DisplayApiPreference::Egl;
 
@@ -146,7 +149,7 @@ impl MayApp {
             )
             .expect("Failed to create OpenGl canvas");
 
-            (display, context, surface, canvas)
+            (context, surface, canvas)
         };
 
         let mut taffy = TaffyTree::<()>::new();
@@ -157,17 +160,48 @@ impl MayApp {
             modifiers: Modifiers::default(),
         };
 
-        let mut update = true;
-
         let mut dpi = window.scale_factor();
 
         let mut widget: Box<dyn Widget> = Box::new(DummyWidget::new());
+
+        let mut update = UpdateMode {
+            layout: true,
+            draw: true,
+            force: true,
+            eval: true,
+        };
 
         #[cfg(feature = "default-font")]
         {
             canvas
                 .add_font_mem(include_bytes!("../../../assets/data/Roboto-Regular.ttf"))
                 .expect("Failed to add default font");
+        }
+
+        {
+            let mut app_ctx = AppContext {
+                window: &window,
+                monitor: &monitor,
+                commands: Vec::new(),
+                dpi,
+                update,
+                canvas: &mut canvas,
+            };
+
+            self.page.init(&mut app_ctx);
+
+            for cmd in app_ctx.commands {
+                match cmd {
+                    AppCommand::Exit => {
+                        // todo: add warning log message
+                        std::process::exit(0);
+                    }
+
+                    AppCommand::SetControl(ctrl) => {
+                        event_loop.set_control_flow(ctrl);
+                    }
+                }
+            }
         }
 
         event_loop
@@ -180,6 +214,7 @@ impl MayApp {
                         match window_event {
                             WindowEvent::Resized(new_size) => {
                                 canvas.set_size(new_size.width, new_size.height, dpi as f32);
+                                update.force = true;
                             }
 
                             WindowEvent::CloseRequested => {
@@ -189,17 +224,17 @@ impl MayApp {
                             }
 
                             WindowEvent::DroppedFile(file) => {
-                                update = true;
+                                update.eval = true;
                                 // todo
                             }
 
                             WindowEvent::HoveredFile(file) => {
-                                update = true;
+                                update.eval = true;
                                 // todo
                             }
 
                             WindowEvent::HoveredFileCancelled => {
-                                update = true;
+                                update.eval = true;
                                 // todo
                             }
 
@@ -207,41 +242,42 @@ impl MayApp {
                                 event: key_event, ..
                             } => {
                                 info.keys.push(key_event);
-                                update = true;
+                                update.eval = true;
                             }
 
                             WindowEvent::ModifiersChanged(mods) => {
                                 info.modifiers = mods;
-                                update = true;
+                                update.eval = true;
                             }
 
                             WindowEvent::CursorMoved { position, .. } => {
                                 info.cursor = Some(position);
-                                update = true;
+                                update.eval = true;
                             }
 
                             WindowEvent::CursorLeft { .. } => {
                                 info.cursor = None;
-                                update = true;
+                                update.eval = true;
                             }
 
                             WindowEvent::MouseWheel { delta, phase, .. } => {
-                                update = true;
+                                update.eval = true;
                                 // todo
                             }
 
                             WindowEvent::MouseInput { state, button, .. } => {
-                                update = true;
+                                update.eval = true;
                                 // todo
                             }
 
                             WindowEvent::RedrawRequested => {
-                                update = true;
+                                update.eval = true;
                             }
 
                             WindowEvent::ScaleFactorChanged { scale_factor, .. } => {
                                 dpi = scale_factor;
-                                update = true;
+                                update.eval = true;
+                                update.force = true;
                             }
 
                             _ => (),
@@ -259,42 +295,35 @@ impl MayApp {
                     _ => (),
                 }
 
-                if update {
-                    taffy.clear();
+                if update.eval {
+                    let size = (canvas.width().clone(), canvas.height().clone());
 
-                    let size = (
-                        canvas.width().clone(),
-                        canvas.height().clone(),
-                    );
-
+                    // todo: wrap in context or draw if update
                     canvas.clear_rect(
                         0,
                         0,
                         size.0,
                         size.1,
-                        self.config.graphics.theme.window_scheme().background_primary
+                        self.config
+                            .graphics
+                            .theme
+                            .window_scheme()
+                            .background_primary,
                     );
 
-                    let sketches = {
+                    {
                         let mut app_ctx = AppContext {
                             window: &window,
                             monitor: &monitor,
                             commands: Vec::new(),
                             dpi,
-                            update: false,
+                            update,
                             canvas: &mut canvas,
                         };
 
                         widget = self.page.render(&mut app_ctx);
 
-                        let sketches = draw_root_widget(
-                            &mut widget,
-                            (size.0 as f32, size.1 as f32),
-                            &mut taffy,
-                            &mut info,
-                            self.config.graphics.antialiasing,
-                            &self.config.graphics.theme
-                        );
+                        update = app_ctx.update;
 
                         for commands in app_ctx.commands {
                             match commands {
@@ -304,11 +333,18 @@ impl MayApp {
                                 }
                             }
                         }
+                    }
 
-                        update = app_ctx.update;
+                    update_root_widget(&mut widget, &mut info, &mut update);
 
-                        sketches
-                    };
+                    let sketches = draw_root_widget(
+                        &mut widget,
+                        (size.0 as f32, size.1 as f32),
+                        &mut taffy,
+                        self.config.graphics.force_antialiasing,
+                        &self.config.graphics.theme,
+                        &mut update,
+                    );
 
                     render_sketches(sketches, &mut canvas);
 

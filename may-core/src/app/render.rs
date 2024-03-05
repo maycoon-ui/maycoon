@@ -1,11 +1,12 @@
-use crate::app::context::AppContext;
-use crate::app::page::Page;
-use crate::widget::interaction::{InteractionInfo};
-use crate::widget::{PathMode, Sketch, Widget};
 use femtovg::renderer::OpenGl;
 use femtovg::Canvas;
 use taffy::{Dimension, NodeId, Size, Style, TaffyTree};
+
 use may_theme::theme::Theme;
+
+use crate::widget::interaction::InteractionInfo;
+use crate::widget::update::UpdateMode;
+use crate::widget::{PathMode, Sketch, Widget};
 
 pub fn render_sketches(sketches: Vec<Sketch>, canvas: &mut Canvas<OpenGl>) {
     for sketch in sketches {
@@ -25,15 +26,28 @@ pub fn render_sketches(sketches: Vec<Sketch>, canvas: &mut Canvas<OpenGl>) {
         }
     }
 }
+
+pub fn update_root_widget(
+    widget: &mut Box<dyn Widget>,
+    info: &mut InteractionInfo,
+    update: &mut UpdateMode,
+) {
+    widget.update(info, update);
+
+    for child in widget.children_mut() {
+        update_root_widget(child, info, update);
+    }
+}
+
 pub fn draw_root_widget(
     widget: &mut Box<dyn Widget>,
     size: (f32, f32),
     taffy: &mut TaffyTree,
-    info: &mut InteractionInfo,
     antialiasing: bool,
     theme: &Box<dyn Theme>,
+    update: &mut UpdateMode,
 ) -> Vec<Sketch> {
-    let mut sketches: Vec<Sketch> = Vec::with_capacity(16);
+    let mut sketches: Vec<Sketch> = Vec::with_capacity(32);
 
     let window = taffy
         .new_leaf(Style {
@@ -45,25 +59,17 @@ pub fn draw_root_widget(
         })
         .expect("Failed to create window layout");
 
-    layout_widget(&widget, taffy, window);
+    if update.layout || update.force {
+        layout_widget(&widget, taffy, window);
 
-    taffy
-        .compute_layout(window, Size::max_content())
-        .expect("Failed to compute layout");
+        taffy
+            .compute_layout(window, Size::max_content())
+            .expect("Failed to compute layout");
+    }
 
-    draw_widget(
-        widget,
-        taffy,
-        window,
-        0,
-        info,
-        antialiasing,
-        &mut sketches,
-        theme,
-    );
-
-    // cleanup interactions
-    info.keys.clear();
+    if update.draw || update.force {
+        draw_widget(widget, taffy, window, 0, antialiasing, &mut sketches, theme);
+    }
 
     sketches
 }
@@ -87,7 +93,6 @@ pub fn draw_widget(
     taffy: &mut TaffyTree,
     parent: NodeId,
     child_index: usize,
-    info: &mut InteractionInfo,
     antialiasing: bool,
     sketches: &mut Vec<Sketch>,
     theme: &Box<dyn Theme>,
@@ -100,9 +105,9 @@ pub fn draw_widget(
         )
         .expect("Failed to get layout");
 
-    sketches.append(&mut widget.render(layout, &theme, info));
+    sketches.append(&mut widget.render(layout, &theme));
 
     for (idx, child) in widget.children_mut().iter_mut().enumerate() {
-        draw_widget(child, taffy, parent, idx, info, antialiasing, sketches, &theme);
+        draw_widget(child, taffy, parent, idx, antialiasing, sketches, &theme);
     }
 }

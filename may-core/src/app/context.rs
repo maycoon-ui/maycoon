@@ -1,6 +1,5 @@
 use femtovg::renderer::OpenGl;
-use femtovg::{Canvas, FontId};
-use std::path::Path;
+use femtovg::Canvas;
 use winit::dpi::{PhysicalPosition, PhysicalSize};
 use winit::error::ExternalError;
 use winit::event_loop::ControlFlow;
@@ -9,13 +8,14 @@ use winit::platform::windows::WindowExtWindows;
 use winit::window::{CursorGrabMode, ResizeDirection, Window};
 
 use crate::config::Fullscreen;
+use crate::widget::update::UpdateMode;
 
 pub struct AppContext<'a> {
     pub(crate) window: &'a Window,
     pub(crate) monitor: &'a MonitorHandle,
     pub(crate) commands: Vec<AppCommand>,
     pub(crate) dpi: f64,
-    pub(crate) update: bool,
+    pub(crate) update: UpdateMode,
     pub(crate) canvas: &'a Canvas<OpenGl>,
 }
 
@@ -164,7 +164,7 @@ impl<'a> AppContext<'_> {
         self.window.set_transparent(transparent);
     }
 
-    pub fn set_update(&mut self, update: bool) {
+    pub fn set_update(&mut self, update: UpdateMode) {
         self.update = update;
     }
 
@@ -184,6 +184,10 @@ impl<'a> AppContext<'_> {
 
     pub fn set_cursor_visible(&mut self, visible: bool) {
         self.window.set_cursor_visible(visible);
+    }
+
+    pub fn canvas(&mut self) -> &mut Canvas<OpenGl> {
+        &mut self.canvas
     }
 }
 

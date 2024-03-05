@@ -1,17 +1,18 @@
-pub mod interaction;
-pub mod widgets;
-
-#[cfg(feature = "canvas")]
-pub mod canvas;
-
-use crate::widget::interaction::{InteractionInfo};
 use femtovg::{Paint, Path};
-use may_theme::theme::Theme;
 use mint::Vector2;
 use taffy::{Layout, Style};
 
+use may_theme::theme::Theme;
+
+use crate::widget::interaction::InteractionInfo;
+use crate::widget::update::UpdateMode;
+
+pub mod interaction;
+pub mod update;
+
 pub trait Widget {
-    fn render(&mut self, layout: &Layout, theme: &Box<dyn Theme>, interaction: &InteractionInfo) -> Vec<Sketch>;
+    fn render(&mut self, layout: &Layout, theme: &Box<dyn Theme>) -> Vec<Sketch>;
+    fn update(&mut self, info: &InteractionInfo, update: &mut UpdateMode);
     fn children(&self) -> &Vec<Box<dyn Widget>>;
     fn children_mut(&mut self) -> &mut Vec<Box<dyn Widget>>;
     fn style(&self) -> &Style;
@@ -76,9 +77,11 @@ impl DummyWidget {
 }
 
 impl Widget for DummyWidget {
-    fn render(&mut self, _: &Layout, _: &Box<dyn Theme>, _: &InteractionInfo) -> Vec<Sketch> {
+    fn render(&mut self, _: &Layout, _: &Box<dyn Theme>) -> Vec<Sketch> {
         Vec::new()
     }
+
+    fn update(&mut self, _: &InteractionInfo, _: &mut UpdateMode) {}
 
     fn children(&self) -> &Vec<Box<dyn Widget>> {
         &self.children
