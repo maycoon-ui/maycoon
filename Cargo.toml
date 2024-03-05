@@ -1,5 +1,5 @@
 [workspace]
-members = ["may-core", "may-theme"]
+members = ["may-core", "may-theme", "may-widgets"]
 
 [workspace.dependencies]
 mint = "0.5.9"
@@ -17,19 +17,19 @@ resolver = "2"
 authors = ["Mikail Plotzky <mp@ypon.com>", "Maycoon Contributors"]
 categories = ["gui", "graphics", "rendering"]
 keywords = ["ui", "gui", "interface", "graphics", "user-interface"]
-repository = "https://github.com/maycoon-dev/maycoon"
-homepage = "https://maycoon-dev.github.io"
+repository = "https://github.com/maycoon-ui/maycoon"
+homepage = "https://maycoon-ui.github.io"
 
 [dependencies]
 may-core = { path = "may-core" }
 may-theme = { path = "may-theme" }
+may-widgets = { path = "may-widgets" }
 indexmap = { workspace = true }
 mint = { workspace = true }
 femtovg = { workspace = true }
 
 [features]
-default = ["canvas", "default-font"]
-canvas = ["may-core/canvas"]
+default = ["default-font"]
 default-font = ["may-core/default-font"]
 
 [lib]
