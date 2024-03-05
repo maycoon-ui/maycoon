@@ -1,6 +1,7 @@
-use may_theme::theme::{DummyTheme, Theme};
 use winit::dpi::{LogicalPosition, LogicalSize, Position, Size};
 use winit::window::{Icon, WindowLevel};
+
+use may_theme::theme::{DummyTheme, Theme};
 
 use crate::Gl;
 
@@ -80,7 +81,7 @@ pub struct GraphicsConfig {
     pub gl: Gl,
     pub multisampling: u8,
     pub hardware_acceleration: Option<bool>,
-    pub antialiasing: bool,
+    pub force_antialiasing: bool,
     pub theme: Box<dyn Theme>,
 }
 
@@ -90,7 +91,7 @@ impl Default for GraphicsConfig {
             gl: Gl::OPENGL,
             multisampling: 1,
             hardware_acceleration: None,
-            antialiasing: true,
+            force_antialiasing: true,
             theme: Box::new(DummyTheme),
         }
     }

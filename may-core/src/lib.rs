@@ -18,8 +18,10 @@ pub mod layout {
 
 pub mod window {
     pub use winit::dpi;
+    pub use winit::event::{
+        DeviceId, ElementState, KeyEvent, Modifiers, MouseButton, MouseScrollDelta,
+    };
     pub use winit::event_loop::ControlFlow;
-    pub use winit::event::{KeyEvent, Modifiers, MouseButton, MouseScrollDelta, DeviceId, ElementState};
     pub use winit::keyboard;
     pub use winit::window::{BadIcon, CursorGrabMode, Icon, ResizeDirection, WindowLevel};
 }
