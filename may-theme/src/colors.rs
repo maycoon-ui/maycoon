@@ -9,3 +9,5 @@ pub const CYAN: Color = Color::rgbf(0.03, 0.93, 1.0);
 pub const BLUE: Color = Color::rgbf(0.06, 0.54, 0.9);
 pub const PURPLE: Color = Color::rgbf(0.12, 0.03, 1.0);
 pub const PINK: Color = Color::rgbf(0.9, 0.03, 1.0);
+pub const WHITE: Color = Color::rgbf(1.0, 1.0, 1.0);
+pub const BLACK: Color = Color::rgbf(0.0, 0.0, 0.0);
