@@ -1,26 +1,24 @@
-use std::num::NonZeroU32;
-
 use femtovg::renderer::OpenGl;
 use femtovg::Canvas;
 use glutin::config::{ConfigSurfaceTypes, ConfigTemplateBuilder};
 use glutin::context::{ContextAttributesBuilder, NotCurrentGlContext};
-use glutin::display::{AsRawDisplay, Display, DisplayApiPreference, GlDisplay};
+use glutin::display::{Display, DisplayApiPreference, GlDisplay};
 use glutin::surface::{GlSurface, SurfaceAttributesBuilder, WindowSurface};
 use raw_window_handle::{HasRawDisplayHandle, HasRawWindowHandle};
-use taffy::{PrintTree, TaffyTree};
+use std::num::NonZeroU32;
+use std::time::Instant;
+use taffy::{Dimension, Size, Style, TaffyTree};
 use winit::event::{Event, Modifiers, WindowEvent};
 use winit::event_loop::EventLoopBuilder;
-use winit::platform::windows::{
-    EventLoopBuilderExtWindows, MonitorHandleExtWindows, WindowBuilderExtWindows,
-};
+use winit::platform::windows::{EventLoopBuilderExtWindows, WindowBuilderExtWindows};
 use winit::window::WindowBuilder;
 
 use crate::app::context::{AppCommand, AppContext};
 use crate::app::page::Page;
-use crate::app::render::{draw_root_widget, render_sketches, update_root_widget};
+use crate::app::render::{build_widget, layout_widget, render_sketches, update_widget};
 use crate::config::{AppConfig, Fullscreen};
 use crate::widget::interaction::InteractionInfo;
-use crate::widget::update::UpdateMode;
+use crate::widget::update::Update;
 use crate::widget::{DummyWidget, Widget};
 
 pub mod context;
@@ -164,12 +162,25 @@ impl MayApp {
 
         let mut widget: Box<dyn Widget> = Box::new(DummyWidget::new());
 
-        let mut update = UpdateMode {
-            layout: true,
-            draw: true,
-            force: true,
-            eval: true,
-        };
+        let mut update = Update::all();
+
+        let mut frames_per_second: u32 = 0;
+
+        let mut frames: u32 = 0;
+
+        let mut now = Instant::now();
+
+        let window_node = taffy
+            .new_leaf(Style {
+                size: Size::<Dimension> {
+                    width: Dimension::Length(window.inner_size().width as f32),
+                    height: Dimension::Length(window.inner_size().height as f32),
+                },
+                ..Default::default()
+            })
+            .expect("Failed to create window node");
+
+        let mut first_run = true;
 
         #[cfg(feature = "default-font")]
         {
@@ -186,6 +197,7 @@ impl MayApp {
                 dpi,
                 update,
                 canvas: &mut canvas,
+                fps: frames_per_second,
             };
 
             self.page.init(&mut app_ctx);
@@ -214,7 +226,20 @@ impl MayApp {
                         match window_event {
                             WindowEvent::Resized(new_size) => {
                                 canvas.set_size(new_size.width, new_size.height, dpi as f32);
-                                update.force = true;
+                                taffy
+                                    .set_style(
+                                        window_node,
+                                        Style {
+                                            size: Size::<Dimension> {
+                                                width: Dimension::Length(new_size.width as f32),
+                                                height: Dimension::Length(new_size.height as f32),
+                                            },
+                                            ..Default::default()
+                                        },
+                                    )
+                                    .expect("Failed to set style");
+                                update.insert(Update::FORCE);
+                                update.insert(Update::EVAL);
                             }
 
                             WindowEvent::CloseRequested => {
@@ -224,17 +249,17 @@ impl MayApp {
                             }
 
                             WindowEvent::DroppedFile(file) => {
-                                update.eval = true;
+                                update.insert(Update::EVAL);
                                 // todo
                             }
 
                             WindowEvent::HoveredFile(file) => {
-                                update.eval = true;
+                                update.insert(Update::EVAL);
                                 // todo
                             }
 
                             WindowEvent::HoveredFileCancelled => {
-                                update.eval = true;
+                                update.insert(Update::EVAL);
                                 // todo
                             }
 
@@ -242,42 +267,46 @@ impl MayApp {
                                 event: key_event, ..
                             } => {
                                 info.keys.push(key_event);
-                                update.eval = true;
+                                update.insert(Update::EVAL);
                             }
 
                             WindowEvent::ModifiersChanged(mods) => {
                                 info.modifiers = mods;
-                                update.eval = true;
+                                update.insert(Update::EVAL);
                             }
 
                             WindowEvent::CursorMoved { position, .. } => {
                                 info.cursor = Some(position);
-                                update.eval = true;
+                                update.insert(Update::EVAL);
                             }
 
                             WindowEvent::CursorLeft { .. } => {
                                 info.cursor = None;
-                                update.eval = true;
+                                update.insert(Update::EVAL);
                             }
 
                             WindowEvent::MouseWheel { delta, phase, .. } => {
-                                update.eval = true;
+                                update.insert(Update::EVAL);
                                 // todo
                             }
 
                             WindowEvent::MouseInput { state, button, .. } => {
-                                update.eval = true;
+                                update.insert(Update::EVAL);
                                 // todo
                             }
 
                             WindowEvent::RedrawRequested => {
-                                update.eval = true;
+                                if self.config.debug.immediate_redraw {
+                                    window.request_redraw();
+                                }
+
+                                update.insert(Update::EVAL);
                             }
 
                             WindowEvent::ScaleFactorChanged { scale_factor, .. } => {
                                 dpi = scale_factor;
-                                update.eval = true;
-                                update.force = true;
+                                update.insert(Update::FORCE);
+                                update.insert(Update::EVAL);
                             }
 
                             _ => (),
@@ -295,7 +324,9 @@ impl MayApp {
                     _ => (),
                 }
 
-                if update.eval {
+                if update.contains(Update::EVAL) {
+                    frames += 1;
+
                     let size = (canvas.width().clone(), canvas.height().clone());
 
                     // todo: wrap in context or draw if update
@@ -304,11 +335,7 @@ impl MayApp {
                         0,
                         size.0,
                         size.1,
-                        self.config
-                            .graphics
-                            .theme
-                            .window_scheme()
-                            .background_primary,
+                        self.config.graphics.theme.window_background(),
                     );
 
                     {
@@ -319,6 +346,7 @@ impl MayApp {
                             dpi,
                             update,
                             canvas: &mut canvas,
+                            fps: frames_per_second,
                         };
 
                         widget = self.page.render(&mut app_ctx);
@@ -335,11 +363,16 @@ impl MayApp {
                         }
                     }
 
-                    update_root_widget(&mut widget, &mut info, &mut update);
+                    if first_run {
+                        layout_widget(&widget, &mut taffy, window_node);
+                        first_run = false;
+                    }
 
-                    let sketches = draw_root_widget(
+                    update_widget(&mut widget, &info, &taffy, window_node, 0, update);
+
+                    let sketches = build_widget(
                         &mut widget,
-                        (size.0 as f32, size.1 as f32),
+                        window_node,
                         &mut taffy,
                         self.config.graphics.force_antialiasing,
                         &self.config.graphics.theme,
@@ -353,6 +386,12 @@ impl MayApp {
                     gl_surface
                         .swap_buffers(&gl_ctx)
                         .expect("Failed to swap buffers");
+
+                    if now.elapsed().as_secs() >= 1 {
+                        now = Instant::now();
+                        frames_per_second = frames;
+                        frames = 0;
+                    }
                 }
             })
             .expect("Failed to run event loop");
