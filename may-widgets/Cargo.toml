@@ -10,3 +10,6 @@ homepage = "https://maycoon-ui.github.io"
 [dependencies]
 may-core = { path = "../may-core" }
 may-theme = { path = "../may-theme" }
+femtovg = { workspace = true }
+mint = { workspace = true }
+indexmap = { workspace = true }
