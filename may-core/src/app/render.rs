@@ -1,11 +1,12 @@
+use bitflags::Flags;
 use femtovg::renderer::OpenGl;
 use femtovg::Canvas;
-use taffy::{Dimension, NodeId, Size, Style, TaffyTree};
+use taffy::{NodeId, Size, TaffyTree};
 
 use may_theme::theme::Theme;
 
 use crate::widget::interaction::InteractionInfo;
-use crate::widget::update::UpdateMode;
+use crate::widget::update::Update;
 use crate::widget::{PathMode, Sketch, Widget};
 
 pub fn render_sketches(sketches: Vec<Sketch>, canvas: &mut Canvas<OpenGl>) {
@@ -27,39 +28,42 @@ pub fn render_sketches(sketches: Vec<Sketch>, canvas: &mut Canvas<OpenGl>) {
     }
 }
 
-pub fn update_root_widget(
+pub fn update_widget(
     widget: &mut Box<dyn Widget>,
-    info: &mut InteractionInfo,
-    update: &mut UpdateMode,
-) {
-    widget.update(info, update);
+    info: &InteractionInfo,
+    taffy: &TaffyTree,
+    parent: NodeId,
+    child_index: usize,
+    mut update: Update,
+) -> Update {
+    let node = taffy
+        .child_at_index(parent, child_index)
+        .expect("Failed to get child node");
 
-    for child in widget.children_mut() {
-        update_root_widget(child, info, update);
+    update.insert(widget.update(info, taffy.layout(node).expect("Failed to get layout")));
+
+    for (idx, child) in widget.children_mut().iter_mut().enumerate() {
+        update_widget(child, info, taffy, node, idx, update);
     }
+
+    update
 }
 
-pub fn draw_root_widget(
+pub fn build_widget(
     widget: &mut Box<dyn Widget>,
-    size: (f32, f32),
+    window: NodeId,
     taffy: &mut TaffyTree,
     antialiasing: bool,
     theme: &Box<dyn Theme>,
-    update: &mut UpdateMode,
+    update: &mut Update,
 ) -> Vec<Sketch> {
     let mut sketches: Vec<Sketch> = Vec::with_capacity(32);
 
-    let window = taffy
-        .new_leaf(Style {
-            size: Size::<Dimension> {
-                width: Dimension::Length(size.0),
-                height: Dimension::Length(size.1),
-            },
-            ..Style::default()
-        })
-        .expect("Failed to create window layout");
+    if update.contains(Update::LAYOUT) || update.contains(Update::FORCE) {
+        taffy
+            .set_children(window, &[])
+            .expect("Failed to clear layout tree");
 
-    if update.layout || update.force {
         layout_widget(&widget, taffy, window);
 
         taffy
@@ -67,7 +71,7 @@ pub fn draw_root_widget(
             .expect("Failed to compute layout");
     }
 
-    if update.draw || update.force {
+    if update.contains(Update::DRAW) || update.contains(Update::FORCE) {
         draw_widget(widget, taffy, window, 0, antialiasing, &mut sketches, theme);
     }
 
