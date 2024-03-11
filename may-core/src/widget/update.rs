@@ -1,43 +1,15 @@
-#[derive(Copy, Clone, Debug, PartialEq, Eq)]
-pub struct UpdateMode {
-    pub(crate) layout: bool,
-    pub(crate) draw: bool,
-    pub(crate) force: bool,
-    pub(crate) eval: bool,
-}
+// NOTE: since a bug/false flag in some editors, we need to impl bitflags
 
-impl UpdateMode {
-    pub fn full() -> Self {
-        Self {
-            layout: true,
-            draw: true,
-            force: false,
-            eval: false,
-        }
-    }
+use bitflags::bitflags;
 
-    pub fn none() -> Self {
-        Self {
-            layout: false,
-            draw: false,
-            force: false,
-            eval: false,
-        }
-    }
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub struct Update(u8);
 
-    pub fn update_draw(&mut self) {
-        self.draw = true;
-    }
-
-    pub fn update_force(&mut self) {
-        self.force = true;
-    }
-
-    pub fn update_eval(&mut self) {
-        self.eval = true;
-    }
-
-    pub fn update_layout(&mut self) {
-        self.layout = true;
+bitflags! {
+    impl Update: u8 {
+        const DRAW = 0b00000001;
+        const LAYOUT = 0b00000010;
+        const FORCE = 0b00000100;
+        const EVAL = 0b00001000;
     }
 }

@@ -2,6 +2,7 @@ use taffy::Layout;
 use winit::dpi::PhysicalPosition;
 use winit::event::{KeyEvent, Modifiers};
 
+#[derive(Debug, Clone)]
 pub struct InteractionInfo {
     pub cursor: Option<PhysicalPosition<f64>>,
     pub keys: Vec<KeyEvent>,

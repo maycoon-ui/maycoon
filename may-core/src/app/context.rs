@@ -8,18 +8,23 @@ use winit::platform::windows::WindowExtWindows;
 use winit::window::{CursorGrabMode, ResizeDirection, Window};
 
 use crate::config::Fullscreen;
-use crate::widget::update::UpdateMode;
+use crate::widget::update::Update;
 
 pub struct AppContext<'a> {
     pub(crate) window: &'a Window,
     pub(crate) monitor: &'a MonitorHandle,
     pub(crate) commands: Vec<AppCommand>,
     pub(crate) dpi: f64,
-    pub(crate) update: UpdateMode,
+    pub(crate) update: Update,
     pub(crate) canvas: &'a Canvas<OpenGl>,
+    pub(crate) fps: u32,
 }
 
 impl<'a> AppContext<'_> {
+    pub fn fps(&self) -> u32 {
+        self.fps
+    }
+
     pub fn is_decorated(&self) -> bool {
         self.window.is_decorated()
     }
@@ -164,7 +169,7 @@ impl<'a> AppContext<'_> {
         self.window.set_transparent(transparent);
     }
 
-    pub fn set_update(&mut self, update: UpdateMode) {
+    pub fn set_update(&mut self, update: Update) {
         self.update = update;
     }
 
@@ -184,10 +189,6 @@ impl<'a> AppContext<'_> {
 
     pub fn set_cursor_visible(&mut self, visible: bool) {
         self.window.set_cursor_visible(visible);
-    }
-
-    pub fn canvas(&mut self) -> &mut Canvas<OpenGl> {
-        &mut self.canvas
     }
 }
 
