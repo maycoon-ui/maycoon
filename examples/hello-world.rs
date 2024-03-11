@@ -3,14 +3,15 @@ use may_core::app::page::Page;
 use may_core::app::MayApp;
 use may_core::config::AppConfig;
 use may_core::widget::{DummyWidget, Widget};
+use may_widgets::button::Button;
 
 struct MyPage;
 
 impl Page for MyPage {
     fn init(&self, _: &mut AppContext) {}
 
-    fn render(&self, _: &mut AppContext) -> Box<dyn Widget> {
-        Box::new(DummyWidget::new())
+    fn render(&self, ctx: &mut AppContext) -> Box<dyn Widget> {
+        Box::new(Button::new(Box::new(DummyWidget::new())))
     }
 }
 
