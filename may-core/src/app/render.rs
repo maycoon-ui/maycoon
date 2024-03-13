@@ -1,4 +1,3 @@
-use bitflags::Flags;
 use femtovg::renderer::OpenGl;
 use femtovg::Canvas;
 use taffy::{NodeId, Size, TaffyTree};
