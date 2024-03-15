@@ -60,6 +60,12 @@ pub trait Widget: Send {
     }
 }
 
+impl<T: Widget + 'static> From<T> for Box<dyn Widget> {
+    fn from(value: T) -> Self {
+        Box::new(value)
+    }
+}
+
 pub struct DummyWidget {
     children: Vec<Box<dyn Widget>>,
     style: Style,

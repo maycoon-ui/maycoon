@@ -156,6 +156,7 @@ impl MayApp {
             keys: Vec::new(),
             cursor: None,
             modifiers: Modifiers::default(),
+            mouse_buttons: Vec::new(),
         };
 
         let mut dpi = window.scale_factor();
@@ -292,6 +293,7 @@ impl MayApp {
 
                             WindowEvent::MouseInput { state, button, .. } => {
                                 update.insert(Update::EVAL);
+                                info.mouse_buttons.push((state, button));
                                 // todo
                             }
 
@@ -338,6 +340,8 @@ impl MayApp {
                         self.config.graphics.theme.window_background(),
                     );
 
+                    update.remove(Update::EVAL);
+
                     {
                         let mut app_ctx = AppContext {
                             window: &window,
@@ -369,6 +373,10 @@ impl MayApp {
                     }
 
                     update_widget(&mut widget, &info, &taffy, window_node, 0, update);
+
+                    if !update.is_empty() {
+                        info.reset();
+                    }
 
                     let sketches = build_widget(
                         &mut widget,

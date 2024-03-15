@@ -1,10 +1,11 @@
-use femtovg::Paint;
+use femtovg::{Color, Paint};
 use mint::Vector2;
 
 use may_core::layout::{Layout, Style};
 use may_core::widget::interaction::InteractionInfo;
 use may_core::widget::update::Update;
 use may_core::widget::{PathMode, Sketch, Widget};
+use may_theme::scheme::SchemeValue;
 use may_theme::theme::{Theme, WidgetType};
 
 pub struct Text {
@@ -50,16 +51,18 @@ impl Text {
 
 impl Widget for Text {
     fn render(&mut self, layout: &Layout, theme: &Box<dyn Theme>) -> Vec<Sketch> {
+        let scheme = theme.scheme_of("may-widgets:Text".to_string())
+            .unwrap_or(theme.default_scheme_of(WidgetType::Content));
+
         vec![Sketch::Text(
             self.text.clone(),
             Vector2::from([layout.location.x, layout.location.y + self.font_size]),
-            Paint::color(
-                theme
-                    .scheme_of(Text::id())
-                    .unwrap_or(theme.default_scheme_of(WidgetType::Content))
-                    .primary_color,
-            )
-            .with_font_size(self.font_size),
+            scheme.get("color")
+                .unwrap_or(&SchemeValue::Paint(Paint::color(Color::black())))
+                .as_paint()
+                .unwrap()
+                .clone()
+                .with_font_size(self.font_size),
             PathMode::Fill,
         )]
     }
