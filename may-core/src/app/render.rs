@@ -27,8 +27,8 @@ pub fn render_sketches(sketches: Vec<Sketch>, canvas: &mut Canvas<OpenGl>) {
     }
 }
 
-pub fn update_widget(
-    widget: &mut Box<dyn Widget>,
+pub fn update_widget<'a>(
+    widget: &mut Box<dyn Widget<'a> + 'a>,
     info: &InteractionInfo,
     taffy: &TaffyTree,
     parent: NodeId,
@@ -48,8 +48,8 @@ pub fn update_widget(
     update
 }
 
-pub fn build_widget(
-    widget: &mut Box<dyn Widget>,
+pub fn build_widget<'a>(
+    widget: &mut Box<dyn Widget<'a> + 'a>,
     window: NodeId,
     taffy: &mut TaffyTree,
     antialiasing: bool,
@@ -77,7 +77,7 @@ pub fn build_widget(
     sketches
 }
 
-pub fn layout_widget(widget: &Box<dyn Widget>, taffy: &mut TaffyTree, parent: NodeId) {
+pub fn layout_widget<'a>(widget: &Box<dyn Widget<'a> + 'a>, taffy: &mut TaffyTree, parent: NodeId) {
     let node = taffy
         .new_leaf(widget.style().clone())
         .expect("Failed to create layout node");
@@ -91,8 +91,8 @@ pub fn layout_widget(widget: &Box<dyn Widget>, taffy: &mut TaffyTree, parent: No
     }
 }
 
-pub fn draw_widget(
-    widget: &mut Box<dyn Widget>,
+pub fn draw_widget<'a>(
+    widget: &mut Box<dyn Widget<'a> + 'a>,
     taffy: &mut TaffyTree,
     parent: NodeId,
     child_index: usize,

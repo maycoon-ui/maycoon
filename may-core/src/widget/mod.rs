@@ -8,15 +8,15 @@ use taffy::{Layout, Style};
 pub mod interaction;
 pub mod update;
 
-pub trait Widget: Send {
+pub trait Widget<'a>: Send {
     fn render(&mut self, layout: &Layout, theme: &Box<dyn Theme>) -> Vec<Sketch>;
     fn update(&mut self, info: &InteractionInfo, layout: &Layout) -> Update;
-    fn children(&self) -> &Vec<Box<dyn Widget>>;
-    fn children_mut(&mut self) -> &mut Vec<Box<dyn Widget>>;
+    fn children(&self) -> &Vec<Box<dyn Widget<'a> + 'a>>;
+    fn children_mut(&mut self) -> &mut Vec<Box<dyn Widget<'a> + 'a>>;
     fn style(&self) -> &Style;
     fn style_mut(&mut self) -> &mut Style;
 
-    fn with_children(mut self, new_children: Vec<Box<dyn Widget>>) -> Self
+    fn with_children(mut self, new_children: Vec<Box<dyn Widget<'a> + 'a>>) -> Self
     where
         Self: Sized,
     {
@@ -25,7 +25,7 @@ pub trait Widget: Send {
         self
     }
 
-    fn with_child(mut self, child: Box<dyn Widget>) -> Self
+    fn with_child(mut self, child: Box<dyn Widget<'a> + 'a>) -> Self
     where
         Self: Sized,
     {
@@ -34,12 +34,12 @@ pub trait Widget: Send {
         self
     }
 
-    fn push_child(&mut self, child: Box<dyn Widget>) {
+    fn push_child(&mut self, child: Box<dyn Widget<'a> + 'a>) {
         let children = self.children_mut();
         children.push(child);
     }
 
-    fn set_children(&mut self, new_children: Vec<Box<dyn Widget>>) {
+    fn set_children(&mut self, new_children: Vec<Box<dyn Widget<'a> + 'a>>) {
         let children = self.children_mut();
         children.clear();
         children.extend(new_children);
@@ -60,18 +60,18 @@ pub trait Widget: Send {
     }
 }
 
-impl<T: Widget + 'static> From<T> for Box<dyn Widget> {
+impl<'a, T: Widget<'a> + 'a> From<T> for Box<dyn Widget<'a> + 'a> {
     fn from(value: T) -> Self {
         Box::new(value)
     }
 }
 
-pub struct DummyWidget {
-    children: Vec<Box<dyn Widget>>,
+pub struct DummyWidget<'a> {
+    children: Vec<Box<dyn Widget<'a> + 'a>>,
     style: Style,
 }
 
-impl DummyWidget {
+impl<'a> DummyWidget<'a> {
     pub fn new() -> Self {
         Self {
             children: Vec::new(),
@@ -80,7 +80,7 @@ impl DummyWidget {
     }
 }
 
-impl Widget for DummyWidget {
+impl<'a> Widget<'a> for DummyWidget<'a> {
     fn render(&mut self, _: &Layout, _: &Box<dyn Theme>) -> Vec<Sketch> {
         Vec::new()
     }
@@ -89,11 +89,11 @@ impl Widget for DummyWidget {
         Update::empty()
     }
 
-    fn children(&self) -> &Vec<Box<dyn Widget>> {
+    fn children(&self) -> &Vec<Box<dyn Widget<'a> + 'a>> {
         &self.children
     }
 
-    fn children_mut(&mut self) -> &mut Vec<Box<dyn Widget>> {
+    fn children_mut(&mut self) -> &mut Vec<Box<dyn Widget<'a> + 'a>> {
         &mut self.children
     }
 

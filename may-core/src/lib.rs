@@ -6,6 +6,7 @@ pub mod app;
 pub mod config;
 pub mod error;
 pub mod widget;
+pub mod state;
 
 pub mod layout {
     pub use taffy::{

@@ -13,7 +13,7 @@ struct MyPage {
 impl Page for MyPage {
     fn init(&self, _: &mut AppContext) {}
 
-    fn render(&mut self, ctx: &mut AppContext) -> Box<dyn Widget> {
+    fn render<'a>(&mut self, ctx: &mut AppContext) -> Box<dyn Widget<'a> + 'a> {
         Box::new(Button::new(
             Text::new(self.count)
         ).on_press(|| {

@@ -9,16 +9,16 @@ use may_core::window::{ElementState, MouseButton};
 use may_theme::scheme::SchemeValue;
 use may_theme::theme::{Theme, WidgetType};
 
-pub struct Button {
-    children: Vec<Box<dyn Widget>>,
+pub struct Button<'a> {
+    children: Vec<Box<dyn Widget<'a> + 'a>>,
     style: Style,
     on_press: Box<dyn FnMut() + Send>,
     hover: bool,
     pressed: bool,
 }
 
-impl Button {
-    pub fn new(child: impl Into<Box<dyn Widget>>) -> Self {
+impl<'a> Button<'a> {
+    pub fn new(child: impl Into<Box<dyn Widget<'a> + 'a>>) -> Self {
         Self {
             children: vec![child.into()],
             style: Style {
@@ -44,7 +44,7 @@ impl Button {
     }
 }
 
-impl Widget for Button {
+impl<'a> Widget<'a> for Button<'a> {
     fn render(&mut self, layout: &Layout, theme: &Box<dyn Theme>) -> Vec<Sketch> {
         let scheme = theme
             .scheme_of(Button::id())
@@ -97,11 +97,11 @@ impl Widget for Button {
         }
     }
 
-    fn children(&self) -> &Vec<Box<dyn Widget>> {
+    fn children(&self) -> &Vec<Box<dyn Widget<'a> + 'a>> {
         &self.children
     }
 
-    fn children_mut(&mut self) -> &mut Vec<Box<dyn Widget>> {
+    fn children_mut(&mut self) -> &mut Vec<Box<dyn Widget<'a> + 'a>> {
         &mut self.children
     }
 

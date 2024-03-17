@@ -38,7 +38,7 @@ impl MayApp {
         }
     }
 
-    pub fn run(&mut self) {
+    pub fn run<'a>(&mut self) {
         let event_loop = EventLoopBuilder::new()
             .with_any_thread(self.config.window.any_thread)
             .build()
@@ -161,7 +161,7 @@ impl MayApp {
 
         let mut dpi = window.scale_factor();
 
-        let mut widget: Box<dyn Widget> = Box::new(DummyWidget::new());
+        let mut widget: Box<dyn Widget<'a> + 'a> = Box::new(DummyWidget::new());
 
         let mut update = Update::all();
 
@@ -353,7 +353,7 @@ impl MayApp {
                             fps: frames_per_second,
                         };
 
-                        widget = self.page.render(&mut app_ctx);
+                        widget = self.page.render::<'a>(&mut app_ctx);
 
                         update = app_ctx.update;
 

@@ -8,14 +8,14 @@ use may_core::widget::{PathMode, Sketch, Widget};
 use may_theme::scheme::SchemeValue;
 use may_theme::theme::{Theme, WidgetType};
 
-pub struct Text {
+pub struct Text<'a> {
     text: String,
-    children: Vec<Box<dyn Widget>>,
+    children: Vec<Box<dyn Widget<'a> + 'a>>,
     style: Style,
     font_size: f32,
 }
 
-impl Text {
+impl<'a> Text<'a> {
     pub fn id() -> String {
         String::from("may-widgets:Text")
     }
@@ -49,7 +49,7 @@ impl Text {
     }
 }
 
-impl Widget for Text {
+impl<'a> Widget<'a> for Text<'a> {
     fn render(&mut self, layout: &Layout, theme: &Box<dyn Theme>) -> Vec<Sketch> {
         let scheme = theme.scheme_of("may-widgets:Text".to_string())
             .unwrap_or(theme.default_scheme_of(WidgetType::Content));
@@ -71,11 +71,11 @@ impl Widget for Text {
         Update::empty()
     }
 
-    fn children(&self) -> &Vec<Box<dyn Widget>> {
+    fn children(&self) -> &Vec<Box<dyn Widget<'a> + 'a>> {
         &self.children
     }
 
-    fn children_mut(&mut self) -> &mut Vec<Box<dyn Widget>> {
+    fn children_mut(&mut self) -> &mut Vec<Box<dyn Widget<'a> + 'a>> {
         &mut self.children
     }
 
