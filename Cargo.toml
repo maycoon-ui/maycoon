@@ -3,8 +3,8 @@ members = ["may-core", "may-theme", "may-widgets"]
 
 [workspace.dependencies]
 mint = "0.5.9"
-femtovg = "0.9.0"
-indexmap = "2.2.5"
+femtovg = "0.9.1"
+indexmap = "2.2.6"
 
 [package]
 name = "maycoon"
@@ -24,13 +24,10 @@ homepage = "https://maycoon-ui.github.io"
 may-core = { path = "may-core" }
 may-theme = { path = "may-theme" }
 may-widgets = { path = "may-widgets" }
-indexmap = { workspace = true }
 mint = { workspace = true }
-femtovg = { workspace = true }
 
 [features]
-default = ["default-font"]
-default-font = ["may-core/default-font"]
+default = []
 
 [lib]
 name = "maycoon"

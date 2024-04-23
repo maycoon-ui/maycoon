@@ -1,21 +1,12 @@
 use winit::dpi::{LogicalPosition, LogicalSize, Position, Size};
 use winit::window::{Icon, WindowLevel};
 
-use may_theme::theme::Theme;
-use may_theme::themes::MayTheme;
-
 use crate::Gl;
 
 #[derive(Debug, Default)]
 pub struct AppConfig {
     pub window: WindowConfig,
     pub graphics: GraphicsConfig,
-    pub debug: DebugConfig,
-}
-
-#[derive(Debug, Default, Copy, Clone)]
-pub struct DebugConfig {
-    pub immediate_redraw: bool,
 }
 
 #[derive(Debug, Clone)]
@@ -80,7 +71,6 @@ pub struct GraphicsConfig {
     pub multisampling: u8,
     pub hardware_acceleration: Option<bool>,
     pub force_antialiasing: bool,
-    pub theme: Box<dyn Theme>,
 }
 
 impl Default for GraphicsConfig {
@@ -90,7 +80,6 @@ impl Default for GraphicsConfig {
             multisampling: 1,
             hardware_acceleration: None,
             force_antialiasing: true,
-            theme: Box::new(MayTheme::Light),
         }
     }
 }

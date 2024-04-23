@@ -2,54 +2,38 @@ use femtovg::renderer::OpenGl;
 use femtovg::Canvas;
 use glutin::config::{ConfigSurfaceTypes, ConfigTemplateBuilder};
 use glutin::context::{ContextAttributesBuilder, NotCurrentGlContext};
-use glutin::display::{Display, DisplayApiPreference, GlDisplay};
+use glutin::display::{Display, DisplayApiPreference, GetGlDisplay, GlDisplay};
 use glutin::surface::{GlSurface, SurfaceAttributesBuilder, WindowSurface};
 use raw_window_handle::{HasRawDisplayHandle, HasRawWindowHandle};
 use std::num::NonZeroU32;
 use std::time::Instant;
-use taffy::{Dimension, Size, Style, TaffyTree};
-use winit::event::{Event, Modifiers, WindowEvent};
-use winit::event_loop::EventLoopBuilder;
+use winit::event::{DeviceEvent, Event, Modifiers, StartCause, WindowEvent};
+use winit::event_loop::{EventLoopBuilder, EventLoopWindowTarget};
 use winit::platform::windows::{EventLoopBuilderExtWindows, WindowBuilderExtWindows};
 use winit::window::WindowBuilder;
 
-use crate::app::context::{AppCommand, AppContext};
-use crate::app::page::Page;
-use crate::app::render::{build_widget, layout_widget, render_sketches, update_widget};
+use crate::app::context::AppContext;
 use crate::config::{AppConfig, Fullscreen};
-use crate::widget::interaction::InteractionInfo;
-use crate::widget::update::Update;
-use crate::widget::{DummyWidget, Widget};
+use crate::gl::create_gl;
+use crate::handler::AppHandler;
+use crate::util::get_monitor;
 
 pub mod context;
-pub mod page;
-pub mod render;
 
 pub struct MayApp {
     config: AppConfig,
-    page: Box<dyn Page>,
 }
 
 impl MayApp {
-    pub fn new(config: AppConfig, page: impl Page + 'static) -> Self {
-        Self {
-            config,
-            page: Box::new(page),
-        }
+    pub fn new(config: AppConfig) -> Self {
+        Self { config }
     }
 
-    pub fn run<'a>(&mut self) {
-        let event_loop = EventLoopBuilder::new()
+    pub fn run<P: 'static, H: AppHandler<P>>(&mut self, mut handler: H) {
+        let event_loop = EventLoopBuilder::<P>::with_user_event()
             .with_any_thread(self.config.window.any_thread)
             .build()
             .expect("Failed to create event loop");
-
-        let monitor = event_loop.primary_monitor().unwrap_or_else(|| {
-            event_loop
-                .available_monitors()
-                .next()
-                .expect("Failed to get any monitor")
-        });
 
         let window = WindowBuilder::new()
             .with_decorations(self.config.window.decorations)
@@ -58,6 +42,13 @@ impl MayApp {
             .with_maximized(self.config.window.maximized)
             .with_title(&self.config.window.title)
             .with_fullscreen(self.config.window.fullscreen.map(|fullscreen| {
+                let monitor = event_loop.primary_monitor().unwrap_or_else(|| {
+                    event_loop
+                        .available_monitors()
+                        .next()
+                        .expect("Failed to get any monitor")
+                });
+
                 match fullscreen {
                     Fullscreen::Exclusive => winit::window::Fullscreen::Exclusive(
                         monitor
@@ -85,322 +76,79 @@ impl MayApp {
         window.set_min_inner_size(self.config.window.min_size);
         window.set_max_inner_size(self.config.window.max_size);
 
-        let (gl_ctx, gl_surface, mut canvas) = {
-            let display = unsafe {
-                let pref = DisplayApiPreference::Egl;
-
-                #[cfg(target_os = "macos")]
-                let pref = DisplayApiPreference::Cgl;
-
-                #[cfg(target_os = "windows")]
-                let pref = DisplayApiPreference::WglThenEgl(Some(window.raw_window_handle()));
-
-                Display::new(window.raw_display_handle(), pref)
-            }
-            .expect("Failed to create Gl display");
-
-            let gl_config = unsafe {
-                display.find_configs(
-                    ConfigTemplateBuilder::new()
-                        .compatible_with_native_window(window.raw_window_handle())
-                        .prefer_hardware_accelerated(self.config.graphics.hardware_acceleration)
-                        .with_api(self.config.graphics.gl)
-                        .prefer_hardware_accelerated(Some(true))
-                        .with_surface_type(ConfigSurfaceTypes::WINDOW)
-                        .with_multisampling(self.config.graphics.multisampling)
-                        .build(),
-                )
-            }
-            .expect("Failed to find Gl config")
-            .next()
-            .expect("Failed to get any Gl config");
-
-            let surface = unsafe {
-                display.create_window_surface(
-                    &gl_config,
-                    &SurfaceAttributesBuilder::<WindowSurface>::new().build(
-                        window.raw_window_handle(),
-                        NonZeroU32::new_unchecked(window.inner_size().width),
-                        NonZeroU32::new_unchecked(window.inner_size().height),
-                    ),
-                )
-            }
-            .expect("Failed to create Gl surface");
-
-            let context = unsafe {
-                display.create_context(
-                    &gl_config,
-                    &ContextAttributesBuilder::new().build(Some(window.raw_window_handle())),
-                )
-            }
-            .expect("Failed to create Gl context")
-            .make_current(&surface)
-            .expect("Failed to make Gl context current");
-
-            let canvas = Canvas::new(
-                unsafe {
-                    OpenGl::new_from_function_cstr(|cstr| {
-                        display.get_proc_address(cstr) as *const _
-                    })
-                }
-                .expect("Failed to create OpenGl renderer"),
-            )
-            .expect("Failed to create OpenGl canvas");
-
-            (context, surface, canvas)
-        };
-
-        let mut taffy = TaffyTree::<()>::new();
-
-        let mut info = InteractionInfo {
-            keys: Vec::new(),
-            cursor: None,
-            modifiers: Modifiers::default(),
-            mouse_buttons: Vec::new(),
-        };
-
-        let mut dpi = window.scale_factor();
-
-        let mut widget: Box<dyn Widget<'a> + 'a> = Box::new(DummyWidget::new());
-
-        let mut update = Update::all();
-
-        let mut frames_per_second: u32 = 0;
-
-        let mut frames: u32 = 0;
-
-        let mut now = Instant::now();
-
-        let window_node = taffy
-            .new_leaf(Style {
-                size: Size::<Dimension> {
-                    width: Dimension::Length(window.inner_size().width as f32),
-                    height: Dimension::Length(window.inner_size().height as f32),
-                },
-                ..Default::default()
-            })
-            .expect("Failed to create window node");
-
-        let mut first_run = true;
-
-        #[cfg(feature = "default-font")]
-        {
-            canvas
-                .add_font_mem(include_bytes!("../../../assets/data/Roboto-Regular.ttf"))
-                .expect("Failed to add default font");
-        }
-
-        {
-            let mut app_ctx = AppContext {
-                window: &window,
-                monitor: &monitor,
-                commands: Vec::new(),
-                dpi,
-                update,
-                canvas: &mut canvas,
-                fps: frames_per_second,
-            };
-
-            self.page.init(&mut app_ctx);
-
-            for cmd in app_ctx.commands {
-                match cmd {
-                    AppCommand::Exit => {
-                        // todo: add warning log message
-                        std::process::exit(0);
-                    }
-
-                    AppCommand::SetControl(ctrl) => {
-                        event_loop.set_control_flow(ctrl);
-                    }
-                }
-            }
-        }
+        let (mut gl_ctx, mut gl_surface, mut canvas) = create_gl(&window, &self.config.graphics);
 
         event_loop
-            .run(move |event, elwt| {
-                match event {
-                    Event::WindowEvent {
-                        window_id,
-                        event: window_event,
-                    } if window_id == window.id() => {
-                        match window_event {
-                            WindowEvent::Resized(new_size) => {
-                                canvas.set_size(new_size.width, new_size.height, dpi as f32);
-                                taffy
-                                    .set_style(
-                                        window_node,
-                                        Style {
-                                            size: Size::<Dimension> {
-                                                width: Dimension::Length(new_size.width as f32),
-                                                height: Dimension::Length(new_size.height as f32),
-                                            },
-                                            ..Default::default()
-                                        },
-                                    )
-                                    .expect("Failed to set style");
-                                update.insert(Update::FORCE);
-                                update.insert(Update::EVAL);
-                            }
+            .run(move |event, elwt| match event {
+                Event::NewEvents(cause) => handler.on_new_event(
+                    cause,
+                    AppContext {
+                        canvas: &mut canvas,
+                        window: &window,
+                        elwt,
+                    },
+                ),
 
-                            WindowEvent::CloseRequested => {
-                                if self.config.window.close_on_request {
-                                    elwt.exit();
-                                }
-                            }
-
-                            WindowEvent::DroppedFile(file) => {
-                                update.insert(Update::EVAL);
-                                // todo
-                            }
-
-                            WindowEvent::HoveredFile(file) => {
-                                update.insert(Update::EVAL);
-                                // todo
-                            }
-
-                            WindowEvent::HoveredFileCancelled => {
-                                update.insert(Update::EVAL);
-                                // todo
-                            }
-
-                            WindowEvent::KeyboardInput {
-                                event: key_event, ..
-                            } => {
-                                info.keys.push(key_event);
-                                update.insert(Update::EVAL);
-                            }
-
-                            WindowEvent::ModifiersChanged(mods) => {
-                                info.modifiers = mods;
-                                update.insert(Update::EVAL);
-                            }
-
-                            WindowEvent::CursorMoved { position, .. } => {
-                                info.cursor = Some(position);
-                                update.insert(Update::EVAL);
-                            }
-
-                            WindowEvent::CursorLeft { .. } => {
-                                info.cursor = None;
-                                update.insert(Update::EVAL);
-                            }
-
-                            WindowEvent::MouseWheel { delta, phase, .. } => {
-                                update.insert(Update::EVAL);
-                                // todo
-                            }
-
-                            WindowEvent::MouseInput { state, button, .. } => {
-                                update.insert(Update::EVAL);
-                                info.mouse_buttons.push((state, button));
-                                // todo
-                            }
-
-                            WindowEvent::RedrawRequested => {
-                                if self.config.debug.immediate_redraw {
-                                    window.request_redraw();
-                                }
-
-                                update.insert(Update::EVAL);
-                            }
-
-                            WindowEvent::ScaleFactorChanged { scale_factor, .. } => {
-                                dpi = scale_factor;
-                                update.insert(Update::FORCE);
-                                update.insert(Update::EVAL);
-                            }
-
-                            _ => (),
-                        }
-                    }
-
-                    Event::LoopExiting => {
-                        // todo
-                    }
-
-                    Event::MemoryWarning => {
-                        // todo
-                    }
-
-                    _ => (),
-                }
-
-                if update.contains(Update::EVAL) {
-                    frames += 1;
-
-                    let size = (canvas.width().clone(), canvas.height().clone());
-
-                    // todo: wrap in context or draw if update
-                    canvas.clear_rect(
-                        0,
-                        0,
-                        size.0,
-                        size.1,
-                        self.config.graphics.theme.window_background(),
-                    );
-
-                    update.remove(Update::EVAL);
-
-                    {
-                        let mut app_ctx = AppContext {
-                            window: &window,
-                            monitor: &monitor,
-                            commands: Vec::new(),
-                            dpi,
-                            update,
+                Event::WindowEvent { event, window_id } if window.id() == window_id => handler
+                    .on_window_event(
+                        event,
+                        AppContext {
                             canvas: &mut canvas,
-                            fps: frames_per_second,
-                        };
+                            window: &window,
+                            elwt,
+                        },
+                    ),
 
-                        widget = self.page.render::<'a>(&mut app_ctx);
+                Event::DeviceEvent { device_id, event } => handler.on_device_event(
+                    device_id,
+                    event,
+                    AppContext {
+                        canvas: &mut canvas,
+                        window: &window,
+                        elwt,
+                    },
+                ),
 
-                        update = app_ctx.update;
+                Event::UserEvent(event) => handler.on_proxy_event(
+                    event,
+                    AppContext {
+                        canvas: &mut canvas,
+                        window: &window,
+                        elwt,
+                    },
+                ),
 
-                        for commands in app_ctx.commands {
-                            match commands {
-                                AppCommand::Exit => elwt.exit(),
-                                AppCommand::SetControl(ctrl) => {
-                                    elwt.set_control_flow(ctrl);
-                                }
-                            }
-                        }
-                    }
+                Event::Suspended => handler.on_suspended(AppContext {
+                    window: &window,
+                    canvas: &canvas,
+                    elwt,
+                }),
 
-                    if first_run {
-                        layout_widget(&widget, &mut taffy, window_node);
-                        first_run = false;
-                    }
+                Event::Resumed => handler.on_resumed(AppContext {
+                    window: &window,
+                    canvas: &canvas,
+                    elwt,
+                }),
 
-                    update_widget(&mut widget, &info, &taffy, window_node, 0, update);
+                Event::AboutToWait => handler.on_about_to_wait(AppContext {
+                    window: &window,
+                    canvas: &canvas,
+                    elwt,
+                }),
 
-                    if !update.is_empty() {
-                        info.reset();
-                    }
+                Event::LoopExiting => handler.on_existing(AppContext {
+                    window: &window,
+                    canvas: &canvas,
+                    elwt,
+                }),
 
-                    let sketches = build_widget(
-                        &mut widget,
-                        window_node,
-                        &mut taffy,
-                        self.config.graphics.force_antialiasing,
-                        &self.config.graphics.theme,
-                        &mut update,
-                    );
+                Event::MemoryWarning => handler.on_mem_warn(AppContext {
+                    window: &window,
+                    canvas: &canvas,
+                    elwt,
+                }),
 
-                    render_sketches(sketches, &mut canvas);
-
-                    canvas.flush();
-
-                    gl_surface
-                        .swap_buffers(&gl_ctx)
-                        .expect("Failed to swap buffers");
-
-                    if now.elapsed().as_secs() >= 1 {
-                        now = Instant::now();
-                        frames_per_second = frames;
-                        frames = 0;
-                    }
-                }
+                _ => (),
             })
             .expect("Failed to run event loop");
     }
