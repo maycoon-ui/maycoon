@@ -6,11 +6,12 @@ pub mod app;
 pub mod config;
 pub mod error;
 pub mod gl;
-pub mod handler;
+pub mod render;
+pub mod state;
 pub mod util;
+pub mod widget;
 
 pub mod window {
-    pub use winit::dpi;
     pub use winit::event::{
         DeviceId, ElementState, KeyEvent, Modifiers, MouseButton, MouseScrollDelta,
     };
@@ -23,5 +24,12 @@ pub mod vg {
     pub use femtovg::{
         rgb, Align, Baseline, Color, FillRule, FontId, LineCap, LineJoin, Paint, Path, Quad,
         Solidity, Transform2D,
+    };
+}
+
+pub mod layout {
+    pub use taffy::{
+        AvailableSpace, Dimension, Display, FlexDirection, FlexWrap, GridAutoFlow, Layout, Line,
+        MinMax, Size, SizingMode, Style,
     };
 }

@@ -15,7 +15,9 @@ impl Scheme {
     }
 
     pub fn empty() -> Self {
-        Self { properties: IndexMap::new() }
+        Self {
+            properties: IndexMap::new(),
+        }
     }
 
     pub fn get(&self, key: &str) -> Option<&SchemeValue> {
@@ -52,6 +54,62 @@ pub enum SchemeValue {
 }
 
 impl SchemeValue {
+    pub fn to_paint(self) -> Option<Paint> {
+        match self {
+            SchemeValue::Paint(paint) => Some(paint),
+            _ => None,
+        }
+    }
+
+    pub fn to_color(self) -> Option<Color> {
+        match self {
+            SchemeValue::Color(color) => Some(color),
+            _ => None,
+        }
+    }
+
+    pub fn to_string(self) -> Option<String> {
+        match self {
+            SchemeValue::String(string) => Some(string),
+            _ => None,
+        }
+    }
+
+    pub fn to_float(self) -> Option<f32> {
+        match self {
+            SchemeValue::Float(float) => Some(float),
+            _ => None,
+        }
+    }
+
+    pub fn to_int(self) -> Option<i32> {
+        match self {
+            SchemeValue::Int(int) => Some(int),
+            _ => None,
+        }
+    }
+
+    pub fn to_bool(self) -> Option<bool> {
+        match self {
+            SchemeValue::Bool(bool) => Some(bool),
+            _ => None,
+        }
+    }
+
+    pub fn to_list(self) -> Option<Vec<SchemeValue>> {
+        match self {
+            SchemeValue::List(list) => Some(list),
+            _ => None,
+        }
+    }
+
+    pub fn to_none(self) -> Option<()> {
+        match self {
+            SchemeValue::None => Some(()),
+            _ => None,
+        }
+    }
+
     pub fn as_color(&self) -> Option<Color> {
         match self {
             SchemeValue::Color(color) => Some(*color),

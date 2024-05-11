@@ -1,12 +1,27 @@
-use winit::dpi::{LogicalPosition, LogicalSize, Position, Size};
+use may_math::point::Point;
+use may_math::size::Size;
 use winit::window::{Icon, WindowLevel};
+
+use may_theme::theme::Theme;
+use may_theme::themes::MayTheme;
 
 use crate::Gl;
 
-#[derive(Debug, Default)]
+#[derive(Debug)]
 pub struct AppConfig {
     pub window: WindowConfig,
     pub graphics: GraphicsConfig,
+    pub theme: Box<dyn Theme>,
+}
+
+impl Default for AppConfig {
+    fn default() -> Self {
+        Self {
+            window: WindowConfig::default(),
+            graphics: GraphicsConfig::default(),
+            theme: Box::new(MayTheme::Light),
+        }
+    }
 }
 
 #[derive(Debug, Clone)]
@@ -15,7 +30,7 @@ pub struct WindowConfig {
     pub size: Size,
     pub min_size: Option<Size>,
     pub max_size: Option<Size>,
-    pub position: Position,
+    pub position: Point,
     pub resizable: bool,
     pub fullscreen: Option<Fullscreen>,
     pub decorations: bool,
@@ -36,10 +51,10 @@ impl Default for WindowConfig {
     fn default() -> Self {
         Self {
             title: "My Maycoon App".to_string(),
-            size: Size::Logical(LogicalSize::new(800.0, 600.0)),
+            size: Size::new(1000.0, 600.0),
             min_size: None,
             max_size: None,
-            position: Position::Logical(LogicalPosition::default()),
+            position: Point::new(0.0, 0.0),
             resizable: true,
             fullscreen: None,
             decorations: true,

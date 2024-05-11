@@ -8,11 +8,19 @@ repository = "https://github.com/maycoon-ui/maycoon"
 homepage = "https://maycoon-ui.github.io"
 
 [dependencies]
-winit = { version = "0.29.2", default-features = false, features = ["rwh_05"] }
+winit = { version = "0.29.2", default-features = false, features = ["rwh_05", "mint"] }
 raw-window-handle = "0.5.2"
 glutin = "0.31.3"
+
+cfg-if = { workspace = true }
+
+may-math = { path = "../may-math" }
+may-theme = { path = "../may-theme" }
+
 femtovg = { workspace = true }
-mint = { workspace = true }
+
+taffy = "0.4.3"
 
 [features]
-default = []
+default = ["roboto-font"]
+roboto-font = []

@@ -2,6 +2,7 @@ use std::fmt::Debug;
 
 use femtovg::Color;
 
+use crate::id::WidgetId;
 use crate::scheme::Scheme;
 
 /// Theme trait to define the appearances of UI Widgets.
@@ -12,7 +13,7 @@ pub trait Theme: Debug {
     /// Returns the scheme of the given widget.
     ///
     /// If the widget is unknown to the theme, this should return [None].
-    fn scheme_of(&self, id: String) -> Option<Scheme>;
+    fn scheme_of(&self, id: WidgetId) -> Option<Scheme>;
 
     /// The default/fallback scheme for
     fn default_scheme_of(&self, widget_type: WidgetType) -> Scheme;

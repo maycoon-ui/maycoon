@@ -1,5 +1,6 @@
 use femtovg::Color;
 
+use crate::id::WidgetId;
 use crate::scheme::Scheme;
 use crate::theme::{Theme, WidgetType};
 
@@ -18,7 +19,7 @@ impl Theme for MayTheme {
         }
     }
 
-    fn scheme_of(&self, id: String) -> Option<Scheme> {
+    fn scheme_of(&self, id: WidgetId) -> Option<Scheme> {
         match self {
             MayTheme::Light => light::LightTheme::scheme_of(&light::LightTheme, id),
         }
