@@ -1,82 +1,35 @@
-use femtovg::{Paint, Path};
+use crate::CRATE_NAME;
+use may_core::app::context::Context;
+use may_core::app::update::Update;
+use may_core::render::RenderCommand;
+use may_core::state::State;
+use may_core::widget::{Widget, WidgetLayoutNode, WidgetStyleNode};
+use may_theme::id::WidgetId;
+use may_theme::scheme::Scheme;
+use may_theme::theme::WidgetType;
 
-use may_core::layout::{Dimension, Layout, Size, Style};
-use may_core::widget::interaction::InteractionInfo;
-use may_core::widget::update::Update;
-use may_core::widget::{PathMode, Sketch, Widget};
-use may_theme::scheme::SchemeValue;
-use may_theme::theme::{Theme, WidgetType};
-
-pub struct Button {
-    children: Vec<Box<dyn Widget>>,
-    style: Style,
-    hover: bool,
+pub struct Button<S: State> {
+    on_click: Box<dyn FnMut(&mut S) -> Update>,
 }
 
-impl Button {
-    pub fn new(child: Box<dyn Widget>) -> Self {
-        Self {
-            children: vec![child],
-            style: Style {
-                size: Size::<Dimension> {
-                    width: Dimension::Length(100.0),
-                    height: Dimension::Length(60.0),
-                },
-                ..Default::default()
-            },
-            hover: false,
-        }
+impl<S: State> Widget<S> for Button<S> {
+    fn render(&self, theme: Scheme, layout: WidgetLayoutNode) -> Vec<RenderCommand> {
+        vec![]
     }
 
-    pub fn id() -> String {
-        String::from("may-widgets:Button")
-    }
-}
-
-impl Widget for Button {
-    fn render(&mut self, layout: &Layout, theme: &Box<dyn Theme>) -> Vec<Sketch> {
-        let scheme = theme
-            .scheme_of(Button::id())
-            .unwrap_or(theme.default_scheme_of(WidgetType::Interactive));
-
-        let mut rect = Path::new();
-        rect.rounded_rect(
-            layout.location.x,
-            layout.location.y,
-            layout.size.width,
-            layout.size.height,
-            scheme
-                .custom
-                .get(&String::from("radius"))
-                .unwrap_or(&SchemeValue::Float(10.0))
-                .as_float()
-                .unwrap(),
-        );
-
-        vec![Sketch::Path(
-            rect,
-            Paint::color(scheme.primary_background_color),
-            PathMode::Fill,
-        )]
+    fn id(&self) -> WidgetId {
+        WidgetId::new(CRATE_NAME, "Button")
     }
 
-    fn update(&mut self, info: &InteractionInfo, layout: &Layout) -> Update {
+    fn update(&mut self, state: &mut S, ctx: &Context) -> Update {
         Update::empty()
     }
 
-    fn children(&self) -> &Vec<Box<dyn Widget>> {
-        &self.children
+    fn style_node(&self) -> WidgetStyleNode {
+        todo!()
     }
 
-    fn children_mut(&mut self) -> &mut Vec<Box<dyn Widget>> {
-        &mut self.children
-    }
-
-    fn style(&self) -> &Style {
-        &self.style
-    }
-
-    fn style_mut(&mut self) -> &mut Style {
-        &mut self.style
+    fn widget_type(&self) -> WidgetType {
+        WidgetType::Interactive
     }
 }

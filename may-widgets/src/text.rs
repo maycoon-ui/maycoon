@@ -1,86 +1,92 @@
+use crate::CRATE_NAME;
 use femtovg::Paint;
-use mint::Vector2;
+use may_core::app::context::Context;
+use may_core::app::update::Update;
+use may_core::layout::Style;
+use may_core::render::RenderCommand;
+use may_core::state::State;
+use may_core::widget::{Widget, WidgetLayoutNode, WidgetStyleNode};
+use may_theme::colors;
+use may_theme::id::WidgetId;
+use may_theme::scheme::{Scheme, SchemeValue};
+use may_theme::theme::WidgetType;
 
-use may_core::layout::{Layout, Style};
-use may_core::widget::interaction::InteractionInfo;
-use may_core::widget::update::Update;
-use may_core::widget::{PathMode, Sketch, Widget};
-use may_theme::theme::{Theme, WidgetType};
-
+#[derive(Default, Debug, Clone)]
 pub struct Text {
     text: String,
-    children: Vec<Box<dyn Widget>>,
     style: Style,
-    font_size: f32,
+    paint: Option<Paint>,
 }
 
 impl Text {
-    pub fn id() -> String {
-        String::from("may-widgets:Text")
-    }
-
-    pub fn new(text: impl ToString) -> Self {
-        Text {
-            text: text.to_string(),
-            children: Vec::new(),
-            style: Style::default(),
-            font_size: 16.0,
+    pub fn new(text: String) -> Self {
+        Self {
+            text,
+            ..Default::default()
         }
     }
 
-    pub fn set_text(mut self, text: impl ToString) -> Self {
-        self.text = text.to_string();
+    pub fn with_paint(mut self, paint: Paint) -> Self {
+        self.paint = Some(paint);
         self
     }
 
-    pub fn with_text(mut self, text: impl ToString) -> Self {
-        self.text = text.to_string();
+    pub fn with_style(mut self, style: Style) -> Self {
+        self.style = style;
         self
     }
 
-    pub fn with_font_size(mut self, font_size: f32) -> Self {
-        self.font_size = font_size;
+    pub fn with_text(mut self, text: String) -> Self {
+        self.text = text;
         self
     }
 
-    pub fn set_font_size(&mut self, font_size: f32) {
-        self.font_size = font_size;
-    }
-}
-
-impl Widget for Text {
-    fn render(&mut self, layout: &Layout, theme: &Box<dyn Theme>) -> Vec<Sketch> {
-        vec![Sketch::Text(
-            self.text.clone(),
-            Vector2::from([layout.location.x, layout.location.y + self.font_size]),
-            Paint::color(
-                theme
-                    .scheme_of(Text::id())
-                    .unwrap_or(theme.default_scheme_of(WidgetType::Content))
-                    .primary_color,
-            )
-            .with_font_size(self.font_size),
-            PathMode::Fill,
-        )]
+    pub fn paint(&self) -> &Option<Paint> {
+        &self.paint
     }
 
-    fn update(&mut self, info: &InteractionInfo, layout: &Layout) -> Update {
-        Update::empty()
-    }
-
-    fn children(&self) -> &Vec<Box<dyn Widget>> {
-        &self.children
-    }
-
-    fn children_mut(&mut self) -> &mut Vec<Box<dyn Widget>> {
-        &mut self.children
-    }
-
-    fn style(&self) -> &Style {
+    pub fn style(&self) -> &Style {
         &self.style
     }
 
-    fn style_mut(&mut self) -> &mut Style {
-        &mut self.style
+    pub fn text(&self) -> &String {
+        &self.text
+    }
+}
+
+impl<S: State> Widget<S> for Text {
+    fn render(&self, theme: Scheme, layout: WidgetLayoutNode) -> Vec<RenderCommand> {
+        vec![RenderCommand::FillText {
+            text: self.text.clone(),
+            paint: self.paint.clone().unwrap_or(
+                theme
+                    .get("color")
+                    .unwrap_or(&SchemeValue::Paint(Paint::color(colors::BLACK)))
+                    .as_paint()
+                    .expect("Value needs to be `Paint`")
+                    .clone(),
+            ),
+            x: layout.layout.location.x,
+            y: layout.layout.location.y,
+        }]
+    }
+
+    fn id(&self) -> WidgetId {
+        WidgetId::new(CRATE_NAME, "Text")
+    }
+
+    fn update(&mut self, _: &mut S, _: &Context) -> Update {
+        Update::empty()
+    }
+
+    fn style_node(&self) -> WidgetStyleNode {
+        WidgetStyleNode {
+            style: self.style.clone(),
+            ..Default::default()
+        }
+    }
+
+    fn widget_type(&self) -> WidgetType {
+        WidgetType::Content
     }
 }
