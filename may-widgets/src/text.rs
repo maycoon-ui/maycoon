@@ -8,7 +8,7 @@ use may_core::state::State;
 use may_core::widget::{Widget, WidgetLayoutNode, WidgetStyleNode};
 use may_theme::colors;
 use may_theme::id::WidgetId;
-use may_theme::scheme::{Scheme, SchemeValue};
+use may_theme::scheme::{Scheme, SchemeValue, WidgetScheme};
 use may_theme::theme::WidgetType;
 
 #[derive(Default, Debug, Clone)]
@@ -55,20 +55,8 @@ impl Text {
 }
 
 impl<S: State> Widget<S> for Text {
-    fn render(&self, theme: Scheme, layout: WidgetLayoutNode) -> Vec<RenderCommand> {
-        vec![RenderCommand::FillText {
-            text: self.text.clone(),
-            paint: self.paint.clone().unwrap_or(
-                theme
-                    .get("color")
-                    .unwrap_or(&SchemeValue::Paint(Paint::color(colors::BLACK)))
-                    .as_paint()
-                    .expect("Value needs to be `Paint`")
-                    .clone(),
-            ),
-            x: layout.layout.location.x,
-            y: layout.layout.location.y,
-        }]
+    fn render(&self, theme: WidgetScheme, layout: WidgetLayoutNode) -> Vec<RenderCommand> {
+        vec![]
     }
 
     fn id(&self) -> WidgetId {

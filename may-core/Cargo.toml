@@ -14,7 +14,7 @@ glutin = "0.31.3"
 
 cfg-if = { workspace = true }
 
-may-math = { path = "../may-math" }
+ui-math = { path = "../ui-math" }
 may-theme = { path = "../may-theme" }
 
 femtovg = { workspace = true }

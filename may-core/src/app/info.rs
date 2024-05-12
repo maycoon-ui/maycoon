@@ -1,4 +1,4 @@
-use may_math::point::Point;
+use ui_math::point::Point;
 
 pub struct AppInfo {
     pub cursor_pos: Option<Point>,

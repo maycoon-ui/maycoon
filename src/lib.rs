@@ -1,3 +1,4 @@
 pub use may_core as core;
 pub use may_theme as theme;
 pub use may_widgets as widgets;
+pub use ui_math as math;

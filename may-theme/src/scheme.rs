@@ -1,6 +1,11 @@
 use femtovg::{Color, Paint};
 use indexmap::IndexMap;
 
+pub enum WidgetScheme {
+    Generic(GenericScheme),
+    Custom(Scheme),
+}
+
 /// The style of a widget.
 ///
 /// This may contain colors and other properties that influence the appearance of a widget.
@@ -165,4 +170,13 @@ impl SchemeValue {
             _ => None,
         }
     }
+}
+
+#[derive(Clone, Debug, Default)]
+pub struct GenericScheme {
+    pub primary_foreground: Paint,
+    pub primary_background: Paint,
+
+    pub secondary_foreground: Paint,
+    pub secondary_background: Paint,
 }

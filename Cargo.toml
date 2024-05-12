@@ -1,5 +1,5 @@
 [workspace]
-members = ["may-core", "may-math", "may-theme", "may-widgets"]
+members = ["may-core", "ui-math", "may-theme", "may-widgets"]
 
 [workspace.dependencies]
 femtovg = "0.9.1"
@@ -23,6 +23,7 @@ homepage = "https://maycoon-ui.github.io"
 [dependencies]
 may-core = { path = "may-core" }
 may-theme = { path = "may-theme" }
+ui-math = { path = "ui-math" }
 may-widgets = { path = "may-widgets" }
 
 [features]

@@ -1,7 +1,7 @@
 use taffy::{Layout, Style};
 
 use may_theme::id::WidgetId;
-use may_theme::scheme::Scheme;
+use may_theme::scheme::{Scheme, WidgetScheme};
 use may_theme::theme::WidgetType;
 
 use crate::app::context::Context;
@@ -10,7 +10,7 @@ use crate::render::RenderCommand;
 use crate::state::State;
 
 pub trait Widget<S: State> {
-    fn render(&self, theme: Scheme, layout: WidgetLayoutNode) -> Vec<RenderCommand>;
+    fn render(&self, theme: WidgetScheme, layout: WidgetLayoutNode) -> Vec<RenderCommand>;
     fn id(&self) -> WidgetId;
     fn update(&mut self, state: &mut S, ctx: &Context) -> Update;
     fn style_node(&self) -> WidgetStyleNode;

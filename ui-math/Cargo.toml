@@ -1,0 +1,7 @@
+[package]
+name = "ui-math"
+version = "0.1.0"
+edition = "2021"
+description = "Math Library for Common UI Work."
+
+[dependencies]

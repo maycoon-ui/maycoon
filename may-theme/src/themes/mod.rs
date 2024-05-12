@@ -1,7 +1,7 @@
 use femtovg::Color;
 
 use crate::id::WidgetId;
-use crate::scheme::Scheme;
+use crate::scheme::{GenericScheme, Scheme, WidgetScheme};
 use crate::theme::{Theme, WidgetType};
 
 pub mod light;
@@ -19,17 +19,9 @@ impl Theme for MayTheme {
         }
     }
 
-    fn scheme_of(&self, id: WidgetId) -> Option<Scheme> {
+    fn scheme_of(&self, id: WidgetId, widget_type: WidgetType) -> WidgetScheme {
         match self {
-            MayTheme::Light => light::LightTheme::scheme_of(&light::LightTheme, id),
-        }
-    }
-
-    fn default_scheme_of(&self, widget_type: WidgetType) -> Scheme {
-        match self {
-            MayTheme::Light => {
-                light::LightTheme::default_scheme_of(&light::LightTheme, widget_type)
-            }
+            MayTheme::Light => light::LightTheme::scheme_of(&light::LightTheme, id, widget_type),
         }
     }
 }

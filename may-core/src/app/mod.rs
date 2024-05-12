@@ -9,8 +9,8 @@ use crate::render::RenderCommand;
 use crate::state::State;
 use crate::widget::{Widget, WidgetLayoutNode, WidgetStyleNode};
 use glutin::surface::GlSurface;
-use may_math::point::Point;
 use taffy::{Dimension, NodeId, Size, Style, TaffyTree};
+use ui_math::point::Point;
 use winit::dpi::{PhysicalPosition, PhysicalSize};
 use winit::event::{Event, WindowEvent};
 use winit::event_loop::EventLoopBuilder;
@@ -215,9 +215,9 @@ impl MayApp {
                             .expect("Failed to get window node");
 
                         let commands = widget.render(
-                            self.config.theme.scheme_of(widget.id()).unwrap_or(
-                                self.config.theme.default_scheme_of(widget.widget_type()),
-                            ),
+                            self.config
+                                .theme
+                                .scheme_of(widget.id(), widget.widget_type()),
                             Self::layout_of(widget.style_node(), &mut taffy, node),
                         );
 

@@ -5,7 +5,7 @@ use may_core::render::RenderCommand;
 use may_core::state::State;
 use may_core::widget::{Widget, WidgetLayoutNode, WidgetStyleNode};
 use may_theme::id::WidgetId;
-use may_theme::scheme::Scheme;
+use may_theme::scheme::{Scheme, WidgetScheme};
 use may_theme::theme::WidgetType;
 
 pub struct Button<S: State> {
@@ -13,7 +13,7 @@ pub struct Button<S: State> {
 }
 
 impl<S: State> Widget<S> for Button<S> {
-    fn render(&self, theme: Scheme, layout: WidgetLayoutNode) -> Vec<RenderCommand> {
+    fn render(&self, theme: WidgetScheme, layout: WidgetLayoutNode) -> Vec<RenderCommand> {
         vec![]
     }
 

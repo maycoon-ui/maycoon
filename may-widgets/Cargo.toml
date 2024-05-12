@@ -10,5 +10,6 @@ homepage = "https://maycoon-ui.github.io"
 [dependencies]
 may-core = { path = "../may-core" }
 may-theme = { path = "../may-theme" }
+ui-math = { path = "../ui-math" }
 femtovg = { workspace = true }
 indexmap = { workspace = true }

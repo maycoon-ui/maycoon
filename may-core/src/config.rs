@@ -1,5 +1,5 @@
-use may_math::point::Point;
-use may_math::size::Size;
+use ui_math::point::Point;
+use ui_math::size::Size;
 use winit::window::{Icon, WindowLevel};
 
 use may_theme::theme::Theme;
