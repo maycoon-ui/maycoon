@@ -15,6 +15,52 @@ impl Theme for LightTheme {
     }
 
     fn scheme_of(&self, id: WidgetId, widget_type: WidgetType) -> WidgetScheme {
-        WidgetScheme::Generic(GenericScheme::default())
+        match id.as_str() {
+            "may-widgets:Text" => WidgetScheme::Custom(Scheme::new(IndexMap::from([(
+                "color".to_string(),
+                SchemeValue::Paint(Paint::color(Color::rgb(64, 64, 64))),
+            )]))),
+
+            "may-widgets:Button" => WidgetScheme::Custom(Scheme::new(IndexMap::from([
+                (
+                    "color".to_string(),
+                    SchemeValue::Paint(Paint::color(Color::rgb(40, 144, 255))),
+                ),
+                (
+                    "color-hover".to_string(),
+                    SchemeValue::Paint(Paint::color(Color::rgb(40, 170, 225))),
+                ),
+                (
+                    "color-click".to_string(),
+                    SchemeValue::Paint(Paint::color(Color::rgb(45, 250, 255))),
+                ),
+            ]))),
+
+            _ => match widget_type {
+                WidgetType::Other => {
+                    todo!()
+                }
+
+                WidgetType::Interactive => {
+                    todo!()
+                }
+
+                WidgetType::Content => {
+                    todo!()
+                }
+
+                WidgetType::Disabled => {
+                    todo!()
+                }
+
+                WidgetType::Container => {
+                    todo!()
+                }
+
+                WidgetType::Collapsed => {
+                    todo!()
+                }
+            },
+        }
     }
 }

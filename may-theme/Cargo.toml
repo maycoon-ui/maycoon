@@ -10,3 +10,4 @@ homepage = "https://maycoon-ui.github.io"
 [dependencies]
 femtovg = { workspace = true }
 indexmap = { workspace = true }
+ui-math = { path = "../ui-math" }

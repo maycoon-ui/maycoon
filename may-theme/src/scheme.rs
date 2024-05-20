@@ -1,9 +1,23 @@
 use femtovg::{Color, Paint};
 use indexmap::IndexMap;
+use ui_math::size::Size;
 
 pub enum WidgetScheme {
     Generic(GenericScheme),
     Custom(Scheme),
+}
+
+impl WidgetScheme {
+    pub fn get<T, G, C>(&self, get_generic: G, get_custom: C) -> T
+    where
+        G: FnOnce(&GenericScheme) -> T,
+        C: FnOnce(&Scheme) -> T,
+    {
+        match self {
+            WidgetScheme::Generic(generic) => get_generic(generic),
+            WidgetScheme::Custom(custom) => get_custom(custom),
+        }
+    }
 }
 
 /// The style of a widget.
@@ -179,4 +193,7 @@ pub struct GenericScheme {
 
     pub secondary_foreground: Paint,
     pub secondary_background: Paint,
+
+    pub primary_size: Size,
+    pub secondary_size: Size,
 }

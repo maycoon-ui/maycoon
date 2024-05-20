@@ -17,4 +17,18 @@ impl WidgetId {
     pub fn raw(id: impl ToString) -> Self {
         Self(id.to_string())
     }
+
+    pub fn crate_name(&self) -> &str {
+        self.0.split_once(':').unwrap().0
+    }
+
+    pub fn widget_name(&self) -> &str {
+        self.0.split_once(':').unwrap().1
+    }
+}
+
+impl From<(&str, &str)> for WidgetId {
+    fn from(value: (&str, &str)) -> Self {
+        Self::new(value.0, value.1)
+    }
 }

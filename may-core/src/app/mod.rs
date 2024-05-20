@@ -12,7 +12,7 @@ use glutin::surface::GlSurface;
 use taffy::{Dimension, NodeId, Size, Style, TaffyTree};
 use ui_math::point::Point;
 use winit::dpi::{PhysicalPosition, PhysicalSize};
-use winit::event::{Event, WindowEvent};
+use winit::event::{Event, Modifiers, WindowEvent};
 use winit::event_loop::EventLoopBuilder;
 use winit::platform::windows::{EventLoopBuilderExtWindows, WindowBuilderExtWindows};
 use winit::window::WindowBuilder;
@@ -107,7 +107,12 @@ impl MayApp {
 
         let (gl_ctx, gl_surface, mut canvas) = unsafe { create_gl(&window, &self.config.graphics) };
 
-        let mut info = AppInfo { cursor_pos: None };
+        let mut info = AppInfo {
+            cursor_pos: None,
+            keys: Vec::with_capacity(4),
+            buttons: Vec::with_capacity(2),
+            modifiers: Modifiers::default(),
+        };
 
         let mut taffy = TaffyTree::<()>::with_capacity(64);
 
@@ -143,6 +148,28 @@ impl MayApp {
                             WindowEvent::CursorMoved { position, .. } => {
                                 info.cursor_pos =
                                     Some(Point::from((position.x as f32, position.y as f32)));
+                                update.insert(Update::EVAL);
+                            }
+
+                            WindowEvent::KeyboardInput {
+                                event,
+                                is_synthetic,
+                                ..
+                            } => {
+                                // synthetic is only available on X11 and Windows, so we ignore it for compatibility
+                                if !is_synthetic {
+                                    info.keys.push(event);
+                                    update.insert(Update::EVAL);
+                                }
+                            }
+
+                            WindowEvent::MouseInput { state, button, .. } => {
+                                info.buttons.push((state, button));
+                                update.insert(Update::EVAL);
+                            }
+
+                            WindowEvent::ModifiersChanged(mods) => {
+                                info.modifiers = mods;
                                 update.insert(Update::EVAL);
                             }
 
@@ -183,7 +210,15 @@ impl MayApp {
                         app_info: &info,
                     };
 
-                    update.insert(widget.update(&mut state, &ctx));
+                    if let Ok(node) = taffy.child_at_index(window_node, 0) {
+                        if let Ok(layout) = taffy.layout(node) {
+                            update.insert(widget.update(&mut state, &ctx, layout));
+                        } else {
+                            update.insert(Update::LAYOUT);
+                        }
+                    } else {
+                        update.insert(Update::LAYOUT);
+                    }
 
                     if update.contains(Update::LAYOUT) || update.contains(Update::FORCE) {
                         taffy.clear();
@@ -219,6 +254,7 @@ impl MayApp {
                                 .theme
                                 .scheme_of(widget.id(), widget.widget_type()),
                             Self::layout_of(widget.style_node(), &mut taffy, node),
+                            &self.config.theme,
                         );
 
                         for command in commands {

@@ -24,6 +24,12 @@ impl Scala {
     }
 }
 
+impl Default for Scala {
+    fn default() -> Self {
+        Self::Fixed(1.0)
+    }
+}
+
 impl From<f32> for Scala {
     fn from(val: f32) -> Self {
         Self::Fixed(val)

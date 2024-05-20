@@ -1,6 +1,6 @@
 use crate::scala::Scala;
 
-#[derive(Copy, Clone, Debug, PartialEq, PartialOrd)]
+#[derive(Copy, Clone, Debug, PartialEq, PartialOrd, Default)]
 pub struct Size {
     pub width: Scala,
     pub height: Scala,
