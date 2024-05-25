@@ -1,40 +1,54 @@
-use std::num::NonZeroU32;
-
-use crate::app::context::Context;
-use crate::app::info::AppInfo;
-use crate::app::update::Update;
-use crate::config::{AppConfig, Fullscreen};
-use crate::gl::create_gl;
-use crate::render::RenderCommand;
-use crate::state::State;
-use crate::widget::{Widget, WidgetLayoutNode, WidgetStyleNode};
-use glutin::surface::GlSurface;
-use taffy::{Dimension, NodeId, Size, Style, TaffyTree};
-use ui_math::point::Point;
-use winit::dpi::{PhysicalPosition, PhysicalSize};
-use winit::event::{Event, Modifiers, WindowEvent};
-use winit::event_loop::EventLoopBuilder;
-use winit::platform::windows::{EventLoopBuilderExtWindows, WindowBuilderExtWindows};
-use winit::window::WindowBuilder;
-
-pub mod context;
-pub mod info;
 pub mod update;
 
-pub struct MayApp {
-    config: AppConfig,
+use crate::app::update::Update;
+use crate::config::{DevicePreference, Fullscreen, MayConfig, RenderLevel};
+use crate::layout::LayoutStyle;
+use crate::state::State;
+use crate::widget::{LayoutNode, StyleNode, Widget};
+use euclid::Size2D;
+use may_theme::theme::Theme;
+use pathfinder_canvas::{Canvas, CanvasFontContext, FillRule, FillStyle, Path2D};
+use pathfinder_color::ColorF;
+use pathfinder_geometry::rect::RectF;
+use pathfinder_geometry::vector::{Vector2F, Vector2I};
+use pathfinder_gl::GLDevice;
+use pathfinder_renderer::concurrent::executor::Executor;
+use pathfinder_renderer::concurrent::rayon::RayonExecutor;
+use pathfinder_renderer::concurrent::scene_proxy::SceneProxy;
+use pathfinder_renderer::gpu::options::{
+    DestFramebuffer, RendererLevel, RendererMode, RendererOptions,
+};
+use pathfinder_renderer::gpu::renderer::Renderer;
+use pathfinder_renderer::options::BuildOptions;
+use pathfinder_renderer::scene::Scene;
+use pathfinder_resources::embedded::EmbeddedResourceLoader;
+use std::time::Instant;
+use surfman::{
+    Adapter, Connection, ContextAttributeFlags, ContextAttributes, Device, GLVersion,
+    SurfaceAccess, SurfaceType,
+};
+use taffy::{AvailableSpace, Dimension, NodeId, Size, Style, TaffyTree, TraversePartialTree};
+use winit::dpi::{LogicalSize, PhysicalPosition};
+use winit::event::{Event, WindowEvent};
+use winit::event_loop::EventLoop;
+use winit::platform::windows::WindowBuilderExtWindows;
+use winit::raw_window_handle::{HasDisplayHandle, HasWindowHandle};
+use winit::window::{Window, WindowBuilder};
+
+// without this, surfman won't be able to find a suitable device
+surfman::declare_surfman!();
+
+pub struct MayApp<T: Theme> {
+    config: MayConfig<T>,
 }
 
-impl MayApp {
-    pub fn new(config: AppConfig) -> Self {
+impl<T: Theme> MayApp<T> {
+    pub fn new(config: MayConfig<T>) -> Self {
         Self { config }
     }
 
-    pub fn run<W: Widget<S>, S: State>(&mut self, mut widget: W, mut state: S) {
-        let event_loop = EventLoopBuilder::new()
-            .with_any_thread(self.config.window.any_thread)
-            .build()
-            .expect("Failed to create event loop");
+    pub fn run<S: State, W: Widget<S>>(mut self, mut state: S, mut widget: W) {
+        let event_loop = EventLoop::new().expect("Failed to create event loop");
 
         let window = WindowBuilder::new()
             .with_decorations(self.config.window.decorations)
@@ -64,264 +78,313 @@ impl MayApp {
                 }
             }))
             .with_position(PhysicalPosition::<f64>::new(
-                self.config
-                    .window
-                    .position
-                    .x
-                    .as_fixed()
-                    .expect("Window position must be fixed") as f64,
-                self.config
-                    .window
-                    .position
-                    .y
-                    .as_fixed()
-                    .expect("Window position must be fixed") as f64,
+                self.config.window.position.x,
+                self.config.window.position.y,
+            ))
+            .with_inner_size(LogicalSize::new(
+                self.config.window.size.width,
+                self.config.window.size.height,
             ))
             .with_window_level(self.config.window.level)
             .with_blur(self.config.window.blur)
             .with_visible(self.config.window.visible)
             .with_active(self.config.window.active)
             .with_skip_taskbar(self.config.window.skip_taskbar)
-            .with_taskbar_icon(self.config.window.taskbar_icon.clone())
-            .with_window_icon(self.config.window.window_icon.clone())
+            // TODO: .with_taskbar_icon(self.config.window.taskbar_icon.clone())
+            // TODO: .with_window_icon(self.config.window.window_icon.clone())
             .build(&event_loop)
             .expect("Failed to create window");
 
-        window.set_min_inner_size(if let Some(size) = self.config.window.min_size {
-            Some(PhysicalSize::new(
-                size.width.as_fixed().expect("Window size must be fixed"),
-                size.height.as_fixed().expect("Window size must be fixed"),
-            ))
-        } else {
-            None
-        });
+        let connection = Connection::from_display_handle(
+            window
+                .display_handle()
+                .expect("Failed to get display handle"),
+        )
+        .expect("Failed to create connection");
 
-        window.set_max_inner_size(if let Some(size) = self.config.window.max_size {
-            Some(PhysicalSize::new(
-                size.width.as_fixed().expect("Window size must be fixed"),
-                size.height.as_fixed().expect("Window size must be fixed"),
-            ))
-        } else {
-            None
-        });
+        let adapter = match self.config.render.preference {
+            DevicePreference::LowPower => connection.create_low_power_adapter(),
+            DevicePreference::HighPerformance => connection.create_hardware_adapter(),
+            DevicePreference::Software => connection.create_software_adapter(),
+        }
+        .expect("Failed to create adapter");
 
-        let (gl_ctx, gl_surface, mut canvas) = unsafe { create_gl(&window, &self.config.graphics) };
+        let mut device = connection
+            .create_device(&adapter)
+            .expect("Failed to create device");
 
-        let mut info = AppInfo {
-            cursor_pos: None,
-            keys: Vec::with_capacity(4),
-            buttons: Vec::with_capacity(2),
-            modifiers: Modifiers::default(),
+        let mut context = device
+            .create_context(
+                &device
+                    .create_context_descriptor(&ContextAttributes {
+                        version: match self.config.render.mode {
+                            RenderLevel::Auto => GLVersion::new(3, 0),
+                            RenderLevel::Primary => GLVersion::new(4, 3),
+                            RenderLevel::Secondary => GLVersion::new(3, 0),
+                        },
+                        flags: ContextAttributeFlags::ALPHA,
+                    })
+                    .expect("Failed to create context descriptor"),
+                None,
+            )
+            .expect("Failed to create context");
+
+        let mut surface = device
+            .create_surface(
+                &context,
+                SurfaceAccess::GPUOnly,
+                SurfaceType::Widget {
+                    native_widget: connection
+                        .create_native_widget_from_window_handle(
+                            window.window_handle().expect("Failed to get window handle"),
+                            Size2D::new(
+                                window.inner_size().width as i32,
+                                window.inner_size().height as i32,
+                            ),
+                        )
+                        .expect("Failed to create native widget"),
+                },
+            )
+            .expect("Failed to create surface");
+
+        device
+            .bind_surface_to_context(&mut context, surface)
+            .expect("Failed to bind surface to context");
+
+        device
+            .make_context_current(&context)
+            .expect("Failed to make context current");
+
+        gl::load_with(|symbol_name| device.get_proc_address(&context, symbol_name));
+
+        let pathfinder_device = GLDevice::new(
+            pathfinder_gl::GLVersion::GL4,
+            device
+                .context_surface_info(&context)
+                .expect("Failed to get context surface info")
+                .expect("Failed to get surface info")
+                .framebuffer_object,
+        );
+
+        // TODO: add filesystem loader
+        let resource_loader = EmbeddedResourceLoader::new();
+
+        let render_level = match self.config.render.mode {
+            RenderLevel::Auto => RendererLevel::default_for_device(&pathfinder_device),
+            RenderLevel::Primary => RendererLevel::D3D11,
+            RenderLevel::Secondary => RendererLevel::D3D9,
         };
 
-        let mut taffy = TaffyTree::<()>::with_capacity(64);
+        let mut renderer = Renderer::new(
+            pathfinder_device,
+            &resource_loader,
+            RendererMode {
+                level: render_level,
+            },
+            RendererOptions {
+                dest: DestFramebuffer::full_window(Vector2I::new(
+                    window.inner_size().width as i32,
+                    window.inner_size().height as i32,
+                )),
+                background_color: Some(ColorF::white()),
+                show_debug_ui: false,
+            },
+        );
 
-        let mut window_node = taffy
-            .new_leaf(Style {
+        let canvas_font_context = CanvasFontContext::from_system_source(); // TODO: add custom fonts
+
+        let mut canvas = Canvas::new(Vector2F::new(
+            window.inner_size().width as f32,
+            window.inner_size().height as f32,
+        ))
+        .get_context_2d(canvas_font_context.clone());
+
+        let mut update = Update::FORCE;
+
+        let mut taffy: TaffyTree<()> = TaffyTree::with_capacity(32);
+
+        let window_node = taffy
+            .new_leaf(LayoutStyle {
                 size: Size::<Dimension> {
                     width: Dimension::Length(window.inner_size().width as f32),
                     height: Dimension::Length(window.inner_size().height as f32),
                 },
-                ..Style::default()
+                ..Default::default()
             })
             .expect("Failed to create window node");
 
-        let mut update = Update::FORCE;
-
-        #[cfg(feature = "roboto-font")]
-        {
-            canvas
-                .add_font_mem(include_bytes!("../../../assets/data/Roboto-Regular.ttf"))
-                .expect("Failed to add font");
-        }
+        canvas.set_fill_style(FillStyle::Color(self.config.theme.window_background()));
+        canvas.clear_rect(RectF::new(
+            Vector2F::zero(),
+            Vector2F::new(
+                window.inner_size().width as f32,
+                window.inner_size().height as f32,
+            ),
+        ));
 
         event_loop
             .run(move |event, elwt| {
                 match event {
-                    Event::WindowEvent { event, window_id } if window.id() == window_id => {
-                        match event {
-                            WindowEvent::CursorLeft { .. } => {
-                                info.cursor_pos = None;
-                                update.insert(Update::EVAL);
-                            }
+                    Event::WindowEvent { event, window_id } => {
+                        if window_id == window.id() {
+                            match event {
+                                WindowEvent::Resized(new_size) => {
+                                    {
+                                        let canvas_mut = canvas.canvas_mut();
 
-                            WindowEvent::CursorMoved { position, .. } => {
-                                info.cursor_pos =
-                                    Some(Point::from((position.x as f32, position.y as f32)));
-                                update.insert(Update::EVAL);
-                            }
+                                        canvas_mut.set_size(Vector2I::new(
+                                            new_size.width as i32,
+                                            new_size.height as i32,
+                                        ));
+                                    }
 
-                            WindowEvent::KeyboardInput {
-                                event,
-                                is_synthetic,
-                                ..
-                            } => {
-                                // synthetic is only available on X11 and Windows, so we ignore it for compatibility
-                                if !is_synthetic {
-                                    info.keys.push(event);
+                                    canvas.set_fill_style(FillStyle::Color(
+                                        self.config.theme.window_background(),
+                                    ));
+
+                                    canvas.clear_rect(RectF::new(
+                                        Vector2F::zero(),
+                                        Vector2F::new(
+                                            new_size.width as f32,
+                                            new_size.height as f32,
+                                        ),
+                                    ));
+
+                                    taffy
+                                        .set_style(
+                                            window_node,
+                                            Style {
+                                                size: Size::<Dimension> {
+                                                    width: Dimension::Length(new_size.width as f32),
+                                                    height: Dimension::Length(
+                                                        new_size.height as f32,
+                                                    ),
+                                                },
+                                                ..Default::default()
+                                            },
+                                        )
+                                        .expect("Failed to set window style");
+
+                                    // update.insert(Update::EVAL); // gets automatically inserted once RedrawRequest even is processed
+                                    update.insert(Update::LAYOUT);
+                                    update.insert(Update::DRAW);
+                                }
+
+                                WindowEvent::CloseRequested => elwt.exit(),
+
+                                WindowEvent::RedrawRequested => {
                                     update.insert(Update::EVAL);
                                 }
+
+                                _ => (),
                             }
-
-                            WindowEvent::MouseInput { state, button, .. } => {
-                                info.buttons.push((state, button));
-                                update.insert(Update::EVAL);
-                            }
-
-                            WindowEvent::ModifiersChanged(mods) => {
-                                info.modifiers = mods;
-                                update.insert(Update::EVAL);
-                            }
-
-                            WindowEvent::Resized(new_size) => {
-                                canvas.set_size(
-                                    new_size.width,
-                                    new_size.height,
-                                    window.scale_factor() as f32,
-                                );
-
-                                gl_surface.resize(
-                                    &gl_ctx,
-                                    NonZeroU32::new(new_size.width)
-                                        .unwrap_or(NonZeroU32::new(1).unwrap()),
-                                    NonZeroU32::new(new_size.height)
-                                        .unwrap_or(NonZeroU32::new(1).unwrap()),
-                                );
-
-                                update.insert(Update::FORCE);
-                            }
-
-                            WindowEvent::CloseRequested => elwt.exit(),
-
-                            WindowEvent::RedrawRequested => {
-                                update.insert(Update::EVAL);
-                            }
-
-                            _ => (),
                         }
                     }
+
+                    Event::LoopExiting => {
+                        let mut surface = device
+                            .unbind_surface_from_context(&mut context)
+                            .expect("Failed to unbind surface from context")
+                            .expect("Failed to get surface");
+
+                        device
+                            .destroy_surface(&mut context, &mut surface)
+                            .expect("Failed to destroy surface");
+                    }
+
+                    Event::Resumed => {}
 
                     _ => (),
                 }
 
                 if update.contains(Update::EVAL) || update.contains(Update::FORCE) {
-                    let ctx = Context {
-                        window: &window,
-                        app_info: &info,
-                    };
+                    // if true, layout of widgets is not built yet
+                    if taffy.child_count(window_node) == 0 {
+                        let node =
+                            self.layout_widget(&mut taffy, window_node, widget.layout_style()); // TODO: make `node` one variable and mutate it
 
-                    if let Ok(node) = taffy.child_at_index(window_node, 0) {
-                        if let Ok(layout) = taffy.layout(node) {
-                            update.insert(widget.update(&mut state, &ctx, layout));
-                        } else {
-                            update.insert(Update::LAYOUT);
-                        }
-                    } else {
-                        update.insert(Update::LAYOUT);
+                        taffy
+                            .add_child(window_node, node)
+                            .expect("Failed to add child");
+
+                        taffy
+                            .compute_layout(window_node, Size::<AvailableSpace>::max_content())
+                            .expect("Failed to compute layout");
                     }
 
+                    let node = {
+                        let children = taffy.children(window_node).expect("Failed to get children");
+                        children.first().expect("Failed to get first child").clone()
+                    };
+
+                    let mut layout = self.collect_widget_layout(&mut taffy, node.clone());
+
+                    update.insert(widget.update(&layout, &mut state));
+
                     if update.contains(Update::LAYOUT) || update.contains(Update::FORCE) {
-                        taffy.clear();
+                        taffy
+                            .set_children(window_node, &[])
+                            .expect("Failed to set children");
 
-                        window_node = taffy
-                            .new_leaf(Style {
-                                size: Size::<Dimension> {
-                                    width: Dimension::Length(window.inner_size().width as f32),
-                                    height: Dimension::Length(window.inner_size().height as f32),
-                                },
-                                ..Style::default()
-                            })
-                            .expect("Failed to create window node");
+                        self.layout_widget(&mut taffy, window_node, widget.layout_style());
 
-                        Self::layout_compute(widget.style_node(), &mut taffy, window_node);
+                        taffy
+                            .compute_layout(window_node, Size::<AvailableSpace>::max_content())
+                            .expect("Failed to compute layout");
+
+                        layout = self.collect_widget_layout(&mut taffy, node.clone());
                     }
 
                     if update.contains(Update::DRAW) || update.contains(Update::FORCE) {
-                        canvas.clear_rect(
-                            0,
-                            0,
-                            canvas.width(),
-                            canvas.height(),
-                            self.config.theme.window_background(),
+                        canvas.clear();
+
+                        widget.render(&mut canvas, &layout, &mut self.config.theme);
+
+                        SceneProxy::from_scene(
+                            canvas.canvas().scene().clone(), // TODO: remove clone
+                            render_level,
+                            RayonExecutor, // TODO: config
+                        )
+                        .build_and_render(
+                            &mut renderer,
+                            BuildOptions {
+                                transform: Default::default(),
+                                dilation: Default::default(),
+                                subpixel_aa_enabled: false, // TODO: config
+                            },
                         );
-
-                        let node = taffy
-                            .child_at_index(window_node, 0)
-                            .expect("Failed to get window node");
-
-                        let commands = widget.render(
-                            self.config
-                                .theme
-                                .scheme_of(widget.id(), widget.widget_type()),
-                            Self::layout_of(widget.style_node(), &mut taffy, node),
-                            &self.config.theme,
-                        );
-
-                        for command in commands {
-                            match command {
-                                RenderCommand::None => (),
-                                RenderCommand::Fill { path, paint } => {
-                                    canvas.fill_path(&path, &paint);
-                                }
-                                RenderCommand::FillText { text, paint, x, y } => {
-                                    canvas
-                                        .fill_text(x, y, &text, &paint)
-                                        .expect("Failed to fill text");
-                                }
-                            }
-                        }
-
-                        canvas.flush();
-                        gl_surface
-                            .swap_buffers(&gl_ctx)
-                            .expect("Failed to swap buffers");
                     }
 
-                    info.reset();
-                    update.clear();
+                    update = Update::empty();
                 }
             })
             .expect("Failed to run event loop");
     }
 
-    fn layout_compute(style: WidgetStyleNode, taffy: &mut TaffyTree, parent: NodeId) {
-        let node = Self::layout_node(&style, taffy, parent);
+    fn layout_widget(&self, taffy: &mut TaffyTree, parent: NodeId, style: StyleNode) -> NodeId {
+        let node = taffy.new_leaf(style.style).expect("Failed to create node");
 
-        for c in style.children {
-            Self::layout_of(c, taffy, node);
-        }
+        for child in style.children {
+            let child = self.layout_widget(taffy, node, child);
 
-        taffy
-            .compute_layout(parent, Size::max_content())
-            .expect("Failed to compute layout");
-    }
-
-    fn layout_of(style: WidgetStyleNode, taffy: &mut TaffyTree, node: NodeId) -> WidgetLayoutNode {
-        let children = style
-            .children
-            .into_iter()
-            .map(|c| Self::layout_of(c, taffy, node))
-            .collect();
-
-        WidgetLayoutNode {
-            children,
-            layout: taffy.layout(node).expect("Failed to get layout").clone(),
-        }
-    }
-
-    fn layout_node(style: &WidgetStyleNode, taffy: &mut TaffyTree, parent: NodeId) -> NodeId {
-        let node = taffy
-            .new_leaf(style.style.clone())
-            .expect("Failed to create widget node");
-
-        taffy
-            .add_child(parent, node)
-            .expect("Failed to add widget to window");
-
-        for child in style.children.clone() {
-            Self::layout_node(&child, taffy, node);
+            taffy.add_child(node, child).expect("Failed to add child");
         }
 
         node
+    }
+
+    fn collect_widget_layout(&self, taffy: &mut TaffyTree, node: NodeId) -> LayoutNode {
+        // TODO: remove unnecessary clones
+
+        let children = taffy
+            .children(node)
+            .expect("Failed to get children")
+            .into_iter()
+            .map(|el| self.collect_widget_layout(taffy, el))
+            .collect::<Vec<LayoutNode>>();
+
+        let layout = taffy.layout(node).expect("Failed to get layout").clone();
+
+        LayoutNode { layout, children }
     }
 }

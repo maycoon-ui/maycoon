@@ -1,100 +1,105 @@
-use ui_math::point::Point;
-use ui_math::size::Size;
-use winit::window::{Icon, WindowLevel};
-
+use euclid::default::Size2D;
+use euclid::Point2D;
 use may_theme::theme::Theme;
-use may_theme::themes::MayTheme;
+use winit::window::WindowLevel;
 
-use crate::Gl;
-
-#[derive(Debug)]
-pub struct AppConfig {
+#[derive(Clone, Debug)]
+pub struct MayConfig<T: Theme> {
     pub window: WindowConfig,
-    pub graphics: GraphicsConfig,
-    pub theme: Box<dyn Theme>,
+    pub render: RenderConfig,
+    pub theme: T,
 }
 
-impl Default for AppConfig {
+#[derive(Clone, Debug, PartialEq, PartialOrd)]
+pub struct RenderConfig {
+    pub preference: DevicePreference,
+    pub mode: RenderLevel,
+    pub max_frame_latency: u128,
+    pub parallel: bool,
+}
+
+impl Default for RenderConfig {
     fn default() -> Self {
         Self {
-            window: WindowConfig::default(),
-            graphics: GraphicsConfig::default(),
-            theme: Box::new(MayTheme::Light),
+            preference: DevicePreference::default(),
+            mode: RenderLevel::default(),
+            max_frame_latency: 16,
+            parallel: true,
         }
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Copy, Clone, Debug, PartialEq, PartialOrd)]
+pub enum RenderLevel {
+    Auto,
+    Primary,
+    Secondary,
+}
+
+impl Default for RenderLevel {
+    fn default() -> Self {
+        Self::Auto
+    }
+}
+
+#[derive(Copy, Clone, Debug, PartialEq, PartialOrd)]
+pub enum DevicePreference {
+    LowPower,
+    HighPerformance,
+    Software,
+}
+
+impl Default for DevicePreference {
+    fn default() -> Self {
+        Self::HighPerformance
+    }
+}
+
+#[derive(Clone, Debug)]
 pub struct WindowConfig {
+    pub size: Size2D<u32>,
     pub title: String,
-    pub size: Size,
-    pub min_size: Option<Size>,
-    pub max_size: Option<Size>,
-    pub position: Point,
-    pub resizable: bool,
-    pub fullscreen: Option<Fullscreen>,
     pub decorations: bool,
-    pub maximized: bool,
+    pub resizable: bool,
     pub transparent: bool,
-    pub any_thread: bool,
-    pub level: WindowLevel,
+    pub maximized: bool,
+    pub fullscreen: Option<Fullscreen>,
+    pub position: Point2D<f64, f64>,
+    pub level: winit::window::WindowLevel,
     pub blur: bool,
     pub visible: bool,
     pub active: bool,
     pub skip_taskbar: bool,
-    pub close_on_request: bool,
-    pub window_icon: Option<Icon>,
-    pub taskbar_icon: Option<Icon>,
 }
 
 impl Default for WindowConfig {
     fn default() -> Self {
         Self {
-            title: "My Maycoon App".to_string(),
-            size: Size::new(1000.0, 600.0),
-            min_size: None,
-            max_size: None,
-            position: Point::new(0.0, 0.0),
-            resizable: true,
-            fullscreen: None,
+            size: Size2D::new(1000, 600),
+            title: "My Awesome App".to_string(),
             decorations: true,
-            maximized: false,
+            resizable: true,
             transparent: false,
-            any_thread: false,
+            maximized: false,
+            fullscreen: None,
+            position: Point2D::default(),
             level: WindowLevel::Normal,
             blur: false,
             visible: true,
             active: true,
             skip_taskbar: false,
-            close_on_request: true,
-            window_icon: None,
-            taskbar_icon: None,
         }
     }
 }
 
-#[derive(Debug, Copy, Clone, PartialEq, Ord, PartialOrd, Eq, Hash, Default)]
+#[derive(Copy, Clone, Debug, PartialEq, PartialOrd)]
 pub enum Fullscreen {
     Exclusive,
-    #[default]
     Borderless,
 }
 
-#[derive(Debug)]
-pub struct GraphicsConfig {
-    pub gl: Gl,
-    pub multisampling: u8,
-    pub hardware_acceleration: Option<bool>,
-    pub force_antialiasing: bool,
-}
-
-impl Default for GraphicsConfig {
+impl Default for Fullscreen {
     fn default() -> Self {
-        Self {
-            gl: Gl::OPENGL,
-            multisampling: 1,
-            hardware_acceleration: None,
-            force_antialiasing: true,
-        }
+        Self::Exclusive
     }
 }

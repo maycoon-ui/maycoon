@@ -1,97 +1,87 @@
-use std::ops::{BitAnd, BitAndAssign, BitOr, BitOrAssign, BitXor};
-
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Update {
-    flags: u8,
+    bits: u32,
 }
 
 impl Update {
-    pub const DRAW: Update = Update::from(0b0001);
-    pub const LAYOUT: Update = Update::from(0b0010);
-    pub const FORCE: Update = Update::from(0b0100);
-    pub const EVAL: Update = Update::from(0b1000);
+    pub const EVAL: Update = Self { bits: 0b0001 };
+    pub const DRAW: Update = Self { bits: 0b0010 };
+    pub const LAYOUT: Update = Self { bits: 0b0100 };
+    pub const FORCE: Update = Self { bits: 0b1000 };
 
     pub fn empty() -> Self {
-        Update { flags: 0 }
+        Update { bits: 0 }
     }
 
     pub fn all() -> Self {
         Update {
-            flags: (Self::DRAW | Self::LAYOUT | Self::FORCE | Self::EVAL).flags,
+            bits: Self::EVAL.bits() | Self::DRAW.bits() | Self::LAYOUT.bits() | Self::FORCE.bits(),
         }
     }
 
-    pub fn insert(&mut self, flag: Update) {
-        self.flags |= flag.flags;
+    pub fn bits(&self) -> u32 {
+        self.bits
     }
 
-    pub fn remove(&mut self, flag: Update) {
-        self.flags &= !flag.flags;
+    pub fn insert(&mut self, other: Self) {
+        self.bits |= other.bits;
     }
 
-    pub fn contains(&self, flag: Update) -> bool {
-        self.flags & flag.flags != 0
+    pub fn remove(&mut self, other: Self) {
+        self.bits &= !other.bits;
     }
 
-    pub fn any(&self) -> bool {
-        self.flags != 0
+    pub fn contains(&self, other: Self) -> bool {
+        (self.bits & other.bits) == other.bits
     }
 
-    pub fn none(&self) -> bool {
-        self.flags == 0
+    pub fn intersects(&self, other: Self) -> bool {
+        (self.bits & other.bits) != 0
     }
 
-    pub fn clear(&mut self) {
-        self.flags = 0;
-    }
-
-    pub fn toggle(&mut self, flag: Update) {
-        self.flags ^= flag.flags;
-    }
-
-    pub const fn from(flags: u8) -> Self {
-        Update { flags }
+    pub fn from_bits(bits: u32) -> Self {
+        Update { bits }
     }
 }
 
-impl BitOr for Update {
+// Implementing BitOr for combining flags using the | operator
+impl std::ops::BitOr for Update {
     type Output = Self;
 
     fn bitor(self, rhs: Self) -> Self::Output {
         Update {
-            flags: self.flags | rhs.flags,
+            bits: self.bits | rhs.bits,
         }
     }
 }
 
-impl BitAnd for Update {
+// Implementing BitAnd for combining flags using the & operator
+impl std::ops::BitAnd for Update {
     type Output = Self;
 
     fn bitand(self, rhs: Self) -> Self::Output {
         Update {
-            flags: self.flags & rhs.flags,
+            bits: self.bits & rhs.bits,
         }
     }
 }
 
-impl BitXor for Update {
+// Implementing BitXor for combining flags using the ^ operator
+impl std::ops::BitXor for Update {
     type Output = Self;
 
     fn bitxor(self, rhs: Self) -> Self::Output {
         Update {
-            flags: self.flags ^ rhs.flags,
+            bits: self.bits ^ rhs.bits,
         }
     }
 }
 
-impl BitAndAssign for Update {
-    fn bitand_assign(&mut self, rhs: Self) {
-        self.flags &= rhs.flags;
-    }
-}
+// Implementing Not for negating flags using the ! operator
+impl std::ops::Not for Update {
+    type Output = Self;
 
-impl BitOrAssign for Update {
-    fn bitor_assign(&mut self, rhs: Self) {
-        self.flags |= rhs.flags;
+    fn not(self) -> Self::Output {
+        Update { bits: !self.bits }
     }
 }

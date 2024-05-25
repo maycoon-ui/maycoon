@@ -8,6 +8,8 @@ repository = "https://github.com/maycoon-ui/maycoon"
 homepage = "https://maycoon-ui.github.io"
 
 [dependencies]
-femtovg = { workspace = true }
 indexmap = { workspace = true }
-ui-math = { path = "../ui-math" }
+euclid = { workspace = true }
+pathfinder_color = { workspace = true }
+pathfinder_canvas = { workspace = true }
+pathfinder_content = { workspace = true }

@@ -1,13 +1,10 @@
+use may_core::app::update::Update;
 use may_core::app::MayApp;
-use may_core::config::AppConfig;
+use may_core::config::MayConfig;
+use may_core::render::CanvasContext;
 use may_core::state::State;
-use may_widgets::button::Button;
-use may_widgets::text::Text;
+use may_core::widget::{LayoutNode, StyleNode, Widget};
+use may_theme::id::WidgetId;
+use may_theme::theme::Theme;
 
-struct MyState {}
-
-impl State for MyState {}
-
-fn main() {
-    MayApp::new(AppConfig::default()).run(Button::new(Text::new("Hello World!")), MyState {});
-}
+fn main() {}

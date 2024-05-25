@@ -1,10 +1,20 @@
 [workspace]
-members = ["may-core", "ui-math", "may-theme", "may-widgets"]
+members = ["may-core", "may-theme", "may-widgets"]
 
 [workspace.dependencies]
-femtovg = "0.9.1"
 indexmap = "2.2.6"
-cfg-if = "1.0.0"
+euclid = "0.22.9"
+
+pathfinder_canvas = { git = "https://github.com/servo/pathfinder.git", rev = "30419d0" }
+pathfinder_color = { git = "https://github.com/servo/pathfinder.git", rev = "30419d0" }
+pathfinder_geometry = { git = "https://github.com/servo/pathfinder.git", rev = "30419d0" }
+pathfinder_gl = { git = "https://github.com/servo/pathfinder.git", rev = "30419d0" }
+pathfinder_gpu = { git = "https://github.com/servo/pathfinder.git", rev = "30419d0" }
+pathfinder_renderer = { git = "https://github.com/servo/pathfinder.git", rev = "30419d0" }
+pathfinder_resources = { git = "https://github.com/servo/pathfinder.git", rev = "30419d0" }
+pathfinder_content = { git = "https://github.com/servo/pathfinder.git", rev = "30419d0" }
+
+surfman = { git = "https://github.com/servo/surfman.git", rev = "b3b42f4" }
 
 [package]
 name = "maycoon"
@@ -23,8 +33,8 @@ homepage = "https://maycoon-ui.github.io"
 [dependencies]
 may-core = { path = "may-core" }
 may-theme = { path = "may-theme" }
-ui-math = { path = "ui-math" }
 may-widgets = { path = "may-widgets" }
+euclid = { workspace = true }
 
 [features]
 default = []
