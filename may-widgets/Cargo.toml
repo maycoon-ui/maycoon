@@ -8,7 +8,3 @@ repository = "https://github.com/maycoon-ui/maycoon"
 homepage = "https://maycoon-ui.github.io"
 
 [dependencies]
-may-core = { path = "../may-core" }
-may-theme = { path = "../may-theme" }
-femtovg = { workspace = true }
-indexmap = { workspace = true }

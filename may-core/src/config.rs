@@ -1,100 +1,99 @@
-use may_math::point::Point;
-use may_math::size::Size;
-use winit::window::{Icon, WindowLevel};
+use nalgebra::{Point2, Vector2};
+pub use vello::AaConfig;
+pub use wgpu_types::PresentMode;
+pub use winit::platform::windows::CornerPreference;
+pub use winit::window::{
+    BadIcon, Cursor, CursorIcon, CustomCursor, Icon as WindowIcon, WindowButtons, WindowLevel,
+};
 
 use may_theme::theme::Theme;
-use may_theme::themes::MayTheme;
 
-use crate::Gl;
-
-#[derive(Debug)]
-pub struct AppConfig {
+#[derive(Clone)]
+pub struct MayConfig<T: Theme> {
     pub window: WindowConfig,
-    pub graphics: GraphicsConfig,
-    pub theme: Box<dyn Theme>,
+    pub render: RenderConfig,
+    pub theme: T,
 }
 
-impl Default for AppConfig {
-    fn default() -> Self {
-        Self {
-            window: WindowConfig::default(),
-            graphics: GraphicsConfig::default(),
-            theme: Box::new(MayTheme::Light),
-        }
-    }
-}
-
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 pub struct WindowConfig {
     pub title: String,
-    pub size: Size,
-    pub min_size: Option<Size>,
-    pub max_size: Option<Size>,
-    pub position: Point,
+    pub size: Vector2<f64>,
+    pub min_size: Option<Vector2<f64>>,
+    pub max_size: Option<Vector2<f64>>,
     pub resizable: bool,
-    pub fullscreen: Option<Fullscreen>,
-    pub decorations: bool,
     pub maximized: bool,
-    pub transparent: bool,
-    pub any_thread: bool,
+    pub mode: WindowMode,
     pub level: WindowLevel,
-    pub blur: bool,
     pub visible: bool,
+    pub blur: bool,
+    pub transparent: bool,
+    pub position: Option<Point2<f64>>,
     pub active: bool,
-    pub skip_taskbar: bool,
+    pub buttons: WindowButtons,
+    pub decorations: bool,
+    pub corners: CornerPreference,
+    pub resize_increments: Option<Vector2<f64>>,
+    pub content_protected: bool,
+    pub icon: Option<WindowIcon>,
+    pub cursor: Cursor,
     pub close_on_request: bool,
-    pub window_icon: Option<Icon>,
-    pub taskbar_icon: Option<Icon>,
 }
 
 impl Default for WindowConfig {
     fn default() -> Self {
         Self {
-            title: "My Maycoon App".to_string(),
-            size: Size::new(1000.0, 600.0),
+            title: "New App".to_string(),
+            size: Vector2::new(800.0, 600.0),
             min_size: None,
             max_size: None,
-            position: Point::new(0.0, 0.0),
             resizable: true,
-            fullscreen: None,
-            decorations: true,
             maximized: false,
-            transparent: false,
-            any_thread: false,
-            level: WindowLevel::Normal,
-            blur: false,
+            mode: WindowMode::default(),
+            level: Default::default(),
             visible: true,
+            blur: false,
+            transparent: false,
+            position: None,
             active: true,
-            skip_taskbar: false,
+            buttons: WindowButtons::all(),
+            decorations: true,
+            corners: Default::default(),
+            resize_increments: None,
+            content_protected: false,
+            icon: None,
+            cursor: Cursor::default(),
             close_on_request: true,
-            window_icon: None,
-            taskbar_icon: None,
         }
     }
 }
 
-#[derive(Debug, Copy, Clone, PartialEq, Ord, PartialOrd, Eq, Hash, Default)]
-pub enum Fullscreen {
-    Exclusive,
-    #[default]
-    Borderless,
+#[derive(Clone)]
+pub struct RenderConfig {
+    pub antialiasing: AaConfig,
+    pub cpu: bool,
+    pub present_mode: PresentMode,
 }
 
-#[derive(Debug)]
-pub struct GraphicsConfig {
-    pub gl: Gl,
-    pub multisampling: u8,
-    pub hardware_acceleration: Option<bool>,
-    pub force_antialiasing: bool,
-}
-
-impl Default for GraphicsConfig {
+impl Default for RenderConfig {
     fn default() -> Self {
         Self {
-            gl: Gl::OPENGL,
-            multisampling: 1,
-            hardware_acceleration: None,
-            force_antialiasing: true,
+            antialiasing: AaConfig::Area,
+            cpu: false,
+            present_mode: PresentMode::AutoNoVsync,
         }
+    }
+}
+
+#[derive(Clone, Debug)]
+pub enum WindowMode {
+    Windowed,
+    Borderless,
+    Fullscreen,
+}
+
+impl Default for WindowMode {
+    fn default() -> Self {
+        Self::Windowed
     }
 }

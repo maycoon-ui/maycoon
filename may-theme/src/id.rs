@@ -1,20 +1,30 @@
-use std::fmt::Display;
+use std::fmt::{Debug, Display, Formatter};
 
-#[derive(Debug, Clone, PartialEq, Ord, PartialOrd, Eq, Hash)]
-pub struct WidgetId(String);
+#[derive(Debug, Clone, PartialEq, PartialOrd, Eq, Ord)]
+pub struct WidgetId {
+    namespace: String,
+    id: String,
+}
 
 impl WidgetId {
-    pub const EMPTY: WidgetId = WidgetId(String::new());
-
-    pub fn as_str(&self) -> &str {
-        &self.0.as_str()
+    pub fn new(namespace: impl ToString, id: impl ToString) -> Self {
+        Self {
+            namespace: namespace.to_string(),
+            id: id.to_string(),
+        }
     }
 
-    pub fn new(crate_name: impl Display, widget_name: impl Display) -> WidgetId {
-        WidgetId(format!("{}:{}", crate_name, widget_name))
+    pub fn namespace(&self) -> &str {
+        &self.namespace
     }
 
-    pub fn raw(id: impl ToString) -> Self {
-        Self(id.to_string())
+    pub fn id(&self) -> &str {
+        &self.id
+    }
+}
+
+impl Display for WidgetId {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", format!("{}.{}", self.namespace, self.id))
     }
 }

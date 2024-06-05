@@ -1,97 +1,63 @@
-use std::ops::{BitAnd, BitAndAssign, BitOr, BitOrAssign, BitXor};
-
-#[derive(Debug, Clone, Copy, PartialEq)]
-pub struct Update {
-    flags: u8,
-}
+pub struct Update(u8);
 
 impl Update {
-    pub const DRAW: Update = Update::from(0b0001);
-    pub const LAYOUT: Update = Update::from(0b0010);
-    pub const FORCE: Update = Update::from(0b0100);
-    pub const EVAL: Update = Update::from(0b1000);
+    pub const DRAW: Update = Update(1 << 0);
+    pub const LAYOUT: Update = Update(1 << 1);
+    pub const FORCE: Update = Update(1 << 2);
 
     pub fn empty() -> Self {
-        Update { flags: 0 }
+        Update(0)
     }
 
-    pub fn all() -> Self {
-        Update {
-            flags: (Self::DRAW | Self::LAYOUT | Self::FORCE | Self::EVAL).flags,
+    pub fn set(&mut self, flag: Update) {
+        self.0 |= flag.0;
+    }
+
+    pub fn unset(&mut self, flag: Update) {
+        self.0 &= !flag.0;
+    }
+
+    pub fn has_flag(&self, flag: Update) -> bool {
+        (self.0 & flag.0) != 0
+    }
+
+    pub fn combine(updates: &[Update]) -> Update {
+        let mut flags = 0;
+        for update in updates {
+            flags |= update.0;
         }
-    }
-
-    pub fn insert(&mut self, flag: Update) {
-        self.flags |= flag.flags;
-    }
-
-    pub fn remove(&mut self, flag: Update) {
-        self.flags &= !flag.flags;
-    }
-
-    pub fn contains(&self, flag: Update) -> bool {
-        self.flags & flag.flags != 0
-    }
-
-    pub fn any(&self) -> bool {
-        self.flags != 0
-    }
-
-    pub fn none(&self) -> bool {
-        self.flags == 0
-    }
-
-    pub fn clear(&mut self) {
-        self.flags = 0;
-    }
-
-    pub fn toggle(&mut self, flag: Update) {
-        self.flags ^= flag.flags;
-    }
-
-    pub const fn from(flags: u8) -> Self {
-        Update { flags }
+        Update(flags)
     }
 }
 
-impl BitOr for Update {
+impl std::ops::BitOr for Update {
     type Output = Self;
 
-    fn bitor(self, rhs: Self) -> Self::Output {
-        Update {
-            flags: self.flags | rhs.flags,
-        }
+    fn bitor(self, other: Self) -> Self {
+        Update(self.0 | other.0)
     }
 }
 
-impl BitAnd for Update {
+impl std::ops::BitAnd for Update {
     type Output = Self;
 
-    fn bitand(self, rhs: Self) -> Self::Output {
-        Update {
-            flags: self.flags & rhs.flags,
-        }
+    fn bitand(self, other: Self) -> Self {
+        Update(self.0 & other.0)
     }
 }
 
-impl BitXor for Update {
+impl std::ops::BitXor for Update {
     type Output = Self;
 
-    fn bitxor(self, rhs: Self) -> Self::Output {
-        Update {
-            flags: self.flags ^ rhs.flags,
-        }
+    fn bitxor(self, other: Self) -> Self {
+        Update(self.0 ^ other.0)
     }
 }
 
-impl BitAndAssign for Update {
-    fn bitand_assign(&mut self, rhs: Self) {
-        self.flags &= rhs.flags;
-    }
-}
+impl std::ops::Not for Update {
+    type Output = Self;
 
-impl BitOrAssign for Update {
-    fn bitor_assign(&mut self, rhs: Self) {
-        self.flags |= rhs.flags;
+    fn not(self) -> Self {
+        Update(!self.0)
     }
 }

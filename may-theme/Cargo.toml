@@ -8,5 +8,5 @@ repository = "https://github.com/maycoon-ui/maycoon"
 homepage = "https://maycoon-ui.github.io"
 
 [dependencies]
-femtovg = { workspace = true }
-indexmap = { workspace = true }
+dashmap = { version = "5.5.3", features = ["inline", "rayon"] }
+peniko = { workspace = true }
