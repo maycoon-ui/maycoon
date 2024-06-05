@@ -14,6 +14,3 @@
 ## Getting Started
 
 To get started, you can ``cargo add maycoon`` to your project and follow the instructions [here](https://maycoon-ui.github.io).
-
-## Need help?
-Visit the [FAQ](faq.md)
