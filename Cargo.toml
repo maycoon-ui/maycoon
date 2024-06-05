@@ -2,19 +2,8 @@
 members = ["may-core", "may-theme", "may-widgets"]
 
 [workspace.dependencies]
-indexmap = "2.2.6"
-euclid = "0.22.9"
-
-pathfinder_canvas = { git = "https://github.com/servo/pathfinder.git", rev = "30419d0" }
-pathfinder_color = { git = "https://github.com/servo/pathfinder.git", rev = "30419d0" }
-pathfinder_geometry = { git = "https://github.com/servo/pathfinder.git", rev = "30419d0" }
-pathfinder_gl = { git = "https://github.com/servo/pathfinder.git", rev = "30419d0" }
-pathfinder_gpu = { git = "https://github.com/servo/pathfinder.git", rev = "30419d0" }
-pathfinder_renderer = { git = "https://github.com/servo/pathfinder.git", rev = "30419d0" }
-pathfinder_resources = { git = "https://github.com/servo/pathfinder.git", rev = "30419d0" }
-pathfinder_content = { git = "https://github.com/servo/pathfinder.git", rev = "30419d0" }
-
-surfman = { git = "https://github.com/servo/surfman.git", rev = "b3b42f4" }
+peniko = "0.1.1"
+nalgebra = { version = "0.32.5", default-features = false, features = ["std"] }
 
 [package]
 name = "maycoon"
@@ -34,11 +23,11 @@ homepage = "https://maycoon-ui.github.io"
 may-core = { path = "may-core" }
 may-theme = { path = "may-theme" }
 may-widgets = { path = "may-widgets" }
-euclid = { workspace = true }
+peniko = { workspace = true }
+nalgebra = { workspace = true }
 
 [features]
 default = []
-roboto-font = ["may-core/roboto-font"]
 
 [lib]
 name = "maycoon"

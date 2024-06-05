@@ -1,1 +1,1 @@
-
+#![warn(missing_docs)]

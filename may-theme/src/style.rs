@@ -1,139 +1,249 @@
-use indexmap::IndexMap;
-use pathfinder_color::{ColorF, ColorU};
+use dashmap::DashMap;
+use peniko::{Brush, Color, Gradient};
 
 pub struct Style {
-    map: IndexMap<String, StyleVal>,
-    defaults: DefaultStyles,
+    map: DashMap<String, StyleVal>,
 }
 
 impl Style {
-    pub fn new(defaults: DefaultStyles, map: IndexMap<String, StyleVal>) -> Self {
-        Self { map, defaults }
+    pub fn new() -> Self {
+        Self {
+            map: DashMap::with_capacity(16),
+        }
     }
 
-    pub fn get(&self, key: impl ToString) -> Option<&StyleVal> {
-        self.map.get(&key.to_string())
+    pub fn set(&mut self, name: impl ToString, value: StyleVal) {
+        self.map.insert(name.to_string(), value);
     }
 
-    pub fn defaults(&self) -> &DefaultStyles {
-        &self.defaults
+    pub fn set_color(&mut self, name: impl ToString, color: Color) {
+        self.map.insert(name.to_string(), StyleVal::Color(color));
+    }
+
+    pub fn set_gradient(&mut self, name: impl ToString, gradient: Gradient) {
+        self.map
+            .insert(name.to_string(), StyleVal::Gradient(gradient));
+    }
+
+    pub fn set_brush(&mut self, name: impl ToString, brush: Brush) {
+        self.map.insert(name.to_string(), StyleVal::Brush(brush));
+    }
+
+    pub fn set_float(&mut self, name: impl ToString, value: f32) {
+        self.map.insert(name.to_string(), StyleVal::Float(value));
+    }
+
+    pub fn set_int(&mut self, name: impl ToString, value: i32) {
+        self.map.insert(name.to_string(), StyleVal::Int(value));
+    }
+
+    pub fn set_uint(&mut self, name: impl ToString, value: u32) {
+        self.map.insert(name.to_string(), StyleVal::UInt(value));
+    }
+
+    pub fn get(&self, name: impl ToString) -> Option<StyleVal> {
+        self.map.get(&name.to_string()).map(|val| val.clone())
+    }
+
+    pub fn get_color(&self, name: impl ToString) -> Option<Color> {
+        if let Some(val) = self.map.get(&name.to_string()) {
+            match val.value() {
+                StyleVal::Color(color) => Some(color.clone()),
+                _ => None,
+            }
+        } else {
+            None
+        }
+    }
+
+    pub fn get_gradient(&self, name: impl ToString) -> Option<Gradient> {
+        if let Some(val) = self.map.get(&name.to_string()) {
+            match val.value() {
+                StyleVal::Gradient(gradient) => Some(gradient.clone()),
+                _ => None,
+            }
+        } else {
+            None
+        }
+    }
+
+    pub fn get_brush(&self, name: impl ToString) -> Option<Brush> {
+        if let Some(val) = self.map.get(&name.to_string()) {
+            match val.value() {
+                StyleVal::Brush(brush) => Some(brush.clone()),
+                _ => None,
+            }
+        } else {
+            None
+        }
+    }
+
+    pub fn get_float(&self, name: impl ToString) -> Option<f32> {
+        if let Some(val) = self.map.get(&name.to_string()) {
+            match val.value() {
+                StyleVal::Float(float) => Some(*float),
+                _ => None,
+            }
+        } else {
+            None
+        }
+    }
+
+    pub fn get_int(&self, name: impl ToString) -> Option<i32> {
+        if let Some(val) = self.map.get(&name.to_string()) {
+            match val.value() {
+                StyleVal::Int(int) => Some(*int),
+                _ => None,
+            }
+        } else {
+            None
+        }
+    }
+
+    pub fn get_uint(&self, name: impl ToString) -> Option<u32> {
+        if let Some(val) = self.map.get(&name.to_string()) {
+            match val.value() {
+                StyleVal::UInt(uint) => Some(*uint),
+                _ => None,
+            }
+        } else {
+            None
+        }
+    }
+
+    pub fn get_bool(&self, name: impl ToString) -> Option<bool> {
+        if let Some(val) = self.map.get(&name.to_string()) {
+            match val.value() {
+                StyleVal::Bool(bool) => Some(*bool),
+                _ => None,
+            }
+        } else {
+            None
+        }
     }
 }
 
-pub enum StyleVal {
-    ColorF(ColorF),
-    ColorU(ColorU),
-    String(String),
-    Int(i32),
-    Bool(bool),
-    Float(f32),
-    List(Vec<StyleVal>),
-    Map(IndexMap<String, StyleVal>),
-    None,
-}
-
-#[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
+#[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Default, Debug)]
 pub struct DefaultStyles {
-    text: DefaultTextStyle,
-    interactive: DefaultInteractiveStyle,
-    container: DefaultContainerStyle,
+    text: DefaultTextStyles,
+    container: DefaultContainerStyles,
+    interactive: DefaultInteractiveStyles,
 }
 
 impl DefaultStyles {
     pub fn new(
-        text: DefaultTextStyle,
-        interactive: DefaultInteractiveStyle,
-        container: DefaultContainerStyle,
+        text: DefaultTextStyles,
+        container: DefaultContainerStyles,
+        interactive: DefaultInteractiveStyles,
     ) -> Self {
         Self {
             text,
-            interactive,
             container,
+            interactive,
         }
     }
-    pub fn text(&self) -> &DefaultTextStyle {
+
+    pub fn text(&self) -> &DefaultTextStyles {
         &self.text
     }
 
-    pub fn interactive(&self) -> &DefaultInteractiveStyle {
-        &self.interactive
-    }
-
-    pub fn container(&self) -> &DefaultContainerStyle {
+    pub fn container(&self) -> &DefaultContainerStyles {
         &self.container
     }
-}
 
-#[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
-pub struct DefaultTextStyle {
-    primary: ColorU,
-    secondary: ColorU,
-}
-
-impl DefaultTextStyle {
-    pub fn new(primary: ColorU, secondary: ColorU) -> Self {
-        Self { primary, secondary }
-    }
-    pub fn primary(&self) -> ColorU {
-        self.primary
-    }
-    pub fn secondary(&self) -> ColorU {
-        self.secondary
+    pub fn interactive(&self) -> &DefaultInteractiveStyles {
+        &self.interactive
     }
 }
 
-#[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
-pub struct DefaultInteractiveStyle {
-    enabled: ColorU,
-    disabled: ColorU,
-    active: ColorU,
-    inactive: ColorU,
+#[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Default, Debug)]
+pub struct DefaultTextStyles {
+    foreground: Color,
+    background: Color,
 }
 
-impl DefaultInteractiveStyle {
-    pub fn new(enabled: ColorU, disabled: ColorU, active: ColorU, inactive: ColorU) -> Self {
+impl DefaultTextStyles {
+    pub fn new(foreground: Color, background: Color) -> Self {
         Self {
-            enabled,
-            disabled,
-            active,
-            inactive,
+            foreground,
+            background,
         }
     }
-    pub fn enabled(&self) -> ColorU {
-        self.enabled
+
+    pub fn foreground(&self) -> Color {
+        self.foreground
     }
 
-    pub fn disabled(&self) -> ColorU {
-        self.disabled
+    pub fn background(&self) -> Color {
+        self.background
+    }
+}
+
+#[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Default, Debug)]
+pub struct DefaultContainerStyles {
+    foreground: Color,
+    background: Color,
+}
+
+impl DefaultContainerStyles {
+    pub fn new(foreground: Color, background: Color) -> Self {
+        Self {
+            foreground,
+            background,
+        }
     }
 
-    pub fn active(&self) -> ColorU {
+    pub fn foreground(&self) -> Color {
+        self.foreground
+    }
+
+    pub fn background(&self) -> Color {
+        self.background
+    }
+}
+
+#[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Default, Debug)]
+pub struct DefaultInteractiveStyles {
+    active: Color,
+    inactive: Color,
+    hover: Color,
+    disabled: Color,
+}
+
+impl DefaultInteractiveStyles {
+    pub fn new(active: Color, inactive: Color, hover: Color, disabled: Color) -> Self {
+        Self {
+            active,
+            inactive,
+            hover,
+            disabled,
+        }
+    }
+
+    pub fn active(&self) -> Color {
         self.active
     }
 
-    pub fn inactive(&self) -> ColorU {
+    pub fn inactive(&self) -> Color {
         self.inactive
     }
+
+    pub fn hover(&self) -> Color {
+        self.hover
+    }
+
+    pub fn disabled(&self) -> Color {
+        self.disabled
+    }
 }
 
-#[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
-pub struct DefaultContainerStyle {
-    background: ColorU,
-    foreground: ColorU,
-}
-
-impl DefaultContainerStyle {
-    pub fn new(background: ColorU, foreground: ColorU) -> Self {
-        Self {
-            background,
-            foreground,
-        }
-    }
-    pub fn background(&self) -> ColorU {
-        self.background
-    }
-
-    pub fn foreground(&self) -> ColorU {
-        self.foreground
-    }
+#[derive(Clone, Debug)]
+pub enum StyleVal {
+    Color(Color),
+    Gradient(Gradient),
+    Brush(Brush),
+    Float(f32),
+    Int(i32),
+    UInt(u32),
+    Bool(bool),
 }

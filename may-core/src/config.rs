@@ -1,105 +1,99 @@
-use euclid::default::Size2D;
-use euclid::Point2D;
-use may_theme::theme::Theme;
-use winit::window::WindowLevel;
+use nalgebra::{Point2, Vector2};
+pub use vello::AaConfig;
+pub use wgpu_types::PresentMode;
+pub use winit::platform::windows::CornerPreference;
+pub use winit::window::{
+    BadIcon, Cursor, CursorIcon, CustomCursor, Icon as WindowIcon, WindowButtons, WindowLevel,
+};
 
-#[derive(Clone, Debug)]
+use may_theme::theme::Theme;
+
+#[derive(Clone)]
 pub struct MayConfig<T: Theme> {
     pub window: WindowConfig,
     pub render: RenderConfig,
     pub theme: T,
 }
 
-#[derive(Clone, Debug, PartialEq, PartialOrd)]
-pub struct RenderConfig {
-    pub preference: DevicePreference,
-    pub mode: RenderLevel,
-    pub max_frame_latency: u128,
-    pub parallel: bool,
-}
-
-impl Default for RenderConfig {
-    fn default() -> Self {
-        Self {
-            preference: DevicePreference::default(),
-            mode: RenderLevel::default(),
-            max_frame_latency: 16,
-            parallel: true,
-        }
-    }
-}
-
-#[derive(Copy, Clone, Debug, PartialEq, PartialOrd)]
-pub enum RenderLevel {
-    Auto,
-    Primary,
-    Secondary,
-}
-
-impl Default for RenderLevel {
-    fn default() -> Self {
-        Self::Auto
-    }
-}
-
-#[derive(Copy, Clone, Debug, PartialEq, PartialOrd)]
-pub enum DevicePreference {
-    LowPower,
-    HighPerformance,
-    Software,
-}
-
-impl Default for DevicePreference {
-    fn default() -> Self {
-        Self::HighPerformance
-    }
-}
-
-#[derive(Clone, Debug)]
+#[derive(Clone)]
 pub struct WindowConfig {
-    pub size: Size2D<u32>,
     pub title: String,
-    pub decorations: bool,
+    pub size: Vector2<f64>,
+    pub min_size: Option<Vector2<f64>>,
+    pub max_size: Option<Vector2<f64>>,
     pub resizable: bool,
-    pub transparent: bool,
     pub maximized: bool,
-    pub fullscreen: Option<Fullscreen>,
-    pub position: Point2D<f64, f64>,
-    pub level: winit::window::WindowLevel,
-    pub blur: bool,
+    pub mode: WindowMode,
+    pub level: WindowLevel,
     pub visible: bool,
+    pub blur: bool,
+    pub transparent: bool,
+    pub position: Option<Point2<f64>>,
     pub active: bool,
-    pub skip_taskbar: bool,
+    pub buttons: WindowButtons,
+    pub decorations: bool,
+    pub corners: CornerPreference,
+    pub resize_increments: Option<Vector2<f64>>,
+    pub content_protected: bool,
+    pub icon: Option<WindowIcon>,
+    pub cursor: Cursor,
+    pub close_on_request: bool,
 }
 
 impl Default for WindowConfig {
     fn default() -> Self {
         Self {
-            size: Size2D::new(1000, 600),
-            title: "My Awesome App".to_string(),
-            decorations: true,
+            title: "New App".to_string(),
+            size: Vector2::new(800.0, 600.0),
+            min_size: None,
+            max_size: None,
             resizable: true,
-            transparent: false,
             maximized: false,
-            fullscreen: None,
-            position: Point2D::default(),
-            level: WindowLevel::Normal,
-            blur: false,
+            mode: WindowMode::default(),
+            level: Default::default(),
             visible: true,
+            blur: false,
+            transparent: false,
+            position: None,
             active: true,
-            skip_taskbar: false,
+            buttons: WindowButtons::all(),
+            decorations: true,
+            corners: Default::default(),
+            resize_increments: None,
+            content_protected: false,
+            icon: None,
+            cursor: Cursor::default(),
+            close_on_request: true,
         }
     }
 }
 
-#[derive(Copy, Clone, Debug, PartialEq, PartialOrd)]
-pub enum Fullscreen {
-    Exclusive,
-    Borderless,
+#[derive(Clone)]
+pub struct RenderConfig {
+    pub antialiasing: AaConfig,
+    pub cpu: bool,
+    pub present_mode: PresentMode,
 }
 
-impl Default for Fullscreen {
+impl Default for RenderConfig {
     fn default() -> Self {
-        Self::Exclusive
+        Self {
+            antialiasing: AaConfig::Area,
+            cpu: false,
+            present_mode: PresentMode::AutoNoVsync,
+        }
+    }
+}
+
+#[derive(Clone, Debug)]
+pub enum WindowMode {
+    Windowed,
+    Borderless,
+    Fullscreen,
+}
+
+impl Default for WindowMode {
+    fn default() -> Self {
+        Self::Windowed
     }
 }

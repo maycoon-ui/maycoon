@@ -1,87 +1,63 @@
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct Update {
-    bits: u32,
-}
+pub struct Update(u8);
 
 impl Update {
-    pub const EVAL: Update = Self { bits: 0b0001 };
-    pub const DRAW: Update = Self { bits: 0b0010 };
-    pub const LAYOUT: Update = Self { bits: 0b0100 };
-    pub const FORCE: Update = Self { bits: 0b1000 };
+    pub const DRAW: Update = Update(1 << 0);
+    pub const LAYOUT: Update = Update(1 << 1);
+    pub const FORCE: Update = Update(1 << 2);
 
     pub fn empty() -> Self {
-        Update { bits: 0 }
+        Update(0)
     }
 
-    pub fn all() -> Self {
-        Update {
-            bits: Self::EVAL.bits() | Self::DRAW.bits() | Self::LAYOUT.bits() | Self::FORCE.bits(),
+    pub fn set(&mut self, flag: Update) {
+        self.0 |= flag.0;
+    }
+
+    pub fn unset(&mut self, flag: Update) {
+        self.0 &= !flag.0;
+    }
+
+    pub fn has_flag(&self, flag: Update) -> bool {
+        (self.0 & flag.0) != 0
+    }
+
+    pub fn combine(updates: &[Update]) -> Update {
+        let mut flags = 0;
+        for update in updates {
+            flags |= update.0;
         }
-    }
-
-    pub fn bits(&self) -> u32 {
-        self.bits
-    }
-
-    pub fn insert(&mut self, other: Self) {
-        self.bits |= other.bits;
-    }
-
-    pub fn remove(&mut self, other: Self) {
-        self.bits &= !other.bits;
-    }
-
-    pub fn contains(&self, other: Self) -> bool {
-        (self.bits & other.bits) == other.bits
-    }
-
-    pub fn intersects(&self, other: Self) -> bool {
-        (self.bits & other.bits) != 0
-    }
-
-    pub fn from_bits(bits: u32) -> Self {
-        Update { bits }
+        Update(flags)
     }
 }
 
-// Implementing BitOr for combining flags using the | operator
 impl std::ops::BitOr for Update {
     type Output = Self;
 
-    fn bitor(self, rhs: Self) -> Self::Output {
-        Update {
-            bits: self.bits | rhs.bits,
-        }
+    fn bitor(self, other: Self) -> Self {
+        Update(self.0 | other.0)
     }
 }
 
-// Implementing BitAnd for combining flags using the & operator
 impl std::ops::BitAnd for Update {
     type Output = Self;
 
-    fn bitand(self, rhs: Self) -> Self::Output {
-        Update {
-            bits: self.bits & rhs.bits,
-        }
+    fn bitand(self, other: Self) -> Self {
+        Update(self.0 & other.0)
     }
 }
 
-// Implementing BitXor for combining flags using the ^ operator
 impl std::ops::BitXor for Update {
     type Output = Self;
 
-    fn bitxor(self, rhs: Self) -> Self::Output {
-        Update {
-            bits: self.bits ^ rhs.bits,
-        }
+    fn bitxor(self, other: Self) -> Self {
+        Update(self.0 ^ other.0)
     }
 }
 
-// Implementing Not for negating flags using the ! operator
 impl std::ops::Not for Update {
     type Output = Self;
 
-    fn not(self) -> Self::Output {
-        Update { bits: !self.bits }
+    fn not(self) -> Self {
+        Update(!self.0)
     }
 }

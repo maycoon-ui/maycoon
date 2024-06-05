@@ -8,20 +8,14 @@ repository = "https://github.com/maycoon-ui/maycoon"
 homepage = "https://maycoon-ui.github.io"
 
 [dependencies]
-pathfinder_canvas = { workspace = true }
-pathfinder_gl = { workspace = true }
-pathfinder_geometry = { workspace = true }
-pathfinder_gpu = { workspace = true }
-pathfinder_resources = { workspace = true }
-pathfinder_renderer = { workspace = true }
-pathfinder_color = { workspace = true }
-surfman = { workspace = true }
-euclid = { workspace = true }
-gl = "0.14.0"
-winit = "0.29.10"
+winit = "0.30.0"
+futures-lite = "2.3.0"
+wgpu-types = "0.20.0"
+vello = { git = "https://github.com/linebender/vello.git", rev = "2f25262" }
+taffy = "0.5.1"
 may-theme = { path = "../may-theme" }
-taffy = "0.4.4"
+nalgebra = { workspace = true }
+peniko = { workspace = true }
 
 [features]
-default = ["roboto-font"]
-roboto-font = []
+default = []
