@@ -1,4 +1,5 @@
 use std::sync::Arc;
+use std::time::{Duration, Instant};
 
 use nalgebra::Vector2;
 use taffy::{
@@ -7,8 +8,9 @@ use taffy::{
 use vello::util::{RenderContext, RenderSurface};
 use vello::{AaConfig, AaSupport, RenderParams, Renderer, RendererOptions, Scene};
 use winit::application::ApplicationHandler;
-use winit::event::WindowEvent;
-use winit::event_loop::ActiveEventLoop;
+use winit::dpi::PhysicalSize;
+use winit::event::{DeviceEvent, DeviceId, StartCause, WindowEvent};
+use winit::event_loop::{ActiveEventLoop, ControlFlow};
 use winit::window::{Window, WindowAttributes, WindowId};
 
 use may_theme::theme::Theme;
@@ -34,6 +36,7 @@ pub struct AppHandler<'a, T: Theme, W: Widget<S>, S: State> {
     info: AppInfo,
     render_ctx: Option<RenderContext>,
     update: Update,
+    last_update: Instant,
 }
 
 impl<'a, T: Theme, W: Widget<S>, S: State> AppHandler<'a, T, W, S> {
@@ -63,6 +66,7 @@ impl<'a, T: Theme, W: Widget<S>, S: State> AppHandler<'a, T, W, S> {
             window_node,
             render_ctx: None,
             update: Update::empty(),
+            last_update: Instant::now(),
         }
     }
 
@@ -106,7 +110,14 @@ impl<'a, T: Theme, W: Widget<S>, S: State> AppHandler<'a, T, W, S> {
         })
     }
 
+    fn request_redraw(&self) {
+        if let Some(window) = self.window.as_ref() {
+            window.request_redraw();
+        }
+    }
+
     fn update(&mut self, event_loop: &ActiveEventLoop) {
+        // completely layout widgets if taffy is not set up yet (e.g. during first update)
         if self.taffy.child_count(self.window_node) == 0 {
             self.layout_widget(self.window_node, &self.widget.layout_style())
                 .expect("Failed to layout window");
@@ -125,12 +136,15 @@ impl<'a, T: Theme, W: Widget<S>, S: State> AppHandler<'a, T, W, S> {
             )
             .expect("Failed to collect layout");
 
+        // update call to check if app should re-evaluate
         self.update.set(
             self.widget
                 .update(&layout_node, &mut self.state, &self.info),
         );
 
+        // check if app should re-evaluate layout
         if self.update.has_flag(Update::FORCE) || self.update.has_flag(Update::LAYOUT) {
+            // clear all nodes (except root window node)
             self.taffy
                 .set_children(self.window_node, &[])
                 .expect("Failed to set children");
@@ -145,11 +159,17 @@ impl<'a, T: Theme, W: Widget<S>, S: State> AppHandler<'a, T, W, S> {
                 .expect("Failed to collect layout");
         }
 
+        // check if app should redraw
         if self.update.has_flag(Update::FORCE) || self.update.has_flag(Update::DRAW) {
+            // clear scene
             self.scene.reset();
 
-            self.widget
-                .render(&mut self.scene, &mut self.config.theme, &self.state);
+            self.widget.render(
+                &mut self.scene,
+                &mut self.config.theme,
+                &self.info,
+                &layout_node,
+            );
 
             let renderer = self.renderer.as_mut().expect("Renderer not initialized");
             let render_ctx = self
@@ -159,15 +179,19 @@ impl<'a, T: Theme, W: Widget<S>, S: State> AppHandler<'a, T, W, S> {
             let surface = self.surface.as_ref().expect("Surface not initialized");
             let window = self.window.as_ref().expect("Window not initialized");
 
-            let device_handle = render_ctx.devices.first().unwrap(); // TODO: better device select
+            let device_handle = render_ctx.devices.first().expect("No devices available");
 
-            // TODO: better window minimize/occlusion handling
+            // check surface validity
             if window.inner_size().width != 0 && window.inner_size().height != 0 {
                 let surface_texture = surface
                     .surface
                     .get_current_texture()
                     .expect("Failed to get surface texture");
 
+                // make sure winit knows that the surface texture is ready to be presented
+                window.pre_present_notify();
+
+                // TODO: this panics if canvas didn't change (no operation was done) in debug mode
                 renderer
                     .render_to_surface(
                         &device_handle.device,
@@ -187,8 +211,31 @@ impl<'a, T: Theme, W: Widget<S>, S: State> AppHandler<'a, T, W, S> {
             }
         }
 
+        // check if app should re-evaluate
+        if self.update.has_flag(Update::EVAL) || self.update.has_flag(Update::FORCE) {
+            if let Some(window) = self.window.as_ref() {
+                window.request_redraw();
+            }
+        }
+
+        // reset AppInfo and update states
         self.info.reset();
         self.update = Update::empty();
+
+        // update diagnostics
+        if self.last_update.elapsed() >= Duration::from_secs(1) {
+            self.last_update = Instant::now();
+
+            // calc avg updates per sec through updates per sec NOW divided by 2
+            self.info.diagnostics.updates_per_sec =
+                (self.info.diagnostics.updates_per_sec + self.info.diagnostics.updates) / 2;
+
+            // reset current updates per seconds
+            self.info.diagnostics.updates = 0;
+        } else {
+            // increase updates per sec NOW by 1
+            self.info.diagnostics.updates += 1;
+        }
     }
 }
 
@@ -258,7 +305,6 @@ impl<'a, T: Theme, W: Widget<S>, S: State> ApplicationHandler for AppHandler<'a,
             if window.id() == window_id {
                 match event {
                     WindowEvent::Resized(new_size) => {
-                        // TODO: better way of handling minimize/occlude
                         if new_size.width != 0 && new_size.height != 0 {
                             if let Some(ctx) = &self.render_ctx {
                                 if let Some(surface) = &mut self.surface {
@@ -266,7 +312,7 @@ impl<'a, T: Theme, W: Widget<S>, S: State> ApplicationHandler for AppHandler<'a,
                                 }
                             }
 
-                            window.request_redraw();
+                            self.request_redraw();
 
                             self.update.set(Update::DRAW | Update::LAYOUT);
                         }
@@ -285,19 +331,17 @@ impl<'a, T: Theme, W: Widget<S>, S: State> ApplicationHandler for AppHandler<'a,
                     }
 
                     WindowEvent::RedrawRequested => {
-                        if let Some(window) = self.window.as_ref() {
-                            window.request_redraw();
-                        }
-
                         self.update(event_loop);
                     }
 
                     WindowEvent::CursorLeft { .. } => {
                         self.info.cursor_pos = None;
+                        self.request_redraw();
                     }
 
                     WindowEvent::CursorMoved { position, .. } => {
                         self.info.cursor_pos = Some(Vector2::new(position.x, position.y));
+                        self.request_redraw();
                     }
 
                     WindowEvent::KeyboardInput {
@@ -307,6 +351,7 @@ impl<'a, T: Theme, W: Widget<S>, S: State> ApplicationHandler for AppHandler<'a,
                     } => {
                         if !is_synthetic {
                             self.info.keys.push((device_id, event));
+                            self.request_redraw();
                         }
                     }
 
@@ -316,6 +361,7 @@ impl<'a, T: Theme, W: Widget<S>, S: State> ApplicationHandler for AppHandler<'a,
                         state,
                     } => {
                         self.info.buttons.push((device_id, button, state));
+                        self.request_redraw();
                     }
 
                     _ => (),
@@ -324,10 +370,11 @@ impl<'a, T: Theme, W: Widget<S>, S: State> ApplicationHandler for AppHandler<'a,
         }
     }
 
-    fn suspended(&mut self, event_loop: &ActiveEventLoop) {
+    fn suspended(&mut self, _: &ActiveEventLoop) {
         self.window = None;
         self.surface = None;
         self.render_ctx = None;
         self.renderer = None;
+        self.info.reset();
     }
 }

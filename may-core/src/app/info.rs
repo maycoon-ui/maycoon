@@ -1,3 +1,5 @@
+use crate::app::diagnostics::Diagnostics;
+use crate::app::font_ctx::FontContext;
 use nalgebra::Vector2;
 use winit::event::{DeviceId, ElementState, KeyEvent, MouseButton};
 
@@ -5,6 +7,8 @@ pub struct AppInfo {
     pub cursor_pos: Option<Vector2<f64>>,
     pub keys: Vec<(DeviceId, KeyEvent)>,
     pub buttons: Vec<(DeviceId, MouseButton, ElementState)>,
+    pub diagnostics: Diagnostics,
+    pub font_context: FontContext,
 }
 
 impl AppInfo {
@@ -20,6 +24,8 @@ impl Default for AppInfo {
             cursor_pos: None,
             keys: Vec::with_capacity(4),
             buttons: Vec::with_capacity(2),
+            diagnostics: Diagnostics::default(),
+            font_context: FontContext::default(),
         }
     }
 }

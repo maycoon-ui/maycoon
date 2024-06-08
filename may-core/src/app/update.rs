@@ -4,6 +4,7 @@ impl Update {
     pub const DRAW: Update = Update(1 << 0);
     pub const LAYOUT: Update = Update(1 << 1);
     pub const FORCE: Update = Update(1 << 2);
+    pub const EVAL: Update = Update(1 << 3);
 
     pub fn empty() -> Self {
         Update(0)
@@ -27,6 +28,10 @@ impl Update {
             flags |= update.0;
         }
         Update(flags)
+    }
+
+    pub fn all() -> Update {
+        Update::DRAW | Update::LAYOUT | Update::FORCE | Update::EVAL
     }
 }
 

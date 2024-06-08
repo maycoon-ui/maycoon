@@ -24,9 +24,14 @@ impl Theme for CelesteTheme {
 
     fn defaults(&self) -> DefaultStyles {
         DefaultStyles::new(
-            DefaultTextStyles::new(Color::BLACK, Color::BLACK),
-            DefaultContainerStyles::new(Color::BLACK, Color::BLACK),
-            DefaultInteractiveStyles::new(Color::BLACK, Color::BLACK, Color::BLACK, Color::BLACK),
+            DefaultTextStyles::new(Color::BLACK, Color::WHITE_SMOKE),
+            DefaultContainerStyles::new(Color::ANTIQUE_WHITE, Color::WHITE),
+            DefaultInteractiveStyles::new(
+                Color::DARK_VIOLET,
+                Color::BLUE_VIOLET,
+                Color::rgb8(138, 146, 226),
+                Color::LAVENDER_BLUSH,
+            ),
         )
     }
 

@@ -1,3 +1,9 @@
+pub mod diagnostics;
+pub mod font_ctx;
+pub mod handler;
+pub mod info;
+pub mod update;
+
 use winit::dpi::{LogicalPosition, LogicalSize, Position, Size};
 use winit::event_loop::EventLoopBuilder;
 use winit::platform::windows::WindowAttributesExtWindows;
@@ -9,10 +15,6 @@ use crate::app::handler::AppHandler;
 use crate::config::MayConfig;
 use crate::state::State;
 use crate::widget::Widget;
-
-pub mod handler;
-pub mod info;
-pub mod update;
 
 pub struct MayApp<T: Theme> {
     config: MayConfig<T>,

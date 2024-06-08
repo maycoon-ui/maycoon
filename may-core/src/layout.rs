@@ -1,4 +1,8 @@
-pub use taffy::*;
+pub use taffy::style_helpers::*;
+pub use taffy::Layout;
+pub use taffy::Point;
+pub use taffy::Size;
+pub use taffy::Style as LayoutStyle;
 
 pub struct LayoutNode {
     pub layout: Layout,
@@ -6,6 +10,6 @@ pub struct LayoutNode {
 }
 
 pub struct StyleNode {
-    pub style: Style,
+    pub style: LayoutStyle,
     pub children: Vec<StyleNode>,
 }

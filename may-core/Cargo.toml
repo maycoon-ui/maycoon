@@ -15,6 +15,7 @@ vello = { git = "https://github.com/linebender/vello.git", rev = "2f25262" }
 taffy = "0.5.1"
 may-theme = { path = "../may-theme" }
 nalgebra = { workspace = true }
+dashmap = { workspace = true }
 peniko = { workspace = true }
 
 [features]
