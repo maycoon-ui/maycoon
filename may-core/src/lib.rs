@@ -1,11 +1,24 @@
 #![warn(missing_docs)]
 
+//! Core library for Maycoon => See `maycoon` crate.
+//!
+//! Contains core app logic and widget types.
+
 pub use vello as vg;
 pub use winit::event::DeviceId;
 pub use winit::keyboard;
 
+/// Contains app functionality.
 pub mod app;
+
+/// Contains the [MayConfig](config::MayConfig) struct.
 pub mod config;
+
+/// Contains useful types and functions for layout interaction.
 pub mod layout;
+
+/// Contains app state management features
 pub mod state;
+
+/// Contains the core widget functionalities
 pub mod widget;

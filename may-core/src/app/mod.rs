@@ -1,7 +1,16 @@
+/// Contains diagnostics data for the application.
 pub mod diagnostics;
+
+/// Contains the font context structure.
 pub mod font_ctx;
+
+/// Contains the application handler.
 pub mod handler;
+
+/// Contains the application information structure.
 pub mod info;
+
+/// Contains the update mode bitflag.
 pub mod update;
 
 use winit::dpi::{LogicalPosition, LogicalSize, Position, Size};
@@ -16,16 +25,19 @@ use crate::config::MayConfig;
 use crate::state::State;
 use crate::widget::Widget;
 
+/// The core Application structure.
 pub struct MayApp<T: Theme> {
     config: MayConfig<T>,
 }
 
 impl<T: Theme> MayApp<T> {
+    /// Create a new App with the given [MayConfig].
     pub fn new(config: MayConfig<T>) -> Self {
         Self { config }
     }
 
-    pub fn run<S: State, W: Widget<S>>(mut self, widget: W, state: S) {
+    /// Run the application with given widget and state.
+    pub fn run<S: State, W: Widget<S>>(self, widget: W, state: S) {
         let event_loop = EventLoopBuilder::default()
             .build()
             .expect("Failed to create event loop");

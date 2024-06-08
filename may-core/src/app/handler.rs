@@ -8,9 +8,8 @@ use taffy::{
 use vello::util::{RenderContext, RenderSurface};
 use vello::{AaConfig, AaSupport, RenderParams, Renderer, RendererOptions, Scene};
 use winit::application::ApplicationHandler;
-use winit::dpi::PhysicalSize;
-use winit::event::{DeviceEvent, DeviceId, StartCause, WindowEvent};
-use winit::event_loop::{ActiveEventLoop, ControlFlow};
+use winit::event::WindowEvent;
+use winit::event_loop::ActiveEventLoop;
 use winit::window::{Window, WindowAttributes, WindowId};
 
 use may_theme::theme::Theme;
@@ -22,6 +21,7 @@ use crate::layout::{LayoutNode, StyleNode};
 use crate::state::State;
 use crate::widget::Widget;
 
+/// The core application handler. You should use [MayApp](crate::app::MayApp) instead for running applications.
 pub struct AppHandler<'a, T: Theme, W: Widget<S>, S: State> {
     config: MayConfig<T>,
     attrs: WindowAttributes,
@@ -40,6 +40,7 @@ pub struct AppHandler<'a, T: Theme, W: Widget<S>, S: State> {
 }
 
 impl<'a, T: Theme, W: Widget<S>, S: State> AppHandler<'a, T, W, S> {
+    /// Create a new handler with given window attributes, config, widget and state.
     pub fn new(attrs: WindowAttributes, config: MayConfig<T>, widget: W, state: S) -> Self {
         let mut taffy = TaffyTree::with_capacity(16);
         let window_node = taffy
@@ -70,6 +71,7 @@ impl<'a, T: Theme, W: Widget<S>, S: State> AppHandler<'a, T, W, S> {
         }
     }
 
+    /// Add the parent node and its children to the layout tree.
     fn layout_widget(&mut self, parent: NodeId, style: &StyleNode) -> TaffyResult<()> {
         let node = self.taffy.new_leaf(style.style.clone())?;
 
@@ -82,6 +84,7 @@ impl<'a, T: Theme, W: Widget<S>, S: State> AppHandler<'a, T, W, S> {
         Ok(())
     }
 
+    /// Compute the layout of the root node and its children.
     fn compute_layout(&mut self) -> TaffyResult<()> {
         self.taffy.compute_layout(
             self.window_node,
@@ -97,6 +100,7 @@ impl<'a, T: Theme, W: Widget<S>, S: State> AppHandler<'a, T, W, S> {
         Ok(())
     }
 
+    /// Collection the computed layout of the given node and its children. Make sure to call [AppHandler::compute_layout] to not get false results.
     fn collect_layout(&mut self, node: NodeId, style: &StyleNode) -> TaffyResult<LayoutNode> {
         let mut children = Vec::new();
 
@@ -105,18 +109,20 @@ impl<'a, T: Theme, W: Widget<S>, S: State> AppHandler<'a, T, W, S> {
         }
 
         Ok(LayoutNode {
-            layout: self.taffy.layout(node)?.clone(),
+            layout: *self.taffy.layout(node)?,
             children,
         })
     }
 
+    /// Request a window redraw.
     fn request_redraw(&self) {
         if let Some(window) = self.window.as_ref() {
             window.request_redraw();
         }
     }
 
-    fn update(&mut self, event_loop: &ActiveEventLoop) {
+    /// Update the app and process events.
+    fn update(&mut self, _: &ActiveEventLoop) {
         // completely layout widgets if taffy is not set up yet (e.g. during first update)
         if self.taffy.child_count(self.window_node) == 0 {
             self.layout_widget(self.window_node, &self.widget.layout_style())

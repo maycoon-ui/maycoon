@@ -3,18 +3,19 @@ use may_core::app::update::Update;
 use may_core::layout::{LayoutNode, LayoutStyle, StyleNode};
 use may_core::state::State;
 use may_core::vg::glyph::Glyph;
-use may_core::vg::kurbo::Affine;
-use may_core::vg::peniko::{Brush, Fill, StyleRef};
-use may_core::vg::skrifa::instance::{Location, Size};
+use may_core::vg::peniko::{Brush, Fill};
+use may_core::vg::skrifa::instance::Size;
 use may_core::vg::skrifa::raw::FileRef;
 use may_core::vg::skrifa::setting::VariationSetting;
-use may_core::vg::skrifa::{FontRef, MetadataProvider, Tag};
+use may_core::vg::skrifa::MetadataProvider;
 use may_core::vg::{peniko, Scene};
 use may_core::widget::Widget;
 use may_theme::id::WidgetId;
-use may_theme::style::Style;
 use may_theme::theme::Theme;
 
+/// A text widget.
+///
+/// It's text, what do you expect?
 pub struct Text {
     style: LayoutStyle,
     text: String,
@@ -23,6 +24,7 @@ pub struct Text {
 }
 
 impl Text {
+    /// Create a new text widget with the given text.
     pub fn new(text: impl ToString) -> Self {
         Self {
             style: LayoutStyle::default(),
@@ -32,16 +34,19 @@ impl Text {
         }
     }
 
+    /// Set the font of the text.
     pub fn with_font(mut self, font: impl ToString) -> Self {
         self.font = Some(font.to_string());
         self
     }
 
+    /// Set the font size of the text.
     pub fn with_font_size(mut self, size: f32) -> Self {
         self.font_size = size;
         self
     }
 
+    /// Set the layout style of the text.
     pub fn with_layout(mut self, style: LayoutStyle) -> Self {
         self.style = style;
         self
@@ -119,8 +124,6 @@ impl<S: State> Widget<S> for Text {
                     })
                 }),
             );
-
-        // todo
     }
 
     fn layout_style(&self) -> StyleNode {
@@ -130,7 +133,7 @@ impl<S: State> Widget<S> for Text {
         }
     }
 
-    fn update(&mut self, layout: &LayoutNode, _: &mut S, info: &AppInfo) -> Update {
+    fn update(&mut self, _: &LayoutNode, _: &mut S, _: &AppInfo) -> Update {
         Update::empty()
     }
 

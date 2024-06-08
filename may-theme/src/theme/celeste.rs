@@ -6,8 +6,10 @@ use crate::style::{
 };
 use crate::theme::Theme;
 
+/// The Celeste Theme inspired by cold blue and white colors.
 #[derive(Debug, Copy, Clone, Default)]
 pub enum CelesteTheme {
+    /// The Light Celeste Theme.
     #[default]
     Light,
 }
