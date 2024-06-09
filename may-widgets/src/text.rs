@@ -5,6 +5,7 @@ use may_core::state::State;
 use may_core::vg::glyph::Glyph;
 use may_core::vg::peniko::{Brush, Fill};
 use may_core::vg::skrifa::instance::Size;
+use may_core::vg::skrifa::outline::Hinting;
 use may_core::vg::skrifa::raw::FileRef;
 use may_core::vg::skrifa::setting::VariationSetting;
 use may_core::vg::skrifa::MetadataProvider;
@@ -21,6 +22,7 @@ pub struct Text {
     text: String,
     font: Option<String>,
     font_size: f32,
+    hinting: bool,
 }
 
 impl Text {
@@ -30,8 +32,18 @@ impl Text {
             style: LayoutStyle::default(),
             text: text.to_string(),
             font: None,
-            font_size: 16.0,
+            font_size: 30.0,
+            hinting: true,
         }
+    }
+
+    /// Set the hinting of the text.
+    ///
+    /// Hinting adjusts the display of an outline font so that it lines up with a rasterized grid.
+    /// At low screen resolutions and font size, hinting can produce clearer text.
+    pub fn with_hinting(mut self, hinting: bool) -> Self {
+        self.hinting = hinting;
+        self
     }
 
     /// Set the font of the text.
@@ -104,9 +116,9 @@ impl<S: State> Widget<S> for Text {
             .brush(&brush)
             .glyph_transform(None)
             .normalized_coords(location.coords())
-            .hint(false)
+            .hint(self.hinting)
             .draw(
-                &peniko::Style::Fill(Fill::EvenOdd),
+                &peniko::Style::Fill(Fill::NonZero),
                 self.text.chars().filter_map(|ch| {
                     if ch == '\n' {
                         pen_y += line_height;
