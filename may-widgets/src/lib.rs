@@ -6,3 +6,5 @@
 
 /// Contains the [text::Text] widget.
 pub mod text;
+
+pub mod button;
