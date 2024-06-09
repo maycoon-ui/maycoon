@@ -12,6 +12,7 @@ use winit::event::WindowEvent;
 use winit::event_loop::ActiveEventLoop;
 use winit::window::{Window, WindowAttributes, WindowId};
 
+use crate::app::font_ctx::FontContext;
 use may_theme::theme::Theme;
 
 use crate::app::info::AppInfo;
@@ -41,7 +42,13 @@ pub struct AppHandler<'a, T: Theme, W: Widget<S>, S: State> {
 
 impl<'a, T: Theme, W: Widget<S>, S: State> AppHandler<'a, T, W, S> {
     /// Create a new handler with given window attributes, config, widget and state.
-    pub fn new(attrs: WindowAttributes, config: MayConfig<T>, widget: W, state: S) -> Self {
+    pub fn new(
+        attrs: WindowAttributes,
+        config: MayConfig<T>,
+        widget: W,
+        state: S,
+        font_context: FontContext,
+    ) -> Self {
         let mut taffy = TaffyTree::with_capacity(16);
         let window_node = taffy
             .new_leaf(Style {
@@ -63,7 +70,10 @@ impl<'a, T: Theme, W: Widget<S>, S: State> AppHandler<'a, T, W, S> {
             taffy,
             state,
             widget,
-            info: AppInfo::default(),
+            info: AppInfo {
+                font_context,
+                ..Default::default()
+            },
             window_node,
             render_ctx: None,
             update: Update::empty(),
@@ -269,6 +279,8 @@ impl<'a, T: Theme, W: Widget<S>, S: State> ApplicationHandler for AppHandler<'a,
             .expect("Failed to create surface"),
         );
 
+        // select first device available
+        // TODO: support device filters
         let device_handle = render_ctx.devices.first().expect("Failed to select device");
 
         self.renderer = Some(
