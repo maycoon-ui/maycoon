@@ -13,11 +13,13 @@ pub mod info;
 /// Contains the update mode bitflag.
 pub mod update;
 
+use peniko::Font;
 use winit::dpi::{LogicalPosition, LogicalSize, Position, Size};
 use winit::event_loop::EventLoopBuilder;
 use winit::platform::windows::WindowAttributesExtWindows;
 use winit::window::WindowAttributes;
 
+use crate::app::font_ctx::FontContext;
 use may_theme::theme::Theme;
 
 use crate::app::handler::AppHandler;
@@ -28,12 +30,22 @@ use crate::widget::Widget;
 /// The core Application structure.
 pub struct MayApp<T: Theme> {
     config: MayConfig<T>,
+    font_ctx: FontContext,
 }
 
 impl<T: Theme> MayApp<T> {
     /// Create a new App with the given [MayConfig].
     pub fn new(config: MayConfig<T>) -> Self {
-        Self { config }
+        Self {
+            config,
+            font_ctx: FontContext::default(),
+        }
+    }
+
+    /// Insert a new font into the font context.
+    pub fn with_font(mut self, name: impl ToString, font: Font) -> Self {
+        self.font_ctx.insert(name, font);
+        self
     }
 
     /// Run the application with given widget and state.
@@ -62,21 +74,28 @@ impl<T: Theme> MayApp<T> {
             .with_active(self.config.window.active)
             .with_cursor(self.config.window.cursor.clone());
 
+        // since `with_max_inner_size()` doesn't support `Option` values, we need to manually set them
         attrs.max_inner_size = self
             .config
             .window
             .max_size
             .map(|v| Size::Logical(LogicalSize::new(v.x, v.y)));
+
+        // since `with_min_inner_size()` doesn't support `Option` values, we need to manually set them
         attrs.min_inner_size = self
             .config
             .window
             .min_size
             .map(|v| Size::Logical(LogicalSize::new(v.x, v.y)));
+
+        // since `with_position()` doesn't support `Option` values, we need to manually set them
         attrs.position = self
             .config
             .window
             .position
             .map(|v| Position::Logical(LogicalPosition::new(v.x, v.y)));
+
+        // since `with_resize_increments()` doesn't support `Option` values, we need to manually set them
         attrs.resize_increments = self
             .config
             .window
@@ -84,7 +103,13 @@ impl<T: Theme> MayApp<T> {
             .map(|v| Size::Logical(LogicalSize::new(v.x, v.y)));
 
         event_loop
-            .run_app(&mut AppHandler::new(attrs, self.config, widget, state))
+            .run_app(&mut AppHandler::new(
+                attrs,
+                self.config,
+                widget,
+                state,
+                self.font_ctx,
+            ))
             .expect("Failed to run event loop");
     }
 }
