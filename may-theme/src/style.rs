@@ -14,6 +14,19 @@ impl Style {
         }
     }
 
+    /// Create a style from an array of strings and style values.
+    pub fn from_values(values: impl IntoIterator<Item = (String, StyleVal)>) -> Self {
+        Self {
+            map: DashMap::from_iter(values),
+        }
+    }
+
+    /// Insert a style value with the given name into the style map.
+    pub fn with_value(mut self, name: impl ToString, value: StyleVal) -> Self {
+        self.map.insert(name.to_string(), value);
+        self
+    }
+
     /// Set a style value by name.
     pub fn set(&mut self, name: impl ToString, value: StyleVal) {
         self.map.insert(name.to_string(), value);
