@@ -1,12 +1,13 @@
-use peniko::Color;
+use peniko::{Brush, Color};
 
 use crate::id::WidgetId;
 use crate::style::{
     DefaultContainerStyles, DefaultInteractiveStyles, DefaultStyles, DefaultTextStyles, Style,
+    StyleVal,
 };
 use crate::theme::Theme;
 
-/// The Celeste Theme inspired by cold blue and white colors.
+/// A smooth and minimalistic theme with a cold blue and purple touch.
 #[derive(Debug, Copy, Clone, Default)]
 pub enum CelesteTheme {
     /// The Light Celeste Theme.
@@ -18,6 +19,10 @@ impl Theme for CelesteTheme {
     fn of(&self, id: WidgetId) -> Option<Style> {
         match id.namespace() {
             "may-widgets" => match id.id() {
+                "Text" => Some(Style::from_values([(
+                    "color".to_string(),
+                    StyleVal::Brush(Brush::Solid(Color::BLACK)),
+                )])),
                 _ => None,
             },
             _ => None,
@@ -38,6 +43,6 @@ impl Theme for CelesteTheme {
     }
 
     fn window_background(&self) -> Color {
-        Color::WHITE_SMOKE
+        Color::WHITE
     }
 }
