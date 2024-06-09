@@ -5,8 +5,12 @@
 //! Contains core app logic and widget types.
 
 pub use vello as vg;
-pub use winit::event::DeviceId;
-pub use winit::keyboard;
+
+/// Contains useful types for interacting with winit.
+pub mod window {
+    pub use winit::event::*;
+    pub use winit::keyboard::*;
+}
 
 /// Contains app functionality.
 pub mod app;
