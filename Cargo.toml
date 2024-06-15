@@ -29,6 +29,7 @@ nalgebra = { workspace = true }
 
 [features]
 default = []
+vg = ["may-core/vg"]
 
 [lib]
 name = "maycoon"
