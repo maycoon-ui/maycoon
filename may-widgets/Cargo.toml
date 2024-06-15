@@ -9,4 +9,4 @@ homepage = "https://maycoon-ui.github.io"
 
 [dependencies]
 may-theme = { path = "../may-theme" }
-may-core = { path = "../may-core" }
+may-core = { path = "../may-core", features = ["vg"] }
