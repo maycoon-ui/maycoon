@@ -2,6 +2,7 @@ use dashmap::DashMap;
 use peniko::{Brush, Color, Gradient};
 
 /// Styling map for defining widget appearance.
+#[derive(Clone, Debug)]
 pub struct Style {
     map: DashMap<String, StyleVal>,
 }
@@ -21,8 +22,13 @@ impl Style {
         }
     }
 
+    /// Removes the style value from the map with the give name.
+    pub fn remove(&mut self, name: impl ToString) {
+        self.map.remove(&name.to_string());
+    }
+
     /// Insert a style value with the given name into the style map.
-    pub fn with_value(mut self, name: impl ToString, value: StyleVal) -> Self {
+    pub fn with_value(self, name: impl ToString, value: StyleVal) -> Self {
         self.map.insert(name.to_string(), value);
         self
     }
@@ -41,6 +47,11 @@ impl Style {
     pub fn set_gradient(&mut self, name: impl ToString, gradient: Gradient) {
         self.map
             .insert(name.to_string(), StyleVal::Gradient(gradient));
+    }
+
+    /// Set a bool style value by name.
+    pub fn set_bool(&mut self, name: impl ToString, value: bool) {
+        self.map.insert(name.to_string(), StyleVal::Bool(value));
     }
 
     /// Set a brush style value by name.
