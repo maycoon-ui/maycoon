@@ -1,3 +1,17 @@
+use peniko::Font;
+use winit::dpi::{LogicalPosition, LogicalSize, Position, Size};
+use winit::event_loop::EventLoopBuilder;
+use winit::platform::windows::WindowAttributesExtWindows;
+use winit::window::WindowAttributes;
+
+use may_theme::theme::Theme;
+
+use crate::app::font_ctx::FontContext;
+use crate::app::handler::AppHandler;
+use crate::config::MayConfig;
+use crate::state::State;
+use crate::widget::Widget;
+
 /// Contains diagnostics data for the application.
 pub mod diagnostics;
 
@@ -12,20 +26,6 @@ pub mod info;
 
 /// Contains the update mode bitflag.
 pub mod update;
-
-use peniko::Font;
-use winit::dpi::{LogicalPosition, LogicalSize, Position, Size};
-use winit::event_loop::EventLoopBuilder;
-use winit::platform::windows::WindowAttributesExtWindows;
-use winit::window::WindowAttributes;
-
-use crate::app::font_ctx::FontContext;
-use may_theme::theme::Theme;
-
-use crate::app::handler::AppHandler;
-use crate::config::MayConfig;
-use crate::state::State;
-use crate::widget::Widget;
 
 /// The core Application structure.
 pub struct MayApp<T: Theme> {
