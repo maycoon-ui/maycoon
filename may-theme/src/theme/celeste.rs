@@ -1,6 +1,6 @@
-use crate::globals::Globals;
-use peniko::{Brush, Color};
+use peniko::Color;
 
+use crate::globals::Globals;
 use crate::id::WidgetId;
 use crate::style::{
     DefaultContainerStyles, DefaultInteractiveStyles, DefaultStyles, DefaultTextStyles, Style,
@@ -11,11 +11,12 @@ use crate::theme::Theme;
 /// A smooth and minimalistic theme with a cold blue and purple touch.
 #[derive(Debug, Clone)]
 pub enum CelesteTheme {
-    /// The Light Celeste Theme.
+    /// Use [CelesteTheme::light] to use the light Celeste theme.
     Light(Globals),
 }
 
 impl CelesteTheme {
+    /// The Light Celeste Theme.
     pub fn light() -> Self {
         Self::Light(Globals::default())
     }
