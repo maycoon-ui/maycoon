@@ -1,6 +1,7 @@
+use std::sync::Arc;
+
 use dashmap::DashMap;
 use peniko::{Blob, Font};
-use std::sync::Arc;
 
 /// The font context. Contains font data.
 #[derive(Clone, Debug)]
