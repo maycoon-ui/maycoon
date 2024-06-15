@@ -1,7 +1,8 @@
-use crate::app::diagnostics::Diagnostics;
-use crate::app::font_ctx::FontContext;
 use nalgebra::Vector2;
 use winit::event::{DeviceId, ElementState, KeyEvent, MouseButton};
+
+use crate::app::diagnostics::Diagnostics;
+use crate::app::font_ctx::FontContext;
 
 /// The application information container.
 pub struct AppInfo {
