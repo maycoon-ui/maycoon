@@ -1,21 +1,61 @@
 use may_core::app::info::AppInfo;
 use may_core::app::update::Update;
-use may_core::layout::{LayoutNode, LayoutStyle, StyleNode};
+use may_core::layout;
+use may_core::layout::{Dimension, LayoutNode, LayoutStyle, StyleNode};
 use may_core::state::State;
-use may_core::vg::kurbo::{Affine, Point, Rect, RoundedRect, RoundedRectRadii, Size};
+use may_core::vg::kurbo::{Affine, Point, Rect, RoundedRect, RoundedRectRadii, Size, Vec2};
 use may_core::vg::peniko::{Brush, Fill};
 use may_core::vg::Scene;
 use may_core::widget::Widget;
-use may_core::window::MouseButton;
+use may_core::window::{ElementState, MouseButton};
 use may_theme::id::WidgetId;
 use may_theme::theme::Theme;
 
+/// A generic Button widget to make an interactive button-style widget with a child.
 pub struct Button<S: State> {
     child: Box<dyn Widget<S>>,
     state: ButtonState,
     on_pressed: Box<dyn FnMut(&mut S) -> Update>,
-    on_state_change: Box<dyn FnMut(&mut S, ButtonState) -> Update>,
     layout_style: LayoutStyle,
+}
+
+impl<S: State> Button<S> {
+    /// Create a new button with the given child widget.
+    pub fn new(child: impl Widget<S> + 'static) -> Self {
+        Self {
+            child: Box::new(child),
+            state: ButtonState {
+                active: false,
+                hover: false,
+            },
+            on_pressed: Box::new(|_| Update::empty()),
+            layout_style: LayoutStyle {
+                size: layout::Size {
+                    width: Dimension::Length(100.0),
+                    height: Dimension::Length(50.0),
+                },
+                ..Default::default()
+            },
+        }
+    }
+
+    /// Sets the internal button state. Not recommended to use, unless you know what you're doing.
+    pub fn with_state(mut self, state: ButtonState) -> Self {
+        self.state = state;
+        self
+    }
+
+    /// Sets the function to be called when the button is pressed.
+    pub fn with_on_pressed(mut self, on_pressed: impl FnMut(&mut S) -> Update + 'static) -> Self {
+        self.on_pressed = Box::new(on_pressed);
+        self
+    }
+
+    /// Sets the layout style of the button.
+    pub fn with_layout_style(mut self, layout_style: LayoutStyle) -> Self {
+        self.layout_style = layout_style;
+        self
+    }
 }
 
 impl<S: State> Widget<S> for Button<S> {
@@ -26,22 +66,26 @@ impl<S: State> Widget<S> for Button<S> {
         info: &AppInfo,
         layout_node: &LayoutNode,
     ) {
-        let transform = Affine::scale_non_uniform(
+        let transform = Affine::translate(Vec2::new(
             layout_node.layout.location.x as f64,
             layout_node.layout.location.y as f64,
-        );
+        ));
 
         let brush = if let Some(style) = theme.of(self.widget_id()) {
-            match self.state {
-                ButtonState::Hovered => style.get_brush("color_hovered").unwrap(),
-                ButtonState::Pressed => style.get_brush("color_pressed").unwrap(),
-                ButtonState::Idle => style.get_brush("color_idle").unwrap(),
+            if self.state.active {
+                style.get_brush("color_pressed").unwrap()
+            } else if self.state.hover {
+                style.get_brush("color_hovered").unwrap()
+            } else {
+                style.get_brush("color_idle").unwrap()
             }
         } else {
-            Brush::Solid(match self.state {
-                ButtonState::Hovered => theme.defaults().interactive().hover(),
-                ButtonState::Pressed => theme.defaults().interactive().active(),
-                ButtonState::Idle => theme.defaults().interactive().inactive(),
+            Brush::Solid(if self.state.active {
+                theme.defaults().interactive().active()
+            } else if self.state.hover {
+                theme.defaults().interactive().hover()
+            } else {
+                theme.defaults().interactive().inactive()
             })
         };
 
@@ -51,7 +95,7 @@ impl<S: State> Widget<S> for Button<S> {
             &brush,
             None,
             &RoundedRect::from_rect(
-                Rect::from_center_size(
+                Rect::from_origin_size(
                     Point::new(
                         layout_node.layout.location.x as f64,
                         layout_node.layout.location.y as f64,
@@ -66,6 +110,8 @@ impl<S: State> Widget<S> for Button<S> {
         );
 
         {
+            theme.globals_mut().invert_text_color = true;
+
             let mut child_scene = Scene::new();
 
             self.child.render(
@@ -75,7 +121,9 @@ impl<S: State> Widget<S> for Button<S> {
                 layout_node.children.first().unwrap(),
             );
 
-            scene.append(&mut child_scene, None);
+            scene.append(&child_scene, None);
+
+            theme.globals_mut().invert_text_color = false;
         }
     }
 
@@ -87,35 +135,40 @@ impl<S: State> Widget<S> for Button<S> {
     }
 
     fn update(&mut self, layout: &LayoutNode, state: &mut S, info: &AppInfo) -> Update {
-        let mut btn_state = self.state;
         let mut update = Update::empty();
+        let old_state = self.state;
 
-        if let Some(mouse) = info.cursor_pos.as_ref() {
-            if mouse.x as f32 >= layout.layout.location.x
-                && mouse.y as f32 >= layout.layout.location.y
-                && mouse.x as f32 <= layout.layout.location.x + layout.layout.size.width
-                && mouse.y as f32 <= layout.layout.location.y + layout.layout.size.height
-            {
-                btn_state = ButtonState::Hovered;
+        if let Some(cursor) = info.cursor_pos.as_ref() {
+            self.state.hover = cursor.x as f32 >= layout.layout.location.x
+                && cursor.x as f32 <= layout.layout.location.x + layout.layout.size.width
+                && cursor.y as f32 >= layout.layout.location.y
+                && cursor.y as f32 <= layout.layout.location.y + layout.layout.size.height;
+        } else {
+            self.state.hover = false;
+        }
 
-                for (_, event, el_state) in &info.buttons {
-                    if MouseButton::Left == *event && el_state.is_pressed() {
-                        btn_state = ButtonState::Pressed;
-                        break;
+        if self.state.hover {
+            for (_, btn, el_state) in &info.buttons {
+                if let MouseButton::Left = *btn {
+                    match el_state {
+                        ElementState::Pressed => self.state.active = true,
+                        ElementState::Released => self.state.active = false,
                     }
+                } else {
+                    self.state.active = false;
                 }
             }
+        } else {
+            self.state.active = false;
         }
 
-        if self.state != btn_state {
-            update.set((self.on_state_change)(state, btn_state));
+        if old_state != self.state {
+            update.insert(Update::DRAW);
         }
 
-        if ButtonState::Pressed == btn_state {
-            update.set((self.on_pressed)(state));
+        if self.state.active {
+            update.insert((self.on_pressed)(state));
         }
-
-        self.state = btn_state;
 
         update
     }
@@ -125,9 +178,11 @@ impl<S: State> Widget<S> for Button<S> {
     }
 }
 
+/// The internal state of the button.
 #[derive(Copy, Clone, Eq, PartialEq, Debug)]
-pub enum ButtonState {
-    Hovered,
-    Pressed,
-    Idle,
+pub struct ButtonState {
+    /// If the button is hovered on.
+    pub hover: bool,
+    /// If the button is active (pressed).
+    pub active: bool,
 }

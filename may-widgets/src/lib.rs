@@ -7,4 +7,5 @@
 /// Contains the [text::Text] widget.
 pub mod text;
 
+/// Contains the [button::Button] widget.
 pub mod button;
