@@ -12,9 +12,9 @@ use winit::event::WindowEvent;
 use winit::event_loop::ActiveEventLoop;
 use winit::window::{Window, WindowAttributes, WindowId};
 
-use crate::app::font_ctx::FontContext;
 use may_theme::theme::Theme;
 
+use crate::app::font_ctx::FontContext;
 use crate::app::info::AppInfo;
 use crate::app::update::Update;
 use crate::config::MayConfig;
@@ -53,8 +53,8 @@ impl<'a, T: Theme, W: Widget<S>, S: State> AppHandler<'a, T, W, S> {
         let window_node = taffy
             .new_leaf(Style {
                 size: taffy::Size::<Dimension> {
-                    width: Dimension::Length(config.window.size.x as f32),
-                    height: Dimension::Length(config.window.size.y as f32),
+                    width: Dimension::Auto,
+                    height: Dimension::Auto,
                 },
                 ..Default::default()
             })
@@ -83,7 +83,7 @@ impl<'a, T: Theme, W: Widget<S>, S: State> AppHandler<'a, T, W, S> {
 
     /// Add the parent node and its children to the layout tree.
     fn layout_widget(&mut self, parent: NodeId, style: &StyleNode) -> TaffyResult<()> {
-        let node = self.taffy.new_leaf(style.style.clone())?;
+        let node = self.taffy.new_leaf(style.style.clone().into())?;
 
         self.taffy.add_child(parent, node)?;
 
@@ -140,7 +140,7 @@ impl<'a, T: Theme, W: Widget<S>, S: State> AppHandler<'a, T, W, S> {
 
             self.compute_layout().expect("Failed to compute layout");
 
-            self.update.set(Update::FORCE);
+            self.update.insert(Update::FORCE);
         }
 
         let mut layout_node = self
@@ -153,13 +153,13 @@ impl<'a, T: Theme, W: Widget<S>, S: State> AppHandler<'a, T, W, S> {
             .expect("Failed to collect layout");
 
         // update call to check if app should re-evaluate
-        self.update.set(
+        self.update.insert(
             self.widget
                 .update(&layout_node, &mut self.state, &self.info),
         );
 
         // check if app should re-evaluate layout
-        if self.update.has_flag(Update::FORCE) || self.update.has_flag(Update::LAYOUT) {
+        if self.update.intersects(Update::LAYOUT | Update::FORCE) {
             // clear all nodes (except root window node)
             self.taffy
                 .set_children(self.window_node, &[])
@@ -171,12 +171,17 @@ impl<'a, T: Theme, W: Widget<S>, S: State> AppHandler<'a, T, W, S> {
             self.compute_layout().expect("Failed to compute layout");
 
             layout_node = self
-                .collect_layout(self.window_node, &self.widget.layout_style())
+                .collect_layout(
+                    self.taffy
+                        .child_at_index(self.window_node, 0)
+                        .expect("Failed to get window node"),
+                    &self.widget.layout_style(),
+                )
                 .expect("Failed to collect layout");
         }
 
         // check if app should redraw
-        if self.update.has_flag(Update::FORCE) || self.update.has_flag(Update::DRAW) {
+        if self.update.intersects(Update::FORCE | Update::DRAW) {
             // clear scene
             self.scene.reset();
 
@@ -228,7 +233,7 @@ impl<'a, T: Theme, W: Widget<S>, S: State> AppHandler<'a, T, W, S> {
         }
 
         // check if app should re-evaluate
-        if self.update.has_flag(Update::EVAL) || self.update.has_flag(Update::FORCE) {
+        if self.update.intersects(Update::EVAL | Update::FORCE) {
             if let Some(window) = self.window.as_ref() {
                 window.request_redraw();
             }
@@ -311,6 +316,7 @@ impl<'a, T: Theme, W: Widget<S>, S: State> ApplicationHandler for AppHandler<'a,
         );
 
         self.render_ctx = Some(render_ctx);
+        self.update = Update::FORCE;
     }
 
     fn window_event(
@@ -332,7 +338,7 @@ impl<'a, T: Theme, W: Widget<S>, S: State> ApplicationHandler for AppHandler<'a,
 
                             self.request_redraw();
 
-                            self.update.set(Update::DRAW | Update::LAYOUT);
+                            self.update.insert(Update::DRAW | Update::LAYOUT);
                         }
                     }
 
