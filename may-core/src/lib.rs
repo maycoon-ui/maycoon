@@ -4,6 +4,7 @@
 //!
 //! Contains core app logic and widget types.
 
+#[cfg(feature = "vg")]
 pub use vello as vg;
 
 /// Contains useful types for interacting with winit.
