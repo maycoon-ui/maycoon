@@ -13,6 +13,7 @@ futures-lite = "2.3.0"
 wgpu-types = "0.20.0"
 vello = { git = "https://github.com/linebender/vello.git", rev = "2f25262" }
 taffy = "0.5.1"
+bitflags = "2.5.0"
 may-theme = { path = "../may-theme" }
 nalgebra = { workspace = true }
 dashmap = { workspace = true }
