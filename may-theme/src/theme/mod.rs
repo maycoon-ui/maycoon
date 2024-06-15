@@ -1,6 +1,6 @@
-use crate::globals::Globals;
 use peniko::Color;
 
+use crate::globals::Globals;
 use crate::id::WidgetId;
 use crate::style::{DefaultStyles, Style};
 
