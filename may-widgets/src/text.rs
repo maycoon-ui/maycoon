@@ -5,7 +5,6 @@ use may_core::state::State;
 use may_core::vg::glyph::Glyph;
 use may_core::vg::peniko::{Brush, Fill};
 use may_core::vg::skrifa::instance::Size;
-use may_core::vg::skrifa::outline::Hinting;
 use may_core::vg::skrifa::raw::FileRef;
 use may_core::vg::skrifa::setting::VariationSetting;
 use may_core::vg::skrifa::MetadataProvider;
@@ -90,10 +89,14 @@ impl<S: State> Widget<S> for Text {
         }
         .expect("Failed to load font ref");
 
-        let brush = if let Some(style) = theme.of(<Text as Widget<S>>::widget_id(self)) {
-            style.get_brush("color").expect("Failed to get brush")
+        let color = if let Some(style) = theme.of(<Text as Widget<S>>::widget_id(self)) {
+            if theme.globals().invert_text_color {
+                style.get_color("color_invert").unwrap()
+            } else {
+                style.get_color("color").unwrap()
+            }
         } else {
-            Brush::Solid(theme.defaults().text().foreground())
+            theme.defaults().text().foreground() // TODO: invert this color
         };
 
         let location = font_ref.axes().location::<&[VariationSetting; 0]>(&[]);
@@ -113,7 +116,7 @@ impl<S: State> Widget<S> for Text {
         scene
             .draw_glyphs(&font)
             .font_size(self.font_size)
-            .brush(&brush)
+            .brush(&Brush::Solid(color))
             .glyph_transform(None)
             .normalized_coords(location.coords())
             .hint(self.hinting)
