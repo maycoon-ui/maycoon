@@ -1,3 +1,4 @@
+use crate::globals::Globals;
 use peniko::{Brush, Color};
 
 use crate::id::WidgetId;
@@ -8,21 +9,26 @@ use crate::style::{
 use crate::theme::Theme;
 
 /// A smooth and minimalistic theme with a cold blue and purple touch.
-#[derive(Debug, Copy, Clone, Default)]
+#[derive(Debug, Clone)]
 pub enum CelesteTheme {
     /// The Light Celeste Theme.
-    #[default]
-    Light,
+    Light(Globals),
+}
+
+impl CelesteTheme {
+    pub fn light() -> Self {
+        Self::Light(Globals::default())
+    }
 }
 
 impl Theme for CelesteTheme {
     fn of(&self, id: WidgetId) -> Option<Style> {
         match id.namespace() {
             "may-widgets" => match id.id() {
-                "Text" => Some(Style::from_values([(
-                    "color".to_string(),
-                    StyleVal::Brush(Brush::Solid(Color::BLACK)),
-                )])),
+                "Text" => Some(Style::from_values([
+                    ("color".to_string(), StyleVal::Color(Color::BLACK)),
+                    ("color_invert".to_string(), StyleVal::Color(Color::WHITE)),
+                ])),
                 _ => None,
             },
             _ => None,
@@ -34,15 +40,27 @@ impl Theme for CelesteTheme {
             DefaultTextStyles::new(Color::BLACK, Color::WHITE_SMOKE),
             DefaultContainerStyles::new(Color::ANTIQUE_WHITE, Color::WHITE),
             DefaultInteractiveStyles::new(
-                Color::DARK_VIOLET,
-                Color::BLUE_VIOLET,
-                Color::rgb8(138, 146, 226),
-                Color::LAVENDER_BLUSH,
+                Color::rgb8(90, 90, 200),
+                Color::rgb8(120, 120, 230),
+                Color::rgb8(110, 110, 210),
+                Color::rgb8(60, 60, 60),
             ),
         )
     }
 
     fn window_background(&self) -> Color {
         Color::WHITE
+    }
+
+    fn globals(&self) -> &Globals {
+        match &self {
+            CelesteTheme::Light(globals) => globals,
+        }
+    }
+
+    fn globals_mut(&mut self) -> &mut Globals {
+        match self {
+            CelesteTheme::Light(globals) => globals,
+        }
     }
 }

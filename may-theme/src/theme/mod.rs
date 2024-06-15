@@ -1,3 +1,4 @@
+use crate::globals::Globals;
 use peniko::Color;
 
 use crate::id::WidgetId;
@@ -16,4 +17,8 @@ pub trait Theme {
     fn defaults(&self) -> DefaultStyles;
     /// Get the background color of the window.
     fn window_background(&self) -> Color;
+    /// Get global style values.
+    fn globals(&self) -> &Globals;
+    /// Get mutable global style values.
+    fn globals_mut(&mut self) -> &mut Globals;
 }

@@ -4,6 +4,7 @@
 //!
 //! Contains themes and widget styles.
 
+pub mod globals;
 /// Contains the [id::WidgetId] struct.
 pub mod id;
 /// Contains styling structures.
