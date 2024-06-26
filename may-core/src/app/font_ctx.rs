@@ -26,7 +26,7 @@ impl FontContext {
         self.fonts.remove(&name.to_string()).map(|_| ())
     }
 
-    /// Returns the default font (usually [Roboto](https://fonts.google.com/specimen/Roboto)).
+    /// Returns the default font. [Roboto](https://fonts.google.com/specimen/Roboto) by default.
     pub fn default_font(&self) -> &Font {
         &self.default
     }
