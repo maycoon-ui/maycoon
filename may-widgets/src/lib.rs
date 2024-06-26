@@ -9,3 +9,9 @@ pub mod text;
 
 /// Contains the [button::Button] widget.
 pub mod button;
+
+/// Contains the [container::Container] widget.
+pub mod container;
+
+/// Contains the [dummy::Dummy] widget.
+pub mod dummy;
