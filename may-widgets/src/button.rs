@@ -1,9 +1,11 @@
 use may_core::app::info::AppInfo;
 use may_core::app::update::Update;
 use may_core::layout;
-use may_core::layout::{Dimension, LayoutNode, LayoutStyle, StyleNode};
+use may_core::layout::{
+    LayoutNode, LayoutStyle, LengthPercentage, StyleNode,
+};
 use may_core::state::State;
-use may_core::vg::kurbo::{Affine, Point, Rect, RoundedRect, RoundedRectRadii, Size, Vec2};
+use may_core::vg::kurbo::{Affine, Rect, RoundedRect, RoundedRectRadii, Vec2};
 use may_core::vg::peniko::{Brush, Fill};
 use may_core::vg::Scene;
 use may_core::widget::Widget;
@@ -30,9 +32,11 @@ impl<S: State> Button<S> {
             },
             on_pressed: Box::new(|_| Update::empty()),
             layout_style: LayoutStyle {
-                size: layout::Size {
-                    width: Dimension::Length(100.0),
-                    height: Dimension::Length(50.0),
+                padding: layout::Rect::<LengthPercentage> {
+                    left: LengthPercentage::Length(12.0),
+                    right: LengthPercentage::Length(12.0),
+                    top: LengthPercentage::Length(2.0),
+                    bottom: LengthPercentage::Length(10.0),
                 },
                 ..Default::default()
             },
@@ -66,11 +70,6 @@ impl<S: State> Widget<S> for Button<S> {
         info: &AppInfo,
         layout_node: &LayoutNode,
     ) {
-        let transform = Affine::translate(Vec2::new(
-            layout_node.layout.location.x as f64,
-            layout_node.layout.location.y as f64,
-        ));
-
         let brush = if let Some(style) = theme.of(self.widget_id()) {
             if self.state.active {
                 style.get_brush("color_pressed").unwrap()
@@ -91,19 +90,15 @@ impl<S: State> Widget<S> for Button<S> {
 
         scene.fill(
             Fill::NonZero,
-            transform,
+            Affine::default(),
             &brush,
             None,
             &RoundedRect::from_rect(
-                Rect::from_origin_size(
-                    Point::new(
-                        layout_node.layout.location.x as f64,
-                        layout_node.layout.location.y as f64,
-                    ),
-                    Size::new(
-                        layout_node.layout.size.width as f64,
-                        layout_node.layout.size.height as f64,
-                    ),
+                Rect::new(
+                    layout_node.layout.location.x as f64,
+                    layout_node.layout.location.y as f64,
+                    (layout_node.layout.location.x + layout_node.layout.size.width) as f64,
+                    (layout_node.layout.location.y + layout_node.layout.size.height) as f64,
                 ),
                 RoundedRectRadii::from_single_radius(10.0),
             ),
@@ -114,14 +109,16 @@ impl<S: State> Widget<S> for Button<S> {
 
             let mut child_scene = Scene::new();
 
-            self.child.render(
-                &mut child_scene,
-                theme,
-                info,
-                layout_node.children.first().unwrap(),
-            );
+            self.child
+                .render(&mut child_scene, theme, info, &layout_node.children[0]);
 
-            scene.append(&child_scene, None);
+            scene.append(
+                &child_scene,
+                Some(Affine::translate(Vec2::new(
+                    layout_node.layout.location.x as f64,
+                    layout_node.layout.location.y as f64,
+                ))),
+            );
 
             theme.globals_mut().invert_text_color = false;
         }
