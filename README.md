@@ -1,7 +1,9 @@
 # Maycoon
 
-**Modern and Innovative UI Framework written in Rust**
+![Crates.io Version](https://img.shields.io/crates/v/maycoon)
+![Crates.io Total Downloads](https://img.shields.io/crates/d/maycoon) ![Crates.io License](https://img.shields.io/crates/l/maycoon)
 
+**Modern and Innovative UI Framework written in Rust**
 
 ## Goals
 
@@ -13,4 +15,4 @@
 
 ## Getting Started
 
-To get started, you can ``cargo add maycoon`` to your project and follow the instructions [here](https://maycoon-ui.github.io).
+To get started, you can `cargo add maycoon` to your project and follow the instructions [here](https://maycoon-ui.github.io).
