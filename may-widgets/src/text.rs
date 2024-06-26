@@ -1,14 +1,17 @@
 use may_core::app::info::AppInfo;
 use may_core::app::update::Update;
-use may_core::layout::{LayoutNode, LayoutStyle, StyleNode};
+use may_core::layout;
+use may_core::layout::{
+    Dimension, LayoutNode, LayoutStyle, StyleNode,
+};
 use may_core::state::State;
+use may_core::vg::{peniko, Scene};
 use may_core::vg::glyph::Glyph;
 use may_core::vg::peniko::{Brush, Fill};
 use may_core::vg::skrifa::instance::Size;
+use may_core::vg::skrifa::MetadataProvider;
 use may_core::vg::skrifa::raw::FileRef;
 use may_core::vg::skrifa::setting::VariationSetting;
-use may_core::vg::skrifa::MetadataProvider;
-use may_core::vg::{peniko, Scene};
 use may_core::widget::Widget;
 use may_theme::id::WidgetId;
 use may_theme::theme::Theme;
@@ -87,7 +90,7 @@ impl<S: State> Widget<S> for Text {
                 FileRef::Collection(collection) => collection.get(font.index).ok(),
             }
         }
-        .expect("Failed to load font ref");
+        .expect("Failed to load font reference");
 
         let color = if let Some(style) = theme.of(<Text as Widget<S>>::widget_id(self)) {
             if theme.globals().invert_text_color {
@@ -96,7 +99,7 @@ impl<S: State> Widget<S> for Text {
                 style.get_color("color").unwrap()
             }
         } else {
-            theme.defaults().text().foreground() // TODO: invert this color
+            theme.defaults().text().foreground()
         };
 
         let location = font_ref.axes().location::<&[VariationSetting; 0]>(&[]);
@@ -117,18 +120,17 @@ impl<S: State> Widget<S> for Text {
             .draw_glyphs(&font)
             .font_size(self.font_size)
             .brush(&Brush::Solid(color))
-            .glyph_transform(None)
             .normalized_coords(location.coords())
             .hint(self.hinting)
             .draw(
                 &peniko::Style::Fill(Fill::NonZero),
-                self.text.chars().filter_map(|ch| {
-                    if ch == '\n' {
+                self.text.chars().filter_map(|c| {
+                    if c == '\n' {
                         pen_y += line_height;
-                        pen_x = 0.0;
+                        pen_x = layout_node.layout.location.x;
                         return None;
                     }
-                    let gid = charmap.map(ch).unwrap_or_default();
+                    let gid = charmap.map(c).unwrap_or_default();
                     let advance = glyph_metrics.advance_width(gid).unwrap_or_default();
                     let x = pen_x;
                     pen_x += advance;
@@ -143,7 +145,13 @@ impl<S: State> Widget<S> for Text {
 
     fn layout_style(&self) -> StyleNode {
         StyleNode {
-            style: self.style.clone(),
+            style: LayoutStyle {
+                size: layout::Size::<Dimension> {
+                    width: Dimension::Length(self.font_size * self.text.len() as f32),
+                    height: Dimension::Length(self.font_size),
+                },
+                ..self.style
+            },
             children: Vec::new(),
         }
     }
