@@ -2,6 +2,12 @@ use std::fmt::{Debug, Display, Formatter};
 
 /// An identifier for a widget. This is not for instantiated widgets, but for the widget types in general.
 /// It contains a namespace, which should be the crate name and the id of the widget.
+///
+/// ```
+/// use may_theme::id::WidgetId;
+///
+/// WidgetId::new("fancy_text_widget", "FancyText");
+/// ```
 #[derive(Debug, Clone, PartialEq, PartialOrd, Eq, Ord)]
 pub struct WidgetId {
     namespace: String,
