@@ -49,7 +49,12 @@ impl<T: Theme> MayApp<T> {
     }
 
     /// Run the application with given widget and state.
-    pub fn run<S: State, W: Widget<S>>(self, widget: W, state: S) {
+    pub fn run<S, W, F>(self, ui: F, state: S)
+    where
+        S: State,
+        W: Widget<S>,
+        F: Fn(&mut S) -> W,
+    {
         let event_loop = EventLoopBuilder::default()
             .build()
             .expect("Failed to create event loop");
@@ -74,28 +79,28 @@ impl<T: Theme> MayApp<T> {
             .with_active(self.config.window.active)
             .with_cursor(self.config.window.cursor.clone());
 
-        // since `with_max_inner_size()` doesn't support `Option` values, we need to manually set them
+        // since `with_max_inner_size()` doesn't support `Option` values, we need to manually set it
         attrs.max_inner_size = self
             .config
             .window
             .max_size
             .map(|v| Size::Logical(LogicalSize::new(v.x, v.y)));
 
-        // since `with_min_inner_size()` doesn't support `Option` values, we need to manually set them
+        // since `with_min_inner_size()` doesn't support `Option` values, we need to manually set it
         attrs.min_inner_size = self
             .config
             .window
             .min_size
             .map(|v| Size::Logical(LogicalSize::new(v.x, v.y)));
 
-        // since `with_position()` doesn't support `Option` values, we need to manually set them
+        // since `with_position()` doesn't support `Option` values, we need to manually set it
         attrs.position = self
             .config
             .window
             .position
             .map(|v| Position::Logical(LogicalPosition::new(v.x, v.y)));
 
-        // since `with_resize_increments()` doesn't support `Option` values, we need to manually set them
+        // since `with_resize_increments()` doesn't support `Option` values, we need to manually set it
         attrs.resize_increments = self
             .config
             .window
@@ -106,7 +111,7 @@ impl<T: Theme> MayApp<T> {
             .run_app(&mut AppHandler::new(
                 attrs,
                 self.config,
-                widget,
+                ui,
                 state,
                 self.font_ctx,
             ))
