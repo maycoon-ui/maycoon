@@ -1,5 +1,5 @@
 [workspace]
-members = ["may-core", "may-theme", "may-widgets"]
+members = ["may-core", "may-macro", "may-theme", "may-widgets"]
 
 [workspace.dependencies]
 peniko = "0.1.1"
@@ -24,6 +24,7 @@ homepage = "https://maycoon-ui.github.io"
 may-core = { path = "may-core" }
 may-theme = { path = "may-theme" }
 may-widgets = { path = "may-widgets" }
+may-macro = { path = "may-macro" }
 peniko = { workspace = true }
 nalgebra = { workspace = true }
 
@@ -38,4 +39,9 @@ path = "src/lib.rs"
 [[example]]
 name = "hello-world"
 path = "examples/hello-world.rs"
+harness = false
+
+[[example]]
+name = "counter"
+path = "examples/counter.rs"
 harness = false
