@@ -1,6 +1,6 @@
 use may_core::app::info::AppInfo;
 use may_core::app::update::Update;
-use may_core::layout::{LayoutNode, LayoutStyle, StyleNode};
+use may_core::layout::{Dimension, LayoutNode, LayoutStyle, Size, StyleNode};
 use may_core::state::State;
 use may_core::vg::Scene;
 use may_core::widget::Widget;

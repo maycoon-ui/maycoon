@@ -3,11 +3,11 @@ use std::time::{Duration, Instant};
 
 use nalgebra::Vector2;
 use taffy::{
-    AvailableSpace, Dimension, NodeId, PrintTree, Style, TaffyResult, TaffyTree,
+    AvailableSpace, Dimension, NodeId, PrintTree, Size, Style, TaffyResult, TaffyTree,
     TraversePartialTree,
 };
-use vello::{AaConfig, AaSupport, Renderer, RendererOptions, RenderParams, Scene};
 use vello::util::{RenderContext, RenderSurface};
+use vello::{AaConfig, AaSupport, RenderParams, Renderer, RendererOptions, Scene};
 use winit::application::ApplicationHandler;
 use winit::event::WindowEvent;
 use winit::event_loop::ActiveEventLoop;
@@ -64,13 +64,7 @@ where
     ) -> Self {
         let mut taffy = TaffyTree::with_capacity(16);
         let window_node = taffy
-            .new_leaf(Style {
-                size: taffy::Size::<Dimension> {
-                    width: Dimension::Auto,
-                    height: Dimension::Auto,
-                },
-                ..Default::default()
-            })
+            .new_leaf(Style::default())
             .expect("Failed to create window node");
 
         Self {
@@ -109,9 +103,10 @@ where
 
     /// Compute the layout of the root node and its children.
     fn compute_layout(&mut self) -> TaffyResult<()> {
+        // make sure to use the actual window size
         self.taffy.compute_layout(
             self.window_node,
-            taffy::Size::<AvailableSpace> {
+            Size::<AvailableSpace> {
                 width: AvailableSpace::Definite(
                     self.window.as_ref().unwrap().inner_size().width as f32,
                 ),
@@ -285,6 +280,24 @@ where
                 .expect("Failed to create window"),
         ));
 
+        // set initial window_node size to window size
+        self.taffy
+            .set_style(
+                self.window_node,
+                Style {
+                    size: Size::<Dimension> {
+                        width: Dimension::Length(
+                            self.window.as_ref().unwrap().inner_size().width as f32,
+                        ),
+                        height: Dimension::Length(
+                            self.window.as_ref().unwrap().inner_size().height as f32,
+                        ),
+                    },
+                    ..Default::default()
+                },
+            )
+            .expect("Failed to set window node taffy style");
+
         self.surface = Some(
             futures_lite::future::block_on(async {
                 render_ctx
@@ -351,29 +364,45 @@ where
                                 }
                             }
 
+                            // update window_node style to new window size
+                            self.taffy
+                                .set_style(
+                                    self.window_node,
+                                    Style {
+                                        size: Size {
+                                            width: Dimension::Length(new_size.width as f32),
+                                            height: Dimension::Length(new_size.height as f32),
+                                        },
+                                        ..Default::default()
+                                    },
+                                )
+                                .expect("Failed to set taffy style");
+
                             self.request_redraw();
 
-                            self.update.insert(Update::DRAW | Update::LAYOUT);
+                            self.update.insert(Update::FORCE);
                         }
                     }
 
                     WindowEvent::CloseRequested => {
-                        if let Some(render_ctx) = self.render_ctx.as_mut() {
-                            for handle in &render_ctx.devices {
-                                handle.device.destroy();
-                            }
-                        }
-
                         if self.config.window.close_on_request {
+                            if let Some(render_ctx) = self.render_ctx.as_mut() {
+                                for handle in &render_ctx.devices {
+                                    handle.device.destroy();
+                                }
+                            }
+
                             event_loop.exit();
                         }
                     }
 
                     WindowEvent::RedrawRequested => {
+                        // doesn't necessarily redraw, but checks for updates
                         self.update(event_loop);
                     }
 
                     WindowEvent::CursorLeft { .. } => {
+                        // reset cursor pos since cursor left the window
                         self.info.cursor_pos = None;
                         self.request_redraw();
                     }

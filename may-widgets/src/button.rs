@@ -1,9 +1,7 @@
 use may_core::app::info::AppInfo;
 use may_core::app::update::Update;
 use may_core::layout;
-use may_core::layout::{
-    LayoutNode, LayoutStyle, LengthPercentage, StyleNode,
-};
+use may_core::layout::{LayoutNode, LayoutStyle, LengthPercentage, StyleNode};
 use may_core::state::State;
 use may_core::vg::kurbo::{Affine, Rect, RoundedRect, RoundedRectRadii, Vec2};
 use may_core::vg::peniko::{Brush, Fill};
