@@ -3,8 +3,8 @@ members = ["may-core", "may-macro", "may-theme", "may-widgets"]
 
 [workspace.dependencies]
 peniko = "0.1.1"
-nalgebra = { version = "0.32.5", default-features = false, features = ["std"] }
-dashmap = { version = "5.5.3", features = ["inline", "rayon"] }
+nalgebra = { version = "0.33.0", default-features = false, features = ["std"] }
+dashmap = { version = "6.0.1", features = ["inline", "rayon"] }
 
 [package]
 name = "maycoon"
