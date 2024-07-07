@@ -1,10 +1,6 @@
 use proc_macro2::TokenStream;
 use quote::quote;
-<<<<<<< Updated upstream
-use syn::{DeriveInput, parse_macro_input};
-=======
 use syn::DeriveInput;
->>>>>>> Stashed changes
 
 #[inline]
 pub fn derive_state(input: TokenStream) -> TokenStream {

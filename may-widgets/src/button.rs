@@ -1,9 +1,7 @@
 use may_core::app::info::AppInfo;
 use may_core::app::update::Update;
 use may_core::layout;
-use may_core::layout::{
-    LayoutNode, LayoutStyle, LengthPercentage, StyleNode,
-};
+use may_core::layout::{LayoutNode, LayoutStyle, LengthPercentage, StyleNode};
 use may_core::state::State;
 use may_core::vg::kurbo::{Affine, Rect, RoundedRect, RoundedRectRadii, Vec2};
 use may_core::vg::peniko::{Brush, Fill};
@@ -29,6 +27,7 @@ impl<S: State> Button<S> {
             state: ButtonState {
                 active: false,
                 hover: false,
+                about_to_be_inactive: false,
             },
             on_pressed: Box::new(|_| Update::empty()),
             layout_style: LayoutStyle {
@@ -141,6 +140,11 @@ impl<S: State> Widget<S> for Button<S> {
         let mut update = Update::empty();
         let old_state = self.state;
 
+        if old_state.about_to_be_inactive {
+            self.state.about_to_be_inactive = false;
+            self.state.active = false;
+        }
+
         if let Some(cursor) = info.cursor_pos {
             self.state.hover = cursor.x as f32 >= layout.layout.location.x
                 && cursor.x as f32 <= layout.layout.location.x + layout.layout.size.width
@@ -172,7 +176,7 @@ impl<S: State> Widget<S> for Button<S> {
 
         if self.state.active {
             update.insert((self.on_pressed)(state));
-            self.state.active = false; // make sure to reset the click state after click
+            self.state.about_to_be_inactive = true;
         }
 
         if self.state != old_state {
@@ -194,4 +198,6 @@ pub struct ButtonState {
     pub hover: bool,
     /// If the button is active (pressed).
     pub active: bool,
+    // todo: find a better way of handling click issue
+    about_to_be_inactive: bool,
 }

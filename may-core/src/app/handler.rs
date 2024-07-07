@@ -3,11 +3,11 @@ use std::time::{Duration, Instant};
 
 use nalgebra::Vector2;
 use taffy::{
-    AvailableSpace, Dimension, NodeId, PrintTree, Style, TaffyResult, TaffyTree,
+    AvailableSpace, Dimension, NodeId, PrintTree, Size, Style, TaffyResult, TaffyTree,
     TraversePartialTree,
 };
-use vello::{AaConfig, AaSupport, Renderer, RendererOptions, RenderParams, Scene};
 use vello::util::{RenderContext, RenderSurface};
+use vello::{AaConfig, AaSupport, RenderParams, Renderer, RendererOptions, Scene};
 use winit::application::ApplicationHandler;
 use winit::event::WindowEvent;
 use winit::event_loop::ActiveEventLoop;
@@ -61,14 +61,10 @@ where
         font_context: FontContext,
     ) -> Self {
         let mut taffy = TaffyTree::with_capacity(16);
+
+        // gets configured on resume
         let window_node = taffy
-            .new_leaf(Style {
-                size: taffy::Size::<Dimension> {
-                    width: Dimension::Auto,
-                    height: Dimension::Auto,
-                },
-                ..Default::default()
-            })
+            .new_leaf(Style::default())
             .expect("Failed to create window node");
 
         Self {
@@ -283,6 +279,23 @@ where
                 .expect("Failed to create window"),
         ));
 
+        self.taffy
+            .set_style(
+                self.window_node,
+                Style {
+                    size: Size::<Dimension> {
+                        width: Dimension::Length(
+                            self.window.as_ref().unwrap().inner_size().width as f32,
+                        ),
+                        height: Dimension::Length(
+                            self.window.as_ref().unwrap().inner_size().height as f32,
+                        ),
+                    },
+                    ..Default::default()
+                },
+            )
+            .expect("Failed to set window node style");
+
         self.surface = Some(
             futures_lite::future::block_on(async {
                 render_ctx
@@ -348,6 +361,19 @@ where
                                     ctx.resize_surface(surface, new_size.width, new_size.height);
                                 }
                             }
+
+                            self.taffy
+                                .set_style(
+                                    self.window_node,
+                                    Style {
+                                        size: Size::<Dimension> {
+                                            width: Dimension::Length(new_size.width as f32),
+                                            height: Dimension::Length(new_size.height as f32),
+                                        },
+                                        ..Default::default()
+                                    },
+                                )
+                                .expect("Failed to set window node style");
 
                             self.request_redraw();
 

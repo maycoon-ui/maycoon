@@ -1,22 +1,15 @@
 use may_core::app::info::AppInfo;
 use may_core::app::update::Update;
 use may_core::layout;
-<<<<<<< Updated upstream
-use may_core::layout::{
-    Dimension, LayoutNode, LayoutStyle, StyleNode,
-};
-use may_core::state::State;
-use may_core::vg::{peniko, Scene};
-=======
 use may_core::layout::{Dimension, LayoutNode, LayoutStyle, StyleNode};
 use may_core::state::{State, StateVal};
->>>>>>> Stashed changes
 use may_core::vg::glyph::Glyph;
 use may_core::vg::peniko::{Brush, Fill};
 use may_core::vg::skrifa::instance::Size;
-use may_core::vg::skrifa::MetadataProvider;
 use may_core::vg::skrifa::raw::FileRef;
 use may_core::vg::skrifa::setting::VariationSetting;
+use may_core::vg::skrifa::MetadataProvider;
+use may_core::vg::{peniko, Scene};
 use may_core::widget::Widget;
 use may_theme::id::WidgetId;
 use may_theme::theme::Theme;

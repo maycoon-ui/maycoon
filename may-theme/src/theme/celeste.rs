@@ -30,6 +30,7 @@ impl Theme for CelesteTheme {
                     ("color".to_string(), StyleVal::Color(Color::BLACK)),
                     ("color_invert".to_string(), StyleVal::Color(Color::WHITE)),
                 ])),
+                // TODO: add button style
                 _ => None,
             },
             _ => None,
