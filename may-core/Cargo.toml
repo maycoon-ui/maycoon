@@ -8,12 +8,12 @@ repository = "https://github.com/maycoon-ui/maycoon"
 homepage = "https://maycoon-ui.github.io"
 
 [dependencies]
-winit = "0.30.0"
+winit = "0.30.3"
 futures-lite = "2.3.0"
 wgpu-types = "0.20.0"
-vello = { git = "https://github.com/linebender/vello.git", rev = "2f25262" }
-taffy = "0.5.1"
-bitflags = "2.5.0"
+vello = "0.2.0"
+taffy = "0.5.2"
+bitflags = "2.6.0"
 may-theme = { path = "../may-theme" }
 nalgebra = { workspace = true }
 dashmap = { workspace = true }
