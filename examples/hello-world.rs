@@ -2,7 +2,7 @@
 
 use may_core::app::MayApp;
 use may_core::config::MayConfig;
-use may_macro::State;
+use may_macro::{val, State};
 use may_theme::theme::celeste::CelesteTheme;
 use may_widgets::text::Text;
 
@@ -15,5 +15,5 @@ fn main() {
         window: Default::default(),
         render: Default::default(),
     })
-    .run(|_| Text::new("Hello World!"), MyState {});
+    .run(Text::new(val!("Hello, World!")), MyState {});
 }
