@@ -23,5 +23,5 @@ peniko = { workspace = true }
 default = []
 
 # Re-exports `vello` for drawing vector graphics.
-# Requires if you want to make custom widgets or draw vector graphics.
+# Required if you want to make custom widgets or draw vector graphics.
 vg = []
