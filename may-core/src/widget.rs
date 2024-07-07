@@ -17,9 +17,10 @@ pub trait Widget<S: State> {
         theme: &mut dyn Theme,
         info: &AppInfo,
         layout_node: &LayoutNode,
+        state: &S,
     );
     /// Return the layout style node for layout computation.
-    fn layout_style(&self) -> StyleNode;
+    fn layout_style(&self, state: &S) -> StyleNode;
     /// Update the widget state with given info and layout. Returns if the app should be updated.
     fn update(&mut self, layout: &LayoutNode, state: &mut S, info: &AppInfo) -> Update;
     /// Return the widget id.

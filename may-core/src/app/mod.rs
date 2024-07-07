@@ -49,11 +49,10 @@ impl<T: Theme> MayApp<T> {
     }
 
     /// Run the application with given widget and state.
-    pub fn run<S, W, F>(self, ui: F, state: S)
+    pub fn run<S, W>(self, widget: W, state: S)
     where
         S: State,
         W: Widget<S>,
-        F: Fn(&mut S) -> W,
     {
         let event_loop = EventLoopBuilder::default()
             .build()
@@ -111,7 +110,7 @@ impl<T: Theme> MayApp<T> {
             .run_app(&mut AppHandler::new(
                 attrs,
                 self.config,
-                ui,
+                widget,
                 state,
                 self.font_ctx,
             ))

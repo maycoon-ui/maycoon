@@ -24,12 +24,11 @@ use crate::state::State;
 use crate::widget::Widget;
 
 /// The core application handler. You should use [MayApp](crate::app::MayApp) instead for running applications.
-pub struct AppHandler<'a, T, W, S, F>
+pub struct AppHandler<'a, T, W, S>
 where
     T: Theme,
     W: Widget<S>,
     S: State,
-    F: Fn(&mut S) -> W,
 {
     config: MayConfig<T>,
     attrs: WindowAttributes,
@@ -39,7 +38,7 @@ where
     surface: Option<RenderSurface<'a>>,
     taffy: TaffyTree,
     window_node: NodeId,
-    ui: F,
+    widget: W,
     state: S,
     info: AppInfo,
     render_ctx: Option<RenderContext>,
@@ -47,18 +46,17 @@ where
     last_update: Instant,
 }
 
-impl<'a, T, W, S, F> AppHandler<'a, T, W, S, F>
+impl<'a, T, W, S> AppHandler<'a, T, W, S>
 where
     T: Theme,
     W: Widget<S>,
     S: State,
-    F: Fn(&mut S) -> W,
 {
     /// Create a new handler with given window attributes, config, widget and state.
     pub fn new(
         attrs: WindowAttributes,
         config: MayConfig<T>,
-        ui: F,
+        widget: W,
         state: S,
         font_context: FontContext,
     ) -> Self {
@@ -82,7 +80,7 @@ where
             surface: None,
             taffy,
             state,
-            ui,
+            widget,
             info: AppInfo {
                 font_context,
                 ..Default::default()
@@ -146,11 +144,9 @@ where
 
     /// Update the app and process events.
     fn update(&mut self, _: &ActiveEventLoop) {
-        let mut widget = (self.ui)(&mut self.state);
-
         // completely layout widgets if taffy is not set up yet (e.g. during first update)
         if self.taffy.child_count(self.window_node) == 0 {
-            self.layout_widget(self.window_node, &widget.layout_style())
+            self.layout_widget(self.window_node, &self.widget.layout_style(&self.state))
                 .expect("Failed to layout window");
 
             self.compute_layout().expect("Failed to compute layout");
@@ -161,13 +157,15 @@ where
         let mut layout_node = self
             .collect_layout(
                 self.taffy.child_at_index(self.window_node, 0).unwrap(),
-                &widget.layout_style(),
+                &self.widget.layout_style(&self.state),
             )
             .expect("Failed to collect layout");
 
         // update call to check if app should re-evaluate
-        self.update
-            .insert(widget.update(&layout_node, &mut self.state, &self.info));
+        self.update.insert(
+            self.widget
+                .update(&layout_node, &mut self.state, &self.info),
+        );
 
         // check if app should re-evaluate layout
         if self.update.intersects(Update::LAYOUT | Update::FORCE) {
@@ -176,7 +174,7 @@ where
                 .set_children(self.window_node, &[])
                 .expect("Failed to set children");
 
-            self.layout_widget(self.window_node, &widget.layout_style())
+            self.layout_widget(self.window_node, &self.widget.layout_style(&self.state))
                 .expect("Failed to layout window");
 
             self.compute_layout().expect("Failed to compute layout");
@@ -184,7 +182,7 @@ where
             layout_node = self
                 .collect_layout(
                     self.taffy.child_at_index(self.window_node, 0).unwrap(),
-                    &widget.layout_style(),
+                    &self.widget.layout_style(&self.state),
                 )
                 .expect("Failed to collect layout");
         }
@@ -194,11 +192,12 @@ where
             // clear scene
             self.scene.reset();
 
-            widget.render(
+            self.widget.render(
                 &mut self.scene,
                 &mut self.config.theme,
                 &self.info,
                 &layout_node,
+                &self.state,
             );
 
             let renderer = self.renderer.as_mut().expect("Renderer not initialized");
@@ -269,12 +268,11 @@ where
     }
 }
 
-impl<'a, T, W, S, F> ApplicationHandler for AppHandler<'a, T, W, S, F>
+impl<'a, T, W, S> ApplicationHandler for AppHandler<'a, T, W, S>
 where
     T: Theme,
     W: Widget<S>,
     S: State,
-    F: Fn(&mut S) -> W,
 {
     fn resumed(&mut self, event_loop: &ActiveEventLoop) {
         let mut render_ctx = RenderContext::new();

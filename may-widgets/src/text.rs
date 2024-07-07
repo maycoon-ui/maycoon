@@ -1,11 +1,16 @@
 use may_core::app::info::AppInfo;
 use may_core::app::update::Update;
 use may_core::layout;
+<<<<<<< Updated upstream
 use may_core::layout::{
     Dimension, LayoutNode, LayoutStyle, StyleNode,
 };
 use may_core::state::State;
 use may_core::vg::{peniko, Scene};
+=======
+use may_core::layout::{Dimension, LayoutNode, LayoutStyle, StyleNode};
+use may_core::state::{State, StateVal};
+>>>>>>> Stashed changes
 use may_core::vg::glyph::Glyph;
 use may_core::vg::peniko::{Brush, Fill};
 use may_core::vg::skrifa::instance::Size;
@@ -19,20 +24,20 @@ use may_theme::theme::Theme;
 /// A text widget.
 ///
 /// It's text, what do you expect?
-pub struct Text {
+pub struct Text<S: State> {
     style: LayoutStyle,
-    text: String,
+    text: StateVal<S, String>,
     font: Option<String>,
     font_size: f32,
     hinting: bool,
 }
 
-impl Text {
+impl<S: State> Text<S> {
     /// Create a new text widget with the given text.
-    pub fn new(text: impl ToString) -> Self {
+    pub fn new(text: StateVal<S, impl ToString + 'static>) -> Self {
         Self {
             style: LayoutStyle::default(),
-            text: text.to_string(),
+            text: text.map(|s| s.to_string()),
             font: None,
             font_size: 30.0,
             hinting: true,
@@ -67,13 +72,14 @@ impl Text {
     }
 }
 
-impl<S: State> Widget<S> for Text {
+impl<S: State> Widget<S> for Text<S> {
     fn render(
         &self,
         scene: &mut Scene,
         theme: &mut dyn Theme,
         info: &AppInfo,
         layout_node: &LayoutNode,
+        state: &S,
     ) {
         let font = if self.font.is_some() {
             info.font_context
@@ -92,7 +98,7 @@ impl<S: State> Widget<S> for Text {
         }
         .expect("Failed to load font reference");
 
-        let color = if let Some(style) = theme.of(<Text as Widget<S>>::widget_id(self)) {
+        let color = if let Some(style) = theme.of(<Text<S> as Widget<S>>::widget_id(self)) {
             if theme.globals().invert_text_color {
                 style.get_color("color_invert").unwrap()
             } else {
@@ -116,6 +122,8 @@ impl<S: State> Widget<S> for Text {
 
         let mut pen_y = layout_node.layout.location.y + self.font_size;
 
+        let text = self.text.get(state);
+
         scene
             .draw_glyphs(&font)
             .font_size(self.font_size)
@@ -124,7 +132,7 @@ impl<S: State> Widget<S> for Text {
             .hint(self.hinting)
             .draw(
                 &peniko::Style::Fill(Fill::NonZero),
-                self.text.chars().filter_map(|c| {
+                text.chars().filter_map(|c| {
                     if c == '\n' {
                         pen_y += line_height;
                         pen_x = layout_node.layout.location.x;
@@ -143,11 +151,13 @@ impl<S: State> Widget<S> for Text {
             );
     }
 
-    fn layout_style(&self) -> StyleNode {
+    fn layout_style(&self, state: &S) -> StyleNode {
+        let text = self.text.get(state);
+
         StyleNode {
             style: LayoutStyle {
                 size: layout::Size::<Dimension> {
-                    width: Dimension::Length(self.font_size * self.text.len() as f32),
+                    width: Dimension::Length(self.font_size * text.len() as f32),
                     height: Dimension::Length(self.font_size),
                 },
                 ..self.style

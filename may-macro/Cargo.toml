@@ -9,9 +9,9 @@ homepage = "https://maycoon-ui.github.io"
 
 [dependencies]
 may-core = { path = "../may-core" }
-syn = "2.0.66"
+syn = "2.0.68"
 quote = "1.0.36"
-proc-macro2 = "1.0.85"
+proc-macro2 = "1.0.86"
 
 [lib]
 proc-macro = true

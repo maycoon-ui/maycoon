@@ -69,6 +69,7 @@ impl<S: State> Widget<S> for Button<S> {
         theme: &mut dyn Theme,
         info: &AppInfo,
         layout_node: &LayoutNode,
+        state: &S,
     ) {
         let brush = if let Some(style) = theme.of(self.widget_id()) {
             if self.state.active {
@@ -109,8 +110,13 @@ impl<S: State> Widget<S> for Button<S> {
 
             let mut child_scene = Scene::new();
 
-            self.child
-                .render(&mut child_scene, theme, info, &layout_node.children[0]);
+            self.child.render(
+                &mut child_scene,
+                theme,
+                info,
+                &layout_node.children[0],
+                state,
+            );
 
             scene.append(
                 &child_scene,
@@ -124,10 +130,10 @@ impl<S: State> Widget<S> for Button<S> {
         }
     }
 
-    fn layout_style(&self) -> StyleNode {
+    fn layout_style(&self, state: &S) -> StyleNode {
         StyleNode {
             style: self.layout_style.clone(),
-            children: vec![self.child.layout_style()],
+            children: vec![self.child.layout_style(state)],
         }
     }
 
@@ -135,7 +141,7 @@ impl<S: State> Widget<S> for Button<S> {
         let mut update = Update::empty();
         let old_state = self.state;
 
-        if let Some(cursor) = info.cursor_pos.as_ref() {
+        if let Some(cursor) = info.cursor_pos {
             self.state.hover = cursor.x as f32 >= layout.layout.location.x
                 && cursor.x as f32 <= layout.layout.location.x + layout.layout.size.width
                 && cursor.y as f32 >= layout.layout.location.y
@@ -145,11 +151,16 @@ impl<S: State> Widget<S> for Button<S> {
         }
 
         if self.state.hover {
-            for (_, btn, el_state) in &info.buttons {
-                if let MouseButton::Left = *btn {
-                    match el_state {
-                        ElementState::Pressed => self.state.active = true,
-                        ElementState::Released => self.state.active = false,
+            for &(_, btn, state) in &info.buttons {
+                if MouseButton::Left == btn {
+                    match state {
+                        ElementState::Pressed => {
+                            self.state.active = true;
+                        }
+
+                        ElementState::Released => {
+                            self.state.active = false;
+                        }
                     }
                 } else {
                     self.state.active = false;
@@ -159,12 +170,13 @@ impl<S: State> Widget<S> for Button<S> {
             self.state.active = false;
         }
 
-        if old_state != self.state {
-            update.insert(Update::DRAW);
-        }
-
         if self.state.active {
             update.insert((self.on_pressed)(state));
+            self.state.active = false; // make sure to reset the click state after click
+        }
+
+        if self.state != old_state {
+            update.insert(Update::DRAW);
         }
 
         update

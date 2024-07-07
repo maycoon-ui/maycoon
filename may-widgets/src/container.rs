@@ -38,16 +38,21 @@ impl<S: State> Widget<S> for Container<S> {
         theme: &mut dyn Theme,
         info: &AppInfo,
         layout_node: &LayoutNode,
+        state: &S,
     ) {
         for (i, child) in self.children.iter().enumerate() {
-            child.render(scene, theme, info, &layout_node.children[i]);
+            child.render(scene, theme, info, &layout_node.children[i], state);
         }
     }
 
-    fn layout_style(&self) -> StyleNode {
+    fn layout_style(&self, state: &S) -> StyleNode {
         StyleNode {
             style: self.style.clone(),
-            children: self.children.iter().map(|el| el.layout_style()).collect(),
+            children: self
+                .children
+                .iter()
+                .map(|el| el.layout_style(state))
+                .collect(),
         }
     }
 
