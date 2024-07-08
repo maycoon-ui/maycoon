@@ -10,12 +10,12 @@ dashmap = { version = "6.0.1", features = ["inline", "rayon"] }
 name = "maycoon"
 version = "0.1.0"
 edition = "2021"
-description = "Lightning fast and lightweight UI Framework for Rust."
+description = "Lightning fast and powerful UI Framework for Rust."
 readme = "README.md"
 license = "MIT OR Apache-2.0"
 resolver = "2"
 authors = ["Mikail Plotzky <mp@ypon.com>", "Maycoon Contributors"]
-categories = ["gui", "graphics", "rendering"]
+categories = ["gui", "graphics", "rendering", "virtualization", "rendering::engine"]
 keywords = ["ui", "gui", "interface", "graphics", "user-interface"]
 repository = "https://github.com/maycoon-ui/maycoon"
 homepage = "https://maycoon-ui.github.io"
