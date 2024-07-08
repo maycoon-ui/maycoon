@@ -2,8 +2,13 @@
 name = "may-macro"
 version = "0.1.0"
 edition = "2021"
+description = "Macros for Maycoon UI => See the `maycoon` crate for more."
+readme = "README.md"
+license = "MIT OR Apache-2.0"
+resolver = "2"
 authors = ["Mikail Plotzky <mp@ypon.com>", "Maycoon Contributors"]
-description = "Procedural macros for Maycoon => See `maycoon` crate"
+categories = ["gui", "graphics", "rendering", "virtualization", "rendering::engine"]
+keywords = ["ui", "gui", "macros", "maycoon", "user-interface"]
 repository = "https://github.com/maycoon-ui/maycoon"
 homepage = "https://maycoon-ui.github.io"
 
