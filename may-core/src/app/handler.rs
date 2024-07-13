@@ -379,7 +379,7 @@ where
 
                             self.update.insert(Update::DRAW | Update::LAYOUT);
                         }
-                    }
+                    },
 
                     WindowEvent::CloseRequested => {
                         if let Some(render_ctx) = self.render_ctx.as_mut() {
@@ -391,21 +391,21 @@ where
                         if self.config.window.close_on_request {
                             event_loop.exit();
                         }
-                    }
+                    },
 
                     WindowEvent::RedrawRequested => {
                         self.update(event_loop);
-                    }
+                    },
 
                     WindowEvent::CursorLeft { .. } => {
                         self.info.cursor_pos = None;
                         self.request_redraw();
-                    }
+                    },
 
                     WindowEvent::CursorMoved { position, .. } => {
                         self.info.cursor_pos = Some(Vector2::new(position.x, position.y));
                         self.request_redraw();
-                    }
+                    },
 
                     WindowEvent::KeyboardInput {
                         event,
@@ -416,7 +416,7 @@ where
                             self.info.keys.push((device_id, event));
                             self.request_redraw();
                         }
-                    }
+                    },
 
                     WindowEvent::MouseInput {
                         device_id,
@@ -425,7 +425,7 @@ where
                     } => {
                         self.info.buttons.push((device_id, button, state));
                         self.request_redraw();
-                    }
+                    },
 
                     _ => (),
                 }

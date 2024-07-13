@@ -11,6 +11,7 @@ use may_theme::theme::Theme;
 
 /// Maycoon Application Configuration Structure.
 #[derive(Clone)]
+
 pub struct MayConfig<T: Theme> {
     /// Window Configuration
     pub window: WindowConfig,
@@ -32,6 +33,7 @@ impl Default for MayConfig<CelesteTheme> {
 
 /// Window configuration.
 #[derive(Clone)]
+
 pub struct WindowConfig {
     /// The title of the window.
     pub title: String,
@@ -107,6 +109,7 @@ impl Default for WindowConfig {
 
 /// Renderer configuration.
 #[derive(Clone)]
+
 pub struct RenderConfig {
     /// The antialiasing config
     pub antialiasing: AaConfig,
@@ -130,6 +133,7 @@ impl Default for RenderConfig {
 
 /// The window mode.
 #[derive(Clone, Debug, Default)]
+
 pub enum WindowMode {
     /// The default windowed mode.
     #[default]

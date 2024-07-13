@@ -160,11 +160,11 @@ impl<S: State> Widget<S> for Button<S> {
                     match state {
                         ElementState::Pressed => {
                             self.state.active = true;
-                        }
+                        },
 
                         ElementState::Released => {
                             self.state.active = false;
-                        }
+                        },
                     }
                 } else {
                     self.state.active = false;

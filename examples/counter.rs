@@ -3,11 +3,12 @@
 use may_core::app::update::Update;
 use may_core::app::MayApp;
 use may_core::config::MayConfig;
-use may_core::layout::{AlignItems, Dimension, FlexDirection, LayoutStyle, Size};
+use may_core::layout::{AlignItems, Dimension, FlexDirection, LayoutStyle};
 use may_macro::{val, State};
 use may_widgets::button::Button;
 use may_widgets::container::Container;
 use may_widgets::text::Text;
+use nalgebra::Vector2;
 
 #[derive(Default, State)]
 struct MyState {
@@ -34,10 +35,7 @@ fn main() {
             }))),
         ])
         .with_layout_style(LayoutStyle {
-            size: Size::<Dimension> {
-                width: Dimension::Percent(1.0),
-                height: Dimension::Percent(1.0),
-            },
+            size: Vector2::<Dimension>::new(Dimension::Percent(1.0), Dimension::Percent(1.0)),
             flex_direction: FlexDirection::Column,
             align_items: Some(AlignItems::Center),
             ..Default::default()
