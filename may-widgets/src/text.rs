@@ -1,6 +1,5 @@
 use may_core::app::info::AppInfo;
 use may_core::app::update::Update;
-use may_core::layout;
 use may_core::layout::{Dimension, LayoutNode, LayoutStyle, StyleNode};
 use may_core::state::{State, StateVal};
 use may_core::vg::glyph::Glyph;
@@ -13,6 +12,7 @@ use may_core::vg::{peniko, Scene};
 use may_core::widget::Widget;
 use may_theme::id::WidgetId;
 use may_theme::theme::Theme;
+use nalgebra::Vector2;
 
 /// A text widget.
 ///
@@ -149,10 +149,10 @@ impl<S: State> Widget<S> for Text<S> {
 
         StyleNode {
             style: LayoutStyle {
-                size: layout::Size::<Dimension> {
-                    width: Dimension::Length(self.font_size * text.len() as f32),
-                    height: Dimension::Length(self.font_size),
-                },
+                size: Vector2::new(
+                    Dimension::Length(self.font_size * text.len() as f32),
+                    Dimension::Length(self.font_size),
+                ),
                 ..self.style
             },
             children: Vec::new(),

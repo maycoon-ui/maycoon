@@ -1,7 +1,8 @@
+use nalgebra::Vector2;
 pub use taffy::{
     AlignContent, AlignItems, AlignSelf, Dimension, Display, FlexDirection, FlexWrap, GridAutoFlow,
     GridPlacement, JustifyContent, JustifyItems, JustifySelf, Layout, LengthPercentage,
-    LengthPercentageAuto, Line, Overflow, Point, Position, Rect, Size,
+    LengthPercentageAuto, Line, Overflow, Position, Rect,
 };
 
 /// Defines different aspects and properties of a widget layout.
@@ -11,7 +12,7 @@ pub struct LayoutStyle {
     pub display: Display,
 
     /// How children overflowing their container should affect layout.
-    pub overflow: Point<Overflow>,
+    pub overflow: (Overflow, Overflow),
 
     /// How much space (in points) should be reserved for scrollbars.
     pub scrollbar_width: f32,
@@ -23,13 +24,13 @@ pub struct LayoutStyle {
     pub inset: Rect<LengthPercentageAuto>,
 
     /// Sets the initial size of the item.
-    pub size: Size<Dimension>,
+    pub size: Vector2<Dimension>,
 
     /// Controls the minimum size of the item.
-    pub min_size: Size<Dimension>,
+    pub min_size: Vector2<Dimension>,
 
     /// Controls the maximum size of the item.
-    pub max_size: Size<Dimension>,
+    pub max_size: Vector2<Dimension>,
 
     /// Sets the preferred aspect ratio for the item
     ///
@@ -66,7 +67,7 @@ pub struct LayoutStyle {
     pub justify_content: Option<JustifyContent>,
 
     /// How large should the gaps between items in a grid or flex container be?
-    pub gap: Size<LengthPercentage>,
+    pub gap: Vector2<LengthPercentage>,
 
     /// Which direction does the main axis flow in?
     pub flex_direction: FlexDirection,
@@ -101,21 +102,18 @@ impl Default for LayoutStyle {
     fn default() -> Self {
         LayoutStyle {
             display: Display::default(),
-            overflow: Point {
-                x: Overflow::Visible,
-                y: Overflow::Visible,
-            },
+            overflow: (Overflow::Visible, Overflow::Visible),
             scrollbar_width: 0.0,
             position: Position::Relative,
             inset: Rect::auto(),
             margin: Rect::zero(),
             padding: Rect::zero(),
             border: Rect::zero(),
-            size: Size::auto(),
-            min_size: Size::auto(),
-            max_size: Size::auto(),
+            size: Vector2::new(Dimension::Auto, Dimension::Auto),
+            min_size: Vector2::new(Dimension::Auto, Dimension::Auto),
+            max_size: Vector2::new(Dimension::Auto, Dimension::Auto),
             aspect_ratio: None,
-            gap: Size::zero(),
+            gap: Vector2::new(LengthPercentage::Length(0.0), LengthPercentage::Length(0.0)),
             align_items: None,
             align_self: None,
             justify_items: None,
@@ -144,18 +142,33 @@ impl From<LayoutStyle> for taffy::Style {
     fn from(value: LayoutStyle) -> Self {
         taffy::Style {
             display: value.display,
-            overflow: value.overflow,
+            overflow: taffy::Point {
+                x: value.overflow.0,
+                y: value.overflow.1,
+            },
             scrollbar_width: value.scrollbar_width,
             position: value.position,
             inset: value.inset,
             margin: value.margin,
             padding: value.padding,
             border: value.border,
-            size: value.size,
-            min_size: value.min_size,
-            max_size: value.max_size,
+            size: taffy::Size {
+                width: value.size.x,
+                height: value.size.y,
+            },
+            min_size: taffy::Size {
+                width: value.min_size.x,
+                height: value.min_size.y,
+            },
+            max_size: taffy::Size {
+                width: value.max_size.x,
+                height: value.max_size.y,
+            },
             aspect_ratio: value.aspect_ratio,
-            gap: value.gap,
+            gap: taffy::Size {
+                width: value.gap.x,
+                height: value.gap.y,
+            },
             align_items: value.align_items,
             align_self: value.align_self,
             justify_items: value.justify_items,
