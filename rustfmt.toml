@@ -1,1 +1,13 @@
-
+match_block_trailing_comma = true
+use_field_init_shorthand = true
+use_try_shorthand = true
+# TODO: uncomment if rustfmt stabilises these features
+# condense_wildcard_suffixes = true
+# force_multiline_blocks = true
+# format_macro_matchers = true
+# format_macro_bodies = true
+# format_strings = true
+# normalize_comments = true
+# normalize_doc_attributes = true
+# reorder_impl_items = true
+# group_imports = "StdExternalCrate"
