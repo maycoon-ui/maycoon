@@ -11,7 +11,7 @@ pub fn derive_state(input: TokenStream) -> TokenStream {
     let (impl_generics, ty_generics, where_clause) = input.generics.split_for_impl();
 
     quote! {
-        impl #impl_generics may_core::state::State for #name #ty_generics #where_clause {}
+        impl #impl_generics maycoon::core::state::State for #name #ty_generics #where_clause {}
     }
 }
 
@@ -20,22 +20,22 @@ pub fn val(input: TokenStream) -> TokenStream {
     let output: TokenStream = if input.is_empty() {
         // empty val! means empty StateVal
         quote! {
-            may_core::state::StateVal::new(|_| ())
+            maycoon::core::state::StateVal::new(|_| ())
         }
     } else if let Ok(expr) = syn::parse2::<syn::Expr>(input.clone()) {
         // return StateVal from raw expression without state access
         quote! {
-            may_core::state::StateVal::new(|_| #expr)
+            maycoon::core::state::StateVal::new(|_| #expr)
         }
     } else if let Ok(lit) = syn::parse2::<syn::Lit>(input.clone()) {
         // return StateVal from raw literal without state access
         quote! {
-            may_core::state::StateVal::new(|_| #lit)
+            maycoon::core::state::StateVal::new(|_| #lit)
         }
     } else {
         // expect a valid closure
         quote! {
-            may_core::state::StateVal::new(#input)
+            maycoon::core::state::StateVal::new(#input)
         }
     };
 
