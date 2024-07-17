@@ -49,7 +49,7 @@ impl<T: Theme> MayApp<T> {
     }
 
     /// Run the application with given widget and state.
-    pub fn run<S, W>(self, widget: W, state: S)
+    pub fn run<S, W>(self, state: S, widget: W)
     where
         S: State,
         W: Widget<S>,
