@@ -1,5 +1,6 @@
 [workspace]
 members = ["may-core", "may-macro", "may-theme", "may-widgets"]
+exclude = ["examples"]
 
 [workspace.dependencies]
 peniko = "0.1.1"
@@ -29,19 +30,10 @@ peniko = { workspace = true }
 nalgebra = { workspace = true }
 
 [features]
-default = []
+default = ["macros"]
+macros = []
 vg = ["may-core/vg"]
 
 [lib]
 name = "maycoon"
 path = "src/lib.rs"
-
-[[example]]
-name = "hello-world"
-path = "examples/hello-world.rs"
-harness = false
-
-[[example]]
-name = "counter"
-path = "examples/counter.rs"
-harness = false
