@@ -1,6 +1,6 @@
 use proc_macro2::TokenStream;
 use quote::quote;
-use syn::DeriveInput;
+use syn::{DeriveInput, Expr};
 
 #[inline]
 pub fn derive_state(input: TokenStream) -> TokenStream {
@@ -23,20 +23,23 @@ pub fn val(input: TokenStream) -> TokenStream {
             maycoon::core::state::StateVal::new(|_| ())
         }
     } else if let Ok(expr) = syn::parse2::<syn::Expr>(input.clone()) {
-        // return StateVal from raw expression without state access
-        quote! {
-            maycoon::core::state::StateVal::new(|_| #expr)
-        }
-    } else if let Ok(lit) = syn::parse2::<syn::Lit>(input.clone()) {
-        // return StateVal from raw literal without state access
-        quote! {
-            maycoon::core::state::StateVal::new(|_| #lit)
+        match expr {
+            // StateVal from valid closure
+            Expr::Closure(closure) => {
+                quote! {
+                    maycoon::core::state::StateVal::new(#closure)
+                }
+            },
+
+            // Everything else is a normal expression
+            _ => {
+                quote! {
+                    maycoon::core::state::StateVal::new(|_| #expr)
+                }
+            },
         }
     } else {
-        // expect a valid closure
-        quote! {
-            maycoon::core::state::StateVal::new(#input)
-        }
+        panic!("Could not parse expression: {:?}", input);
     };
 
     output

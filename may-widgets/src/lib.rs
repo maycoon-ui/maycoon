@@ -15,3 +15,6 @@ pub mod container;
 
 /// Contains the [dummy::Dummy] widget.
 pub mod dummy;
+
+/// Contains the [image::Image] widget.
+pub mod image;
