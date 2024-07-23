@@ -25,13 +25,13 @@ homepage = "https://maycoon-ui.github.io"
 may-core = { path = "may-core" }
 may-theme = { path = "may-theme" }
 may-widgets = { path = "may-widgets" }
-may-macro = { path = "may-macro" }
+may-macro = { path = "may-macro", optional = true }
 peniko = { workspace = true }
 nalgebra = { workspace = true }
 
 [features]
 default = ["macros"]
-macros = []
+macros = ["may-macro"]
 vg = ["may-core/vg"]
 
 [lib]
