@@ -12,7 +12,7 @@ use crate::state::State;
 pub trait Widget<S: State> {
     /// Render the widget to the canvas.
     fn render(
-        &self,
+        &mut self,
         scene: &mut Scene,
         theme: &mut dyn Theme,
         info: &AppInfo,
@@ -20,9 +20,9 @@ pub trait Widget<S: State> {
         state: &S,
     );
     /// Return the layout style node for layout computation.
-    fn layout_style(&self, state: &S) -> StyleNode;
+    fn layout_style(&mut self, state: &S) -> StyleNode;
     /// Update the widget state with given info and layout. Returns if the app should be updated.
     fn update(&mut self, layout: &LayoutNode, state: &mut S, info: &AppInfo) -> Update;
     /// Return the widget id.
-    fn widget_id(&self) -> WidgetId;
+    fn widget_id(&mut self) -> WidgetId;
 }

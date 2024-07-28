@@ -37,14 +37,14 @@ impl<S: State> Image<S> {
 
 impl<S: State> Widget<S> for Image<S> {
     fn render(
-        &self,
+        &mut self,
         scene: &mut Scene,
         _: &mut dyn Theme,
         _: &AppInfo,
         layout_node: &LayoutNode,
         state: &S,
     ) {
-        let image = self.image.get(state);
+        let image = self.image.get_ref(state);
 
         scene.draw_image(
             &image,
@@ -55,7 +55,7 @@ impl<S: State> Widget<S> for Image<S> {
         );
     }
 
-    fn layout_style(&self, _: &S) -> StyleNode {
+    fn layout_style(&mut self, _: &S) -> StyleNode {
         StyleNode {
             style: self.style.clone(),
             children: Vec::new(),
@@ -66,7 +66,7 @@ impl<S: State> Widget<S> for Image<S> {
         Update::empty()
     }
 
-    fn widget_id(&self) -> WidgetId {
+    fn widget_id(&mut self) -> WidgetId {
         WidgetId::new("may-widgets", "image")
     }
 }

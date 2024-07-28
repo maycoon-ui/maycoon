@@ -67,7 +67,7 @@ impl<S: State> Text<S> {
 
 impl<S: State> Widget<S> for Text<S> {
     fn render(
-        &self,
+        &mut self,
         scene: &mut Scene,
         theme: &mut dyn Theme,
         info: &AppInfo,
@@ -115,7 +115,7 @@ impl<S: State> Widget<S> for Text<S> {
 
         let mut pen_y = layout_node.layout.location.y + self.font_size;
 
-        let text = self.text.get(state);
+        let text = self.text.get_ref(state);
 
         scene
             .draw_glyphs(&font)
@@ -144,8 +144,8 @@ impl<S: State> Widget<S> for Text<S> {
             );
     }
 
-    fn layout_style(&self, state: &S) -> StyleNode {
-        let text = self.text.get(state);
+    fn layout_style(&mut self, state: &S) -> StyleNode {
+        let text = self.text.get_ref(state);
 
         StyleNode {
             style: LayoutStyle {
@@ -163,7 +163,7 @@ impl<S: State> Widget<S> for Text<S> {
         Update::empty()
     }
 
-    fn widget_id(&self) -> WidgetId {
+    fn widget_id(&mut self) -> WidgetId {
         WidgetId::new("may-widgets", "Text")
     }
 }

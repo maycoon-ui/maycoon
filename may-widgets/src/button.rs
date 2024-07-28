@@ -63,7 +63,7 @@ impl<S: State> Button<S> {
 
 impl<S: State> Widget<S> for Button<S> {
     fn render(
-        &self,
+        &mut self,
         scene: &mut Scene,
         theme: &mut dyn Theme,
         info: &AppInfo,
@@ -129,7 +129,7 @@ impl<S: State> Widget<S> for Button<S> {
         }
     }
 
-    fn layout_style(&self, state: &S) -> StyleNode {
+    fn layout_style(&mut self, state: &S) -> StyleNode {
         StyleNode {
             style: self.layout_style.clone(),
             children: vec![self.child.layout_style(state)],
@@ -186,7 +186,7 @@ impl<S: State> Widget<S> for Button<S> {
         update
     }
 
-    fn widget_id(&self) -> WidgetId {
+    fn widget_id(&mut self) -> WidgetId {
         WidgetId::new("may-widgets", "Button")
     }
 }

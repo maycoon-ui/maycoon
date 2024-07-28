@@ -11,9 +11,9 @@ use may_theme::theme::Theme;
 pub struct DummyWidget;
 
 impl<S: State> Widget<S> for DummyWidget {
-    fn render(&self, _: &mut Scene, _: &mut dyn Theme, _: &AppInfo, _: &LayoutNode, _: &S) {}
+    fn render(&mut self, _: &mut Scene, _: &mut dyn Theme, _: &AppInfo, _: &LayoutNode, _: &S) {}
 
-    fn layout_style(&self, _: &S) -> StyleNode {
+    fn layout_style(&mut self, _: &S) -> StyleNode {
         StyleNode {
             style: LayoutStyle::default(),
             children: Vec::new(),
@@ -24,7 +24,7 @@ impl<S: State> Widget<S> for DummyWidget {
         Update::empty()
     }
 
-    fn widget_id(&self) -> WidgetId {
+    fn widget_id(&mut self) -> WidgetId {
         WidgetId::new("may-widgets", "DummyWidget")
     }
 }

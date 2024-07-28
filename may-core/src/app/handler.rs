@@ -142,7 +142,9 @@ where
     fn update(&mut self, _: &ActiveEventLoop) {
         // completely layout widgets if taffy is not set up yet (e.g. during first update)
         if self.taffy.child_count(self.window_node) == 0 {
-            self.layout_widget(self.window_node, &self.widget.layout_style(&self.state))
+            let style = self.widget.layout_style(&self.state);
+
+            self.layout_widget(self.window_node, &style)
                 .expect("Failed to layout window");
 
             self.compute_layout().expect("Failed to compute layout");
@@ -150,10 +152,12 @@ where
             self.update.insert(Update::FORCE);
         }
 
+        let style = self.widget.layout_style(&self.state);
+
         let mut layout_node = self
             .collect_layout(
                 self.taffy.child_at_index(self.window_node, 0).unwrap(),
-                &self.widget.layout_style(&self.state),
+                &style,
             )
             .expect("Failed to collect layout");
 
@@ -170,7 +174,9 @@ where
                 .set_children(self.window_node, &[])
                 .expect("Failed to set children");
 
-            self.layout_widget(self.window_node, &self.widget.layout_style(&self.state))
+            let style = self.widget.layout_style(&self.state);
+
+            self.layout_widget(self.window_node, &style)
                 .expect("Failed to layout window");
 
             self.compute_layout().expect("Failed to compute layout");
@@ -178,7 +184,7 @@ where
             layout_node = self
                 .collect_layout(
                     self.taffy.child_at_index(self.window_node, 0).unwrap(),
-                    &self.widget.layout_style(&self.state),
+                    &style,
                 )
                 .expect("Failed to collect layout");
         }

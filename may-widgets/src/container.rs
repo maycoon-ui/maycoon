@@ -33,24 +33,24 @@ impl<S: State> Container<S> {
 
 impl<S: State> Widget<S> for Container<S> {
     fn render(
-        &self,
+        &mut self,
         scene: &mut Scene,
         theme: &mut dyn Theme,
         info: &AppInfo,
         layout_node: &LayoutNode,
         state: &S,
     ) {
-        for (i, child) in self.children.iter().enumerate() {
+        for (i, child) in self.children.iter_mut().enumerate() {
             child.render(scene, theme, info, &layout_node.children[i], state);
         }
     }
 
-    fn layout_style(&self, state: &S) -> StyleNode {
+    fn layout_style(&mut self, state: &S) -> StyleNode {
         StyleNode {
             style: self.style.clone(),
             children: self
                 .children
-                .iter()
+                .iter_mut()
                 .map(|el| el.layout_style(state))
                 .collect(),
         }
@@ -66,7 +66,7 @@ impl<S: State> Widget<S> for Container<S> {
         update
     }
 
-    fn widget_id(&self) -> WidgetId {
+    fn widget_id(&mut self) -> WidgetId {
         WidgetId::new("may-widgets", "Container")
     }
 }
