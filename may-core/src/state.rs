@@ -80,9 +80,7 @@ impl<S: State, T: 'static> StateVal<S, T> {
     ///
     /// Otherwise, computes the value and returns a reference to it.
     pub fn get_ref(&mut self, state: &S) -> &T {
-        if self.value.is_none() {
-            self.compute(state);
-        }
+        self.compute(state);
 
         self.value.as_ref().unwrap()
     }

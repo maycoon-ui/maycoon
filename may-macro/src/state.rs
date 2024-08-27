@@ -22,7 +22,7 @@ pub fn val(input: TokenStream) -> TokenStream {
         quote! {
             maycoon::core::state::StateVal::new(|_| ())
         }
-    } else if let Ok(expr) = syn::parse2::<syn::Expr>(input.clone()) {
+    } else if let Ok(expr) = syn::parse2::<Expr>(input.clone()) {
         match expr {
             // StateVal from valid closure
             Expr::Closure(closure) => {
@@ -39,7 +39,9 @@ pub fn val(input: TokenStream) -> TokenStream {
             },
         }
     } else {
-        panic!("Could not parse expression: {:?}", input);
+        quote! {
+            maycoon::core::state::StateVal::new(#input)
+        }
     };
 
     output

@@ -1,6 +1,5 @@
 [workspace]
-members = ["may-core", "may-macro", "may-theme", "may-widgets"]
-exclude = ["examples"]
+members = ["may-core", "may-macro", "may-theme", "may-widgets", "examples/*"]
 
 [workspace.dependencies]
 peniko = "0.1.1"
