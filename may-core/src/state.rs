@@ -80,9 +80,17 @@ impl<S: State, T: 'static> StateVal<S, T> {
     ///
     /// Otherwise, computes the value and returns a reference to it.
     pub fn get_ref(&mut self, state: &S) -> &T {
-        self.compute(state);
+        if self.value.is_none() {
+            self.compute(state);
+        }
 
         self.value.as_ref().unwrap()
+    }
+
+    /// Makes the internal value invalid.
+    /// Requires a re-computation if you want to get the value using [StateVal::get] or other methods.
+    pub fn invalidate(&mut self) {
+        self.value = None;
     }
 
     /// Maps the value using the given function.
