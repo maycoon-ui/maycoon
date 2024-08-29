@@ -1,29 +1,29 @@
-use may_core::app::info::AppInfo;
-use may_core::app::update::Update;
-use may_core::layout;
-use may_core::layout::{LayoutNode, LayoutStyle, LengthPercentage, StyleNode};
-use may_core::state::State;
-use may_core::vg::kurbo::{Affine, Rect, RoundedRect, RoundedRectRadii, Vec2};
-use may_core::vg::peniko::{Brush, Fill};
-use may_core::vg::Scene;
-use may_core::widget::Widget;
-use may_core::window::{ElementState, MouseButton};
-use may_theme::id::WidgetId;
-use may_theme::theme::Theme;
+use maycoon_core::app::info::AppInfo;
+use maycoon_core::app::update::Update;
+use maycoon_core::layout;
+use maycoon_core::layout::{LayoutNode, LayoutStyle, LengthPercentage, StyleNode};
+use maycoon_core::state::{State, Val};
+use maycoon_core::vg::kurbo::{Affine, Rect, RoundedRect, RoundedRectRadii, Vec2};
+use maycoon_core::vg::peniko::{Brush, Fill};
+use maycoon_core::vg::Scene;
+use maycoon_core::widget::Widget;
+use maycoon_core::window::{ElementState, MouseButton};
+use maycoon_theme::id::WidgetId;
+use maycoon_theme::theme::Theme;
 
 /// A generic Button widget to make an interactive button-style widget with a child.
-pub struct Button<S: State> {
-    child: Box<dyn Widget<S>>,
+pub struct Button<S: State, W: Widget<S> + 'static> {
+    child: Val<S, W>,
     state: ButtonState,
     on_pressed: Box<dyn FnMut(&mut S) -> Update>,
-    layout_style: LayoutStyle,
+    layout_style: Val<S, LayoutStyle>,
 }
 
-impl<S: State> Button<S> {
+impl<S: State, W: Widget<S> + 'static> Button<S, W> {
     /// Create a new button with the given child widget.
-    pub fn new(child: impl Widget<S> + 'static) -> Self {
+    pub fn new(child: impl Into<Val<S, W>>) -> Self {
         Self {
-            child: Box::new(child),
+            child: child.into(),
             state: ButtonState {
                 active: false,
                 hover: false,
@@ -38,14 +38,9 @@ impl<S: State> Button<S> {
                     bottom: LengthPercentage::Length(10.0),
                 },
                 ..Default::default()
-            },
+            }
+            .into(),
         }
-    }
-
-    /// Sets the internal button state. Not recommended to use, unless you know what you're doing.
-    pub fn with_state(mut self, state: ButtonState) -> Self {
-        self.state = state;
-        self
     }
 
     /// Sets the function to be called when the button is pressed.
@@ -55,13 +50,13 @@ impl<S: State> Button<S> {
     }
 
     /// Sets the layout style of the button.
-    pub fn with_layout_style(mut self, layout_style: LayoutStyle) -> Self {
-        self.layout_style = layout_style;
+    pub fn with_layout_style(mut self, layout_style: impl Into<Val<S, LayoutStyle>>) -> Self {
+        self.layout_style = layout_style.into();
         self
     }
 }
 
-impl<S: State> Widget<S> for Button<S> {
+impl<S: State, W: Widget<S>> Widget<S> for Button<S, W> {
     fn render(
         &mut self,
         scene: &mut Scene,
@@ -109,7 +104,7 @@ impl<S: State> Widget<S> for Button<S> {
 
             let mut child_scene = Scene::new();
 
-            self.child.render(
+            self.child.get_mut(state).render(
                 &mut child_scene,
                 theme,
                 info,
@@ -131,8 +126,8 @@ impl<S: State> Widget<S> for Button<S> {
 
     fn layout_style(&mut self, state: &S) -> StyleNode {
         StyleNode {
-            style: self.layout_style.clone(),
-            children: vec![self.child.layout_style(state)],
+            style: self.layout_style.get_ref(state).clone(),
+            children: vec![self.child.get_mut(state).layout_style(state)],
         }
     }
 
@@ -187,7 +182,7 @@ impl<S: State> Widget<S> for Button<S> {
     }
 
     fn widget_id(&mut self) -> WidgetId {
-        WidgetId::new("may-widgets", "Button")
+        WidgetId::new("maycoon-widgets", "Button")
     }
 }
 

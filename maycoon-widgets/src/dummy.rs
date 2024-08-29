@@ -1,11 +1,11 @@
-use may_core::app::info::AppInfo;
-use may_core::app::update::Update;
-use may_core::layout::{LayoutNode, LayoutStyle, StyleNode};
-use may_core::state::State;
-use may_core::vg::Scene;
-use may_core::widget::Widget;
-use may_theme::id::WidgetId;
-use may_theme::theme::Theme;
+use maycoon_core::app::info::AppInfo;
+use maycoon_core::app::update::Update;
+use maycoon_core::layout::{LayoutNode, LayoutStyle, StyleNode};
+use maycoon_core::state::State;
+use maycoon_core::vg::Scene;
+use maycoon_core::widget::Widget;
+use maycoon_theme::id::WidgetId;
+use maycoon_theme::theme::Theme;
 
 /// A dummy Widget that does nothing. Useful for testing.
 pub struct DummyWidget;
@@ -25,6 +25,6 @@ impl<S: State> Widget<S> for DummyWidget {
     }
 
     fn widget_id(&mut self) -> WidgetId {
-        WidgetId::new("may-widgets", "DummyWidget")
+        WidgetId::new("maycoon-widgets", "DummyWidget")
     }
 }

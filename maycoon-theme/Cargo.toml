@@ -1,5 +1,5 @@
 [package]
-name = "may-theme"
+name = "maycoon-theme"
 version = "0.1.0"
 edition = "2021"
 description = "Themes & Styling for Maycoon UI => See the `maycoon` crate for more."

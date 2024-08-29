@@ -13,7 +13,7 @@ use winit::event::WindowEvent;
 use winit::event_loop::ActiveEventLoop;
 use winit::window::{Window, WindowAttributes, WindowId};
 
-use may_theme::theme::Theme;
+use maycoon_theme::theme::Theme;
 
 use crate::app::font_ctx::FontContext;
 use crate::app::info::AppInfo;

@@ -1,17 +1,17 @@
-use may_core::app::info::AppInfo;
-use may_core::app::update::Update;
-use may_core::layout::{LayoutNode, LayoutStyle, StyleNode};
-use may_core::state::State;
-use may_core::vg::Scene;
-use may_core::widget::Widget;
-use may_theme::id::WidgetId;
-use may_theme::theme::Theme;
+use maycoon_core::app::info::AppInfo;
+use maycoon_core::app::update::Update;
+use maycoon_core::layout::{LayoutNode, LayoutStyle, StyleNode};
+use maycoon_core::state::{State, Val};
+use maycoon_core::vg::Scene;
+use maycoon_core::widget::Widget;
+use maycoon_theme::id::WidgetId;
+use maycoon_theme::theme::Theme;
 
 /// A container widget that can display and layout multiple child widgets.
 ///
 /// The layout of the children (row, column, etc.) depends on the [LayoutStyle] of the container.
 pub struct Container<S: State> {
-    style: LayoutStyle,
+    style: Val<S, LayoutStyle>,
     children: Vec<Box<dyn Widget<S>>>,
 }
 
@@ -19,14 +19,14 @@ impl<S: State> Container<S> {
     /// Creates a new container with given children.
     pub fn new(children: Vec<Box<dyn Widget<S>>>) -> Self {
         Self {
-            style: LayoutStyle::default(),
+            style: LayoutStyle::default().into(),
             children,
         }
     }
 
     /// Sets the layout style of the container.
-    pub fn with_layout_style(mut self, layout_style: LayoutStyle) -> Self {
-        self.style = layout_style;
+    pub fn with_layout_style(mut self, layout_style: impl Into<Val<S, LayoutStyle>>) -> Self {
+        self.style = layout_style.into();
         self
     }
 }
@@ -46,8 +46,10 @@ impl<S: State> Widget<S> for Container<S> {
     }
 
     fn layout_style(&mut self, state: &S) -> StyleNode {
+        let style = self.style.get_ref(state).clone();
+
         StyleNode {
-            style: self.style.clone(),
+            style,
             children: self
                 .children
                 .iter_mut()
@@ -57,6 +59,8 @@ impl<S: State> Widget<S> for Container<S> {
     }
 
     fn update(&mut self, layout: &LayoutNode, state: &mut S, info: &AppInfo) -> Update {
+        self.style.invalidate();
+
         let mut update = Update::empty();
 
         for (i, child) in self.children.iter_mut().enumerate() {
@@ -67,6 +71,6 @@ impl<S: State> Widget<S> for Container<S> {
     }
 
     fn widget_id(&mut self) -> WidgetId {
-        WidgetId::new("may-widgets", "Container")
+        WidgetId::new("maycoon-widgets", "Container")
     }
 }

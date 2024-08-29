@@ -1,22 +1,18 @@
 [package]
-name = "may-macro"
+name = "maycoon-widgets"
 version = "0.1.0"
 edition = "2021"
-description = "Macros for Maycoon UI => See the `maycoon` crate for more."
+description = "Widgets for Maycoon UI => See the `maycoon` crate for more."
 readme = "README.md"
 license = "MIT OR Apache-2.0"
 resolver = "2"
 authors = ["Mikail Plotzky <mp@ypon.com>", "Maycoon Contributors"]
 categories = ["gui", "graphics", "rendering", "virtualization", "rendering::engine"]
-keywords = ["ui", "gui", "macros", "maycoon", "user-interface"]
+keywords = ["ui", "gui", "widgets", "maycoon", "user-interface"]
 repository = "https://github.com/maycoon-ui/maycoon"
 homepage = "https://maycoon-ui.github.io"
 
 [dependencies]
-may-core = { path = "../may-core" }
-syn = "2.0.76"
-quote = "1.0.37"
-proc-macro2 = "1.0.86"
-
-[lib]
-proc-macro = true
+maycoon-theme = { path = "../maycoon-theme" }
+maycoon-core = { path = "../maycoon-core", features = ["vg"] }
+nalgebra = { workspace = true }

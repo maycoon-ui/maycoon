@@ -1,7 +1,7 @@
 use vello::Scene;
 
-use may_theme::id::WidgetId;
-use may_theme::theme::Theme;
+use maycoon_theme::id::WidgetId;
+use maycoon_theme::theme::Theme;
 
 use crate::app::info::AppInfo;
 use crate::app::update::Update;

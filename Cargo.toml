@@ -1,5 +1,5 @@
 [workspace]
-members = ["may-core", "may-macro", "may-theme", "may-widgets", "examples/*"]
+members = ["maycoon-core", "maycoon-macros", "maycoon-theme", "maycoon-widgets", "examples/*"]
 
 [workspace.dependencies]
 peniko = "0.1.1"
@@ -21,17 +21,17 @@ repository = "https://github.com/maycoon-ui/maycoon"
 homepage = "https://maycoon-ui.github.io"
 
 [dependencies]
-may-core = { path = "may-core" }
-may-theme = { path = "may-theme" }
-may-widgets = { path = "may-widgets" }
-may-macro = { path = "may-macro", optional = true }
+maycoon-core = { path = "maycoon-core" }
+maycoon-theme = { path = "maycoon-theme" }
+maycoon-widgets = { path = "maycoon-widgets" }
+maycoon-macros = { path = "maycoon-macros", optional = true }
 peniko = { workspace = true }
 nalgebra = { workspace = true }
 
 [features]
 default = ["macros"]
-macros = ["may-macro"]
-vg = ["may-core/vg"]
+macros = ["maycoon-macros"]
+vg = ["maycoon-core/vg"]
 
 [lib]
 name = "maycoon"

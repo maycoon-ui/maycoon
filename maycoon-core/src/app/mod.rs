@@ -4,7 +4,7 @@ use winit::event_loop::EventLoopBuilder;
 use winit::platform::windows::WindowAttributesExtWindows;
 use winit::window::WindowAttributes;
 
-use may_theme::theme::Theme;
+use maycoon_theme::theme::Theme;
 
 use crate::app::font_ctx::FontContext;
 use crate::app::handler::AppHandler;

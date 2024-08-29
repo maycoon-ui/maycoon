@@ -1,9 +1,9 @@
 use maycoon::core::app::MayApp;
 use maycoon::core::config::MayConfig;
 use maycoon::core::vg::peniko;
-use maycoon::macros::{val, State};
+use maycoon::macros::State;
 use maycoon::math::Vector2;
-use maycoon::widgets::image::Image;
+use maycoon::widgets::image::{Image, ImageData};
 
 #[derive(State)]
 struct MyState;
@@ -16,10 +16,10 @@ fn main() {
 
     MayApp::new(MayConfig::default()).run(
         MyState,
-        Image::new(val!(move |_: &MyState| (
+        Image::new(ImageData::new(
             image_data.clone(),
+            Vector2::new(427, 640),
             peniko::Format::Rgba8,
-            Vector2::new(427, 640)
-        ))),
+        )),
     )
 }

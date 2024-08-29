@@ -6,8 +6,8 @@ pub use winit::window::{
     BadIcon, Cursor, CursorIcon, CustomCursor, Icon as WindowIcon, WindowButtons, WindowLevel,
 };
 
-use may_theme::theme::celeste::CelesteTheme;
-use may_theme::theme::Theme;
+use maycoon_theme::theme::celeste::CelesteTheme;
+use maycoon_theme::theme::Theme;
 
 /// Maycoon Application Configuration Structure.
 #[derive(Clone)]

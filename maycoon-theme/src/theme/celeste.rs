@@ -25,7 +25,7 @@ impl CelesteTheme {
 impl Theme for CelesteTheme {
     fn of(&self, id: WidgetId) -> Option<Style> {
         match id.namespace() {
-            "may-widgets" => match id.id() {
+            "maycoon-widgets" => match id.id() {
                 "Text" => Some(Style::from_values([
                     ("color".to_string(), StyleVal::Color(Color::BLACK)),
                     ("color_invert".to_string(), StyleVal::Color(Color::WHITE)),

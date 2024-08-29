@@ -1,39 +1,37 @@
-use may_core::app::info::AppInfo;
-use may_core::app::update::Update;
-use may_core::layout::{Dimension, LayoutNode, LayoutStyle, StyleNode};
-use may_core::state::{State, StateVal};
-use may_core::vg::glyph::Glyph;
-use may_core::vg::peniko::{Brush, Fill};
-use may_core::vg::skrifa::instance::Size;
-use may_core::vg::skrifa::raw::FileRef;
-use may_core::vg::skrifa::setting::VariationSetting;
-use may_core::vg::skrifa::MetadataProvider;
-use may_core::vg::{peniko, Scene};
-use may_core::widget::Widget;
-use may_theme::id::WidgetId;
-use may_theme::theme::Theme;
+use maycoon_core::app::info::AppInfo;
+use maycoon_core::app::update::Update;
+use maycoon_core::layout::{Dimension, LayoutNode, LayoutStyle, StyleNode};
+use maycoon_core::state::{State, Val};
+use maycoon_core::vg::glyph::Glyph;
+use maycoon_core::vg::peniko::{Brush, Fill};
+use maycoon_core::vg::skrifa::instance::Size;
+use maycoon_core::vg::skrifa::raw::FileRef;
+use maycoon_core::vg::skrifa::setting::VariationSetting;
+use maycoon_core::vg::skrifa::MetadataProvider;
+use maycoon_core::vg::{peniko, Scene};
+use maycoon_core::widget::Widget;
+use maycoon_theme::id::WidgetId;
+use maycoon_theme::theme::Theme;
 use nalgebra::Vector2;
 
-/// A text widget.
-///
-/// It's text, what do you expect?
+/// Displays the given text with optional font, size and hinting.
 pub struct Text<S: State> {
-    style: LayoutStyle,
-    text: StateVal<S, String>,
-    font: Option<String>,
-    font_size: f32,
-    hinting: bool,
+    style: Val<S, LayoutStyle>,
+    text: Val<S, String>,
+    font: Val<S, Option<String>>,
+    font_size: Val<S, f32>,
+    hinting: Val<S, bool>,
 }
 
 impl<S: State> Text<S> {
     /// Create a new text widget with the given text.
-    pub fn new(text: StateVal<S, impl ToString + 'static>) -> Self {
+    pub fn new(text: impl Into<Val<S, String>>) -> Self {
         Self {
-            style: LayoutStyle::default(),
-            text: text.map(|s| s.to_string()),
-            font: None,
-            font_size: 30.0,
-            hinting: true,
+            style: LayoutStyle::default().into(),
+            text: text.into(),
+            font: None.into(),
+            font_size: 30.0.into(),
+            hinting: true.into(),
         }
     }
 
@@ -41,26 +39,26 @@ impl<S: State> Text<S> {
     ///
     /// Hinting adjusts the display of an outline font so that it lines up with a rasterized grid.
     /// At low screen resolutions and font size, hinting can produce clearer text.
-    pub fn with_hinting(mut self, hinting: bool) -> Self {
-        self.hinting = hinting;
+    pub fn with_hinting(mut self, hinting: impl Into<Val<S, bool>>) -> Self {
+        self.hinting = hinting.into();
         self
     }
 
     /// Set the font of the text.
-    pub fn with_font(mut self, font: impl ToString) -> Self {
-        self.font = Some(font.to_string());
+    pub fn with_font(mut self, font: impl Into<Val<S, String>>) -> Self {
+        self.font = font.into().map(|s| Some(s));
         self
     }
 
     /// Set the font size of the text.
-    pub fn with_font_size(mut self, size: f32) -> Self {
-        self.font_size = size;
+    pub fn with_font_size(mut self, size: impl Into<Val<S, f32>>) -> Self {
+        self.font_size = size.into();
         self
     }
 
     /// Set the layout style of the text.
-    pub fn with_layout(mut self, style: LayoutStyle) -> Self {
-        self.style = style;
+    pub fn with_layout(mut self, style: impl Into<Val<S, LayoutStyle>>) -> Self {
+        self.style = style.into();
         self
     }
 }
@@ -74,9 +72,13 @@ impl<S: State> Widget<S> for Text<S> {
         layout_node: &LayoutNode,
         state: &S,
     ) {
-        let font = if self.font.is_some() {
+        let font_size = *self.font_size.get_ref(state);
+        let hinting = *self.hinting.get_ref(state);
+        let font_name = self.font.get_ref(state);
+
+        let font = if font_name.is_some() {
             info.font_context
-                .get(self.font.clone().unwrap())
+                .get(font_name.clone().unwrap())
                 .expect("Font not found")
         } else {
             info.font_context.default_font().clone()
@@ -103,9 +105,9 @@ impl<S: State> Widget<S> for Text<S> {
 
         let location = font_ref.axes().location::<&[VariationSetting; 0]>(&[]);
 
-        let metrics = font_ref.metrics(Size::new(self.font_size), &location);
+        let metrics = font_ref.metrics(Size::new(font_size), &location);
 
-        let glyph_metrics = font_ref.glyph_metrics(Size::new(self.font_size), &location);
+        let glyph_metrics = font_ref.glyph_metrics(Size::new(font_size), &location);
 
         let line_height = metrics.ascent + metrics.descent + metrics.leading;
 
@@ -113,16 +115,16 @@ impl<S: State> Widget<S> for Text<S> {
 
         let mut pen_x = layout_node.layout.location.x;
 
-        let mut pen_y = layout_node.layout.location.y + self.font_size;
+        let mut pen_y = layout_node.layout.location.y + font_size;
 
         let text = self.text.get_ref(state);
 
         scene
             .draw_glyphs(&font)
-            .font_size(self.font_size)
+            .font_size(font_size)
             .brush(&Brush::Solid(color))
             .normalized_coords(location.coords())
-            .hint(self.hinting)
+            .hint(hinting)
             .draw(
                 &peniko::Style::Fill(Fill::NonZero),
                 text.chars().filter_map(|c| {
@@ -147,23 +149,32 @@ impl<S: State> Widget<S> for Text<S> {
     fn layout_style(&mut self, state: &S) -> StyleNode {
         let text = self.text.get_ref(state);
 
+        let font_size = *self.font_size.get_ref(state);
+
+        let style = self.style.get_ref(state).clone();
+
         StyleNode {
             style: LayoutStyle {
                 size: Vector2::new(
-                    Dimension::Length(self.font_size * text.len() as f32),
-                    Dimension::Length(self.font_size),
+                    Dimension::Length(font_size * text.len() as f32),
+                    Dimension::Length(font_size),
                 ),
-                ..self.style
+                ..style
             },
             children: Vec::new(),
         }
     }
 
     fn update(&mut self, _: &LayoutNode, _: &mut S, _: &AppInfo) -> Update {
+        self.text.invalidate();
+        self.font.invalidate();
+        self.hinting.invalidate();
+        self.font_size.invalidate();
+        self.style.invalidate();
         Update::empty()
     }
 
     fn widget_id(&mut self) -> WidgetId {
-        WidgetId::new("may-widgets", "Text")
+        WidgetId::new("maycoon-widgets", "Text")
     }
 }

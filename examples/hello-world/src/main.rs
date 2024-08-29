@@ -7,5 +7,5 @@ use maycoon::widgets::text::Text;
 struct MyState;
 
 fn main() {
-    MayApp::new(MayConfig::default()).run(MyState, Text::new(val!("Hello, World!")));
+    MayApp::new(MayConfig::default()).run(MyState, Text::new("Hello, World!".to_string()));
 }

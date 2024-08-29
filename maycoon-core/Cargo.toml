@@ -1,5 +1,5 @@
 [package]
-name = "may-core"
+name = "maycoon-core"
 version = "0.1.0"
 edition = "2021"
 description = "Core Functionality for Maycoon UI => See the `maycoon` crate for more."
@@ -13,13 +13,13 @@ repository = "https://github.com/maycoon-ui/maycoon"
 homepage = "https://maycoon-ui.github.io"
 
 [dependencies]
-winit = "0.30.3"
+winit = "0.30.5"
 futures-lite = "2.3.0"
 wgpu-types = "0.20.0"
-vello = "0.2.0"
+vello = "0.2.1"
 taffy = "0.5.2"
 bitflags = "2.6.0"
-may-theme = { path = "../may-theme" }
+maycoon-theme = { path = "../maycoon-theme" }
 nalgebra = { workspace = true }
 dashmap = { workspace = true }
 peniko = { workspace = true }
