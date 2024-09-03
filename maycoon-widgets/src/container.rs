@@ -12,12 +12,12 @@ use maycoon_theme::theme::Theme;
 /// The layout of the children (row, column, etc.) depends on the [LayoutStyle] of the container.
 pub struct Container<S: State> {
     style: Val<S, LayoutStyle>,
-    children: Vec<Box<dyn Widget<S>>>,
+    children: Vec<Val<S, Box<dyn Widget<S>>>>,
 }
 
 impl<S: State> Container<S> {
     /// Creates a new container with given children.
-    pub fn new(children: Vec<Box<dyn Widget<S>>>) -> Self {
+    pub fn new(children: Vec<Val<S, Box<dyn Widget<S>>>>) -> Self {
         Self {
             style: LayoutStyle::default().into(),
             children,
@@ -28,6 +28,34 @@ impl<S: State> Container<S> {
     pub fn with_layout_style(mut self, layout_style: impl Into<Val<S, LayoutStyle>>) -> Self {
         self.style = layout_style.into();
         self
+    }
+
+    /// Adds the given children to the container.
+    pub fn add_children(&mut self, children: Vec<Val<S, Box<dyn Widget<S>>>>) {
+        self.children.extend(children);
+    }
+
+    /// Adds the given children to the container and returns itself.
+    pub fn with_children(mut self, children: Vec<Val<S, Box<dyn Widget<S>>>>) -> Self {
+        self.add_children(children);
+        self
+    }
+
+    /// Adds the given child to the container.
+    pub fn add_child(&mut self, child: impl Into<Val<S, Box<dyn Widget<S>>>>) {
+        self.children.push(child.into());
+    }
+
+    /// Adds the given child to the container and returns itself.
+    pub fn with_child(mut self, child: impl Into<Val<S, Box<dyn Widget<S>>>>) -> Self {
+        self.add_child(child);
+        self
+    }
+}
+
+impl<S: State> Default for Container<S> {
+    fn default() -> Self {
+        Self::new(Vec::new())
     }
 }
 
@@ -41,6 +69,7 @@ impl<S: State> Widget<S> for Container<S> {
         state: &S,
     ) {
         for (i, child) in self.children.iter_mut().enumerate() {
+            let child = child.get_mut(state);
             child.render(scene, theme, info, &layout_node.children[i], state);
         }
     }
@@ -48,14 +77,15 @@ impl<S: State> Widget<S> for Container<S> {
     fn layout_style(&mut self, state: &S) -> StyleNode {
         let style = self.style.get_ref(state).clone();
 
-        StyleNode {
-            style,
-            children: self
-                .children
-                .iter_mut()
-                .map(|el| el.layout_style(state))
-                .collect(),
+        let mut children = Vec::with_capacity(self.children.len());
+
+        for child in &mut self.children {
+            let child = child.get_mut(state);
+
+            children.push(child.layout_style(state));
         }
+
+        StyleNode { style, children }
     }
 
     fn update(&mut self, layout: &LayoutNode, state: &mut S, info: &AppInfo) -> Update {
@@ -64,6 +94,7 @@ impl<S: State> Widget<S> for Container<S> {
         let mut update = Update::empty();
 
         for (i, child) in self.children.iter_mut().enumerate() {
+            let child = child.get_mut(state);
             update.insert(child.update(&layout.children[i], state, info));
         }
 
