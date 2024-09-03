@@ -24,11 +24,7 @@ impl<S: State, W: Widget<S> + 'static> Button<S, W> {
     pub fn new(child: impl Into<Val<S, W>>) -> Self {
         Self {
             child: child.into(),
-            state: ButtonState {
-                active: false,
-                hover: false,
-                about_to_be_inactive: false,
-            },
+            state: ButtonState::Idle,
             on_pressed: Box::new(|_| Update::empty()),
             layout_style: LayoutStyle {
                 padding: layout::Rect::<LengthPercentage> {
@@ -66,20 +62,18 @@ impl<S: State, W: Widget<S>> Widget<S> for Button<S, W> {
         state: &S,
     ) {
         let brush = if let Some(style) = theme.of(self.widget_id()) {
-            if self.state.active {
-                style.get_brush("color_pressed").unwrap()
-            } else if self.state.hover {
-                style.get_brush("color_hovered").unwrap()
-            } else {
-                style.get_brush("color_idle").unwrap()
+            match self.state {
+                ButtonState::Pressed => style.get_brush("color_pressed").unwrap(),
+                ButtonState::Hovered => style.get_brush("color_hovered").unwrap(),
+                ButtonState::Idle => style.get_brush("color_idle").unwrap(),
+                ButtonState::Released => style.get_brush("color_hovered").unwrap(),
             }
         } else {
-            Brush::Solid(if self.state.active {
-                theme.defaults().interactive().active()
-            } else if self.state.hover {
-                theme.defaults().interactive().hover()
-            } else {
-                theme.defaults().interactive().inactive()
+            Brush::Solid(match self.state {
+                ButtonState::Idle => theme.defaults().interactive().inactive(),
+                ButtonState::Hovered => theme.defaults().interactive().hover(),
+                ButtonState::Pressed => theme.defaults().interactive().active(),
+                ButtonState::Released => theme.defaults().interactive().hover(),
             })
         };
 
@@ -135,47 +129,46 @@ impl<S: State, W: Widget<S>> Widget<S> for Button<S, W> {
         let mut update = Update::empty();
         let old_state = self.state;
 
-        if old_state.about_to_be_inactive {
-            self.state.about_to_be_inactive = false;
-            self.state.active = false;
-        }
-
+        // check for hovering
         if let Some(cursor) = info.cursor_pos {
-            self.state.hover = cursor.x as f32 >= layout.layout.location.x
+            if cursor.x as f32 >= layout.layout.location.x
                 && cursor.x as f32 <= layout.layout.location.x + layout.layout.size.width
                 && cursor.y as f32 >= layout.layout.location.y
-                && cursor.y as f32 <= layout.layout.location.y + layout.layout.size.height;
-        } else {
-            self.state.hover = false;
-        }
-
-        if self.state.hover {
-            for &(_, btn, state) in &info.buttons {
-                if MouseButton::Left == btn {
-                    match state {
-                        ElementState::Pressed => {
-                            self.state.active = true;
-                        },
-
-                        ElementState::Released => {
-                            self.state.active = false;
-                        },
-                    }
-                } else {
-                    self.state.active = false;
+                && cursor.y as f32 <= layout.layout.location.y + layout.layout.size.height
+            {
+                // fixes state going to hover if the button is pressed but not yet released
+                if self.state != ButtonState::Pressed {
+                    self.state = ButtonState::Hovered;
                 }
+
+                // check for click
+                for (_, btn, el) in &info.buttons {
+                    if *btn == MouseButton::Left {
+                        match el {
+                            ElementState::Pressed => {
+                                self.state = ButtonState::Pressed;
+                            },
+
+                            // actually fire the event if the button is released
+                            ElementState::Released => {
+                                self.state = ButtonState::Released;
+                                update |= (self.on_pressed)(state);
+                            },
+                        }
+                    }
+                }
+            } else {
+                // cursor not in area, so button is idle
+                self.state = ButtonState::Idle;
             }
         } else {
-            self.state.active = false;
+            // cursor is not in window, so button is idle
+            self.state = ButtonState::Idle;
         }
 
-        if self.state.active {
-            update.insert((self.on_pressed)(state));
-            self.state.about_to_be_inactive = true;
-        }
-
-        if self.state != old_state {
-            update.insert(Update::DRAW);
+        // update on state change, due to re-coloring
+        if old_state != self.state {
+            update |= Update::DRAW;
         }
 
         update
@@ -188,11 +181,14 @@ impl<S: State, W: Widget<S>> Widget<S> for Button<S, W> {
 
 /// The internal state of the button.
 #[derive(Copy, Clone, Eq, PartialEq, Debug)]
-pub struct ButtonState {
-    /// If the button is hovered on.
-    pub hover: bool,
-    /// If the button is active (pressed).
-    pub active: bool,
-    // todo: find a better way of handling click issue
-    about_to_be_inactive: bool,
+pub enum ButtonState {
+    /// The button is idling (inactive).
+    Idle,
+    /// The cursor is hovering over the button.
+    Hovered,
+    /// The cursor is hovering over the button and the left click button is pressed.
+    Pressed,
+    /// The cursor is hovering over the button and the left click button is released.
+    /// This is when the `on_pressed` function is called.
+    Released,
 }
