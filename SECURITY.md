@@ -6,4 +6,5 @@ Latest (master branch)
 
 ## Reporting a Vulnerability
 
-To report security vurnerabilities, you can send an E-Mail to mp@ypon.com, though it may take a while until we can respond.
+We currently don't have a real security vurnerability reporting technique, but you are welcome
+to [open an issue](https://github.com/maycoon-ui/maycoon/issues).
