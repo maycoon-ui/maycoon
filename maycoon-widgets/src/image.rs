@@ -54,7 +54,7 @@ impl<S: State> Widget<S> for Image<S> {
         let image = self.image.get_ref(state);
 
         scene.draw_image(
-            &image,
+            image,
             Affine::translate(Vec2::new(
                 layout_node.layout.location.x as f64,
                 layout_node.layout.location.y as f64,

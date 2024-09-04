@@ -53,7 +53,7 @@ impl<S: State> Text<S> {
 
     /// Set the font of the text.
     pub fn with_font(mut self, font: impl Into<Val<S, String>>) -> Self {
-        self.font = font.into().map(|s| Some(s));
+        self.font = font.into().map(Some);
         self
     }
 
