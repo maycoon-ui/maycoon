@@ -11,6 +11,9 @@ use maycoon_theme::theme::Theme;
 use nalgebra::Vector2;
 
 /// An image widget. Pretty self-explanatory.
+///
+/// ### Theming
+/// The widget itself only draws the underlying image, so theming is useless.
 pub struct Image<S: State> {
     image: Val<S, peniko::Image>,
     style: Val<S, LayoutStyle>,

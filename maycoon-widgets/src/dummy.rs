@@ -8,6 +8,9 @@ use maycoon_theme::id::WidgetId;
 use maycoon_theme::theme::Theme;
 
 /// A dummy Widget that does nothing. Useful for testing.
+///
+/// ### Theming
+/// It's a dummy widget.
 pub struct DummyWidget;
 
 impl<S: State> Widget<S> for DummyWidget {

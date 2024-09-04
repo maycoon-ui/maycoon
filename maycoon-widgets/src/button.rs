@@ -11,7 +11,13 @@ use maycoon_core::window::{ElementState, MouseButton};
 use maycoon_theme::id::WidgetId;
 use maycoon_theme::theme::Theme;
 
-/// A generic Button widget to make an interactive button-style widget with a child.
+/// An interactive area with a child widget that runs a closure when pressed.
+///
+/// ### Theming
+/// Styling buttons require following properties:
+/// - `color_pressed` -  The color of the button when pressed.
+/// - `color_idle` - The color of the button when not pressed and not hovered (idling).
+/// - `color_hovered` - The color of the button when hovered on.
 pub struct Button<S: State, W: Widget<S> + 'static> {
     child: Val<S, W>,
     state: ButtonState,
@@ -63,10 +69,10 @@ impl<S: State, W: Widget<S>> Widget<S> for Button<S, W> {
     ) {
         let brush = if let Some(style) = theme.of(self.widget_id()) {
             match self.state {
-                ButtonState::Pressed => style.get_brush("color_pressed").unwrap(),
-                ButtonState::Hovered => style.get_brush("color_hovered").unwrap(),
-                ButtonState::Idle => style.get_brush("color_idle").unwrap(),
-                ButtonState::Released => style.get_brush("color_hovered").unwrap(),
+                ButtonState::Idle => Brush::Solid(style.get_color("color_idle").unwrap()),
+                ButtonState::Hovered => Brush::Solid(style.get_color("color_hovered").unwrap()),
+                ButtonState::Pressed => Brush::Solid(style.get_color("color_pressed").unwrap()),
+                ButtonState::Released => Brush::Solid(style.get_color("color_hovered").unwrap()),
             }
         } else {
             Brush::Solid(match self.state {

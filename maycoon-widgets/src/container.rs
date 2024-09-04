@@ -10,6 +10,9 @@ use maycoon_theme::theme::Theme;
 /// A container widget that can display and layout multiple child widgets.
 ///
 /// The layout of the children (row, column, etc.) depends on the [LayoutStyle] of the container.
+///
+/// ### Theming
+/// The container widget doesn't actually draw anything but the child widgets, so theming is useless.
 pub struct Container<S: State> {
     style: Val<S, LayoutStyle>,
     children: Vec<Val<S, Box<dyn Widget<S>>>>,

@@ -30,7 +30,22 @@ impl Theme for CelesteTheme {
                     ("color".to_string(), StyleVal::Color(Color::BLACK)),
                     ("color_invert".to_string(), StyleVal::Color(Color::WHITE)),
                 ])),
-                // TODO: add button style
+
+                "Button" => Some(Style::from_values([
+                    (
+                        "color_idle".to_string(),
+                        StyleVal::Color(Color::rgb8(150, 170, 250)),
+                    ),
+                    (
+                        "color_pressed".to_string(),
+                        StyleVal::Color(Color::rgb8(130, 150, 230)),
+                    ),
+                    (
+                        "color_hovered".to_string(),
+                        StyleVal::Color(Color::rgb8(140, 160, 240)),
+                    ),
+                ])),
+
                 _ => None,
             },
             _ => None,
@@ -42,10 +57,10 @@ impl Theme for CelesteTheme {
             DefaultTextStyles::new(Color::BLACK, Color::WHITE_SMOKE),
             DefaultContainerStyles::new(Color::ANTIQUE_WHITE, Color::WHITE),
             DefaultInteractiveStyles::new(
-                Color::rgb8(90, 90, 200),
-                Color::rgb8(120, 120, 230),
-                Color::rgb8(110, 110, 210),
-                Color::rgb8(60, 60, 60),
+                Color::rgb8(130, 150, 230),
+                Color::rgb8(150, 170, 250),
+                Color::rgb8(140, 160, 240),
+                Color::rgb8(110, 110, 110),
             ),
         )
     }
