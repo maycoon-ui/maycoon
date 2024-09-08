@@ -16,6 +16,8 @@ use nalgebra::Vector2;
 
 /// Displays the given text with optional font, size and hinting.
 ///
+/// See the [hello-world](https://github.com/maycoon-ui/maycoon/blob/master/examples/hello-world/src/main.rs) example for how to use it in practice.
+///
 /// ### Theming
 /// You can style the text with the following properties:
 /// - `color` - The color of the text.
