@@ -11,6 +11,8 @@ use maycoon_theme::theme::Theme;
 ///
 /// The layout of the children (row, column, etc.) depends on the [LayoutStyle] of the container.
 ///
+/// See the [counter](https://github.com/maycoon-ui/maycoon/blob/master/examples/counter/src/main.rs) example for how to use it in practice.
+///
 /// ### Theming
 /// The container widget doesn't actually draw anything but the child widgets, so theming is useless.
 pub struct Container<S: State> {
