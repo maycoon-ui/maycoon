@@ -13,8 +13,11 @@ pub mod button;
 /// Contains the [container::Container] widget.
 pub mod container;
 
-/// Contains the [dummy::Dummy] widget.
+/// Contains the [dummy::DummyWidget] widget.
 pub mod dummy;
 
 /// Contains the [image::Image] widget.
 pub mod image;
+
+/// Contains the [checkbox::Checkbox] widget.
+pub mod checkbox;
