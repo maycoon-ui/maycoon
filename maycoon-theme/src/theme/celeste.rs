@@ -46,6 +46,17 @@ impl Theme for CelesteTheme {
                     ),
                 ])),
 
+                "Checkbox" => Some(Style::from_values([
+                    (
+                        "color_checked".to_string(),
+                        StyleVal::Color(Color::rgb8(130, 130, 230)),
+                    ),
+                    (
+                        "color_unchecked".to_string(),
+                        StyleVal::Color(Color::rgb8(170, 170, 250)),
+                    ),
+                ])),
+
                 _ => None,
             },
             _ => None,
