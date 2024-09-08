@@ -94,6 +94,10 @@ impl<S: State> Widget<S> for Container<S> {
     fn update(&mut self, layout: &LayoutNode, state: &mut S, info: &AppInfo) -> Update {
         self.style.invalidate();
 
+        for child in &mut self.children {
+            child.invalidate();
+        }
+
         let mut update = Update::empty();
 
         for (i, child) in self.children.iter_mut().enumerate() {
