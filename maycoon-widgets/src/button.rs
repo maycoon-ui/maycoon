@@ -13,8 +13,10 @@ use maycoon_theme::theme::Theme;
 
 /// An interactive area with a child widget that runs a closure when pressed.
 ///
+/// See the [counter](https://github.com/maycoon-ui/maycoon/blob/master/examples/counter/src/main.rs) example for how to use it in practice.
+///
 /// ### Theming
-/// Styling buttons require following properties:
+/// Styling the button require following properties:
 /// - `color_pressed` -  The color of the button when pressed.
 /// - `color_idle` - The color of the button when not pressed and not hovered (idling).
 /// - `color_hovered` - The color of the button when hovered on.
@@ -132,6 +134,9 @@ impl<S: State, W: Widget<S>> Widget<S> for Button<S, W> {
     }
 
     fn update(&mut self, layout: &LayoutNode, state: &mut S, info: &AppInfo) -> Update {
+        self.layout_style.invalidate();
+        self.child.invalidate();
+
         let mut update = Update::empty();
         let old_state = self.state;
 
