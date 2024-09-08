@@ -1,6 +1,11 @@
 /// A trait to define the global state of an application.
 pub trait State: 'static {}
 
+/// An empty state. Useful for testing and examples.
+pub struct EmptyState;
+
+impl State for EmptyState {}
+
 /// A value that's either dependent on the state or independent.
 ///
 /// Use [Val::new_state] or the `val!()` macro from the `maycoon-macros` crate to create a new state dependent value.
