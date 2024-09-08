@@ -12,6 +12,8 @@ use nalgebra::Vector2;
 
 /// An image widget. Pretty self-explanatory.
 ///
+/// See the [image](https://github.com/maycoon-ui/maycoon/blob/master/examples/image/src/main.rs) example for how to use it in practice.
+///
 /// ### Theming
 /// The widget itself only draws the underlying image, so theming is useless.
 pub struct Image<S: State> {
