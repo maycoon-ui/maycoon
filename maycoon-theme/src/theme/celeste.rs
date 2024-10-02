@@ -57,6 +57,17 @@ impl Theme for CelesteTheme {
                     ),
                 ])),
 
+                "Slider" => Some(Style::from_values([
+                    (
+                        "color".to_string(),
+                        StyleVal::Color(Color::rgb8(130, 130, 230)),
+                    ),
+                    (
+                        "color_ball".to_string(),
+                        StyleVal::Color(Color::rgb8(170, 170, 250)),
+                    ),
+                ])),
+
                 _ => None,
             },
             _ => None,

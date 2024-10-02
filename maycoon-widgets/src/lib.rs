@@ -21,3 +21,6 @@ pub mod image;
 
 /// Contains the [checkbox::Checkbox] widget.
 pub mod checkbox;
+
+/// Contains the [slider::Slider] widget.
+pub mod slider;
