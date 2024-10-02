@@ -19,7 +19,7 @@ fn main() {
         MyState { checked: false },
         Container::new(vec![
             Val::new_val(Box::new(
-                Checkbox::new(val!(|state: &MyState| state.checked)).with_on_changed(|state| {
+                Checkbox::new(val!(|state: &MyState| state.checked)).with_on_change(|state| {
                     state.checked = !state.checked;
                     Update::DRAW
                 }),
