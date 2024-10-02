@@ -22,7 +22,7 @@ use nalgebra::Vector2;
 /// - `color_checked` - The color of the checkbox, when it's checked (inner value is true).
 pub struct Checkbox<S: State> {
     layout_style: Val<S, LayoutStyle>,
-    on_changed: Box<dyn FnMut(&mut S) -> Update>,
+    on_change: Box<dyn FnMut(&mut S) -> Update>,
     value: Val<S, bool>,
 }
 
@@ -42,7 +42,7 @@ impl<S: State> Checkbox<S> {
                 },
                 ..Default::default()
             }),
-            on_changed: Box::new(|_| Update::empty()),
+            on_change: Box::new(|_| Update::empty()),
             value,
         }
     }
@@ -50,8 +50,8 @@ impl<S: State> Checkbox<S> {
     /// Sets the function to be called when the checkbox is clicked/changed.
     ///
     /// You should mutate the inner value of the checkbox using the provided state.
-    pub fn with_on_changed(mut self, on_changed: impl FnMut(&mut S) -> Update + 'static) -> Self {
-        self.on_changed = Box::new(on_changed);
+    pub fn with_on_change(mut self, on_change: impl FnMut(&mut S) -> Update + 'static) -> Self {
+        self.on_change = Box::new(on_change);
         self
     }
 
@@ -155,7 +155,7 @@ impl<S: State> Widget<S> for Checkbox<S> {
                     match btn {
                         MouseButton::Left => {
                             if *el == ElementState::Released {
-                                update |= (self.on_changed)(state);
+                                update |= (self.on_change)(state);
                             }
                         },
 
