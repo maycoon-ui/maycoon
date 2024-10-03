@@ -1,16 +1,12 @@
 [package]
 name = "maycoon-theme"
-version = "0.1.0"
-edition = "2021"
 description = "Themes & Styling for Maycoon UI => See the `maycoon` crate for more."
-readme = "README.md"
-license = "MIT OR Apache-2.0"
-resolver = "2"
-authors = ["Mikail Plotzky <mp@ypon.com>", "Maycoon Contributors"]
-categories = ["gui", "graphics", "rendering", "virtualization", "rendering::engine"]
-keywords = ["ui", "styling", "theme", "maycoon", "user-interface"]
-repository = "https://github.com/maycoon-ui/maycoon"
-homepage = "https://maycoon-ui.github.io"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+categories.workspace = true
+keywords.workspace = true
 
 [dependencies]
 dashmap = { workspace = true }
