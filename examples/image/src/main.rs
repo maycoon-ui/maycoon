@@ -9,7 +9,7 @@ use maycoon::widgets::image::{Image, ImageData};
 struct MyState;
 
 fn main() {
-    let image_data = image::open("image/pelican.jpg")
+    let image_data = image::open("../image/pelican.jpg")
         .unwrap()
         .into_rgba8()
         .to_vec();
