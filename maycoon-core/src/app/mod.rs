@@ -1,7 +1,6 @@
 use peniko::Font;
 use winit::dpi::{LogicalPosition, LogicalSize, Position, Size};
 use winit::event_loop::EventLoopBuilder;
-use winit::platform::windows::WindowAttributesExtWindows;
 use winit::window::WindowAttributes;
 
 use maycoon_theme::theme::Theme;
@@ -72,7 +71,6 @@ impl<T: Theme> MayApp<T> {
             .with_blur(self.config.window.blur)
             .with_decorations(self.config.window.decorations)
             .with_window_icon(self.config.window.icon.clone())
-            .with_corner_preference(self.config.window.corners)
             .with_content_protected(self.config.window.content_protected)
             .with_window_level(self.config.window.level)
             .with_active(self.config.window.active)

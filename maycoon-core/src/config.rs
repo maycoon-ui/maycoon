@@ -65,8 +65,6 @@ pub struct WindowConfig {
     pub buttons: WindowButtons,
     /// If the window should be decorated (have borders).
     pub decorations: bool,
-    /// If the corners should be e.g. rounded. Only supported on Windows 11.
-    pub corners: CornerPreference,
     /// The resize increments of the window. Not supported everywhere.
     pub resize_increments: Option<Vector2<f64>>,
     /// Prevents window capturing by some apps (not all though).
@@ -97,7 +95,6 @@ impl Default for WindowConfig {
             active: true,
             buttons: WindowButtons::all(),
             decorations: true,
-            corners: Default::default(),
             resize_increments: None,
             content_protected: false,
             icon: None,
