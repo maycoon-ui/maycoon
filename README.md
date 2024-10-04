@@ -2,6 +2,7 @@
 
 ![Crates.io Version](https://img.shields.io/crates/v/maycoon)
 ![Crates.io License](https://img.shields.io/crates/l/maycoon)
+![docs.rs](https://img.shields.io/docsrs/maycoon)
 
 **Modern and Innovative UI Framework written in Rust**
 
