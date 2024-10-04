@@ -26,6 +26,7 @@ pub struct Slider<S: State> {
 }
 
 impl<S: State> Slider<S> {
+    /// Create a new Slider widget from a value (should be state bound) and an `on_change` callback.
     pub fn new(
         value: impl Into<Val<S, f32>>,
         on_change: impl FnMut(&mut S, f32) -> Update + 'static,
