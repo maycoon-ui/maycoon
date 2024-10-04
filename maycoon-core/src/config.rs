@@ -1,7 +1,6 @@
 use nalgebra::{Point2, Vector2};
 pub use vello::AaConfig;
 pub use wgpu_types::PresentMode;
-pub use winit::platform::windows::CornerPreference;
 pub use winit::window::{
     BadIcon, Cursor, CursorIcon, CustomCursor, Icon as WindowIcon, WindowButtons, WindowLevel,
 };
