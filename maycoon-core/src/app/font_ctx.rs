@@ -1,5 +1,3 @@
-use std::sync::Arc;
-
 use dashmap::DashMap;
 use peniko::{Blob, Font};
 
@@ -34,13 +32,17 @@ impl FontContext {
 
 impl Default for FontContext {
     fn default() -> Self {
+        // TODO: better way to get default font
+        let default_font = font_kit::source::SystemSource::new()
+            .select_by_postscript_name("ArialMT")
+            .expect("Failed to select default font")
+            .load()
+            .expect("Failed to load default font")
+            .copy_font_data()
+            .expect("Failed to copy default font");
+
         Self {
-            default: Font::new(
-                Blob::new(Arc::new(include_bytes!(
-                    "../../../assets/data/Roboto-Regular.ttf"
-                ))),
-                0,
-            ),
+            default: Font::new(Blob::new(default_font), 0),
             fonts: DashMap::new(),
         }
     }

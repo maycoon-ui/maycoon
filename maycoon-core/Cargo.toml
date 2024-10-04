@@ -15,6 +15,7 @@ wgpu-types = "0.20.0"
 vello = "0.2.1"
 taffy = "0.5.2"
 bitflags = "2.6.0"
+font-kit = "0.14.2"
 maycoon-theme = { workspace = true }
 nalgebra = { workspace = true }
 dashmap = { workspace = true }
