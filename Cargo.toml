@@ -31,10 +31,10 @@ categories.workspace = true
 keywords.workspace = true
 
 [dependencies]
-maycoon-core = { path = "maycoon-core" }
-maycoon-theme = { path = "maycoon-theme" }
-maycoon-widgets = { path = "maycoon-widgets" }
-maycoon-macros = { path = "maycoon-macros", optional = true }
+maycoon-core = { workspace = true }
+maycoon-theme = { workspace = true }
+maycoon-widgets = { workspace = true }
+maycoon-macros = { workspace = true, optional = true }
 peniko = { workspace = true }
 nalgebra = { workspace = true }
 
