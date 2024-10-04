@@ -4,7 +4,7 @@ use std::fmt::{Debug, Display, Formatter};
 /// It contains a namespace, which should be the crate name and the id of the widget.
 ///
 /// ```
-/// use may_theme::id::WidgetId;
+/// use maycoon_theme::id::WidgetId;
 ///
 /// WidgetId::new("fancy_text_widget", "FancyText");
 /// ```
@@ -20,7 +20,7 @@ impl WidgetId {
     ///
     /// Example:
     /// ```
-    /// let id = may_theme::id::WidgetId::new("my_crate", "MyWidget");
+    /// let id = maycoon_theme::id::WidgetId::new("my_crate", "MyWidget");
     /// ```
     pub fn new(namespace: impl ToString, id: impl ToString) -> Self {
         Self {
