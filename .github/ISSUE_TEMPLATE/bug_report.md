@@ -26,6 +26,7 @@ If applicable, add screenshots to help explain your problem.
 **Platform:**
  - OS: [e.g. Windows 11]
  - Cargo (`cargo --version`): [e.g. `cargo 1.81.0-nightly`]
+ - Crate Version: [e.g. `maycoon 0.1.0`]
 
 **Additional context**
 Add any other context about the problem here.
