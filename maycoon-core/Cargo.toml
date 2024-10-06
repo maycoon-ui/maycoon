@@ -11,8 +11,8 @@ keywords.workspace = true
 [dependencies]
 winit = "0.30.5"
 futures-lite = "2.3.0"
-wgpu-types = "0.20.0"
-vello = "0.2.1"
+wgpu-types = "22.0.0"
+vello = "0.3.0"
 taffy = "0.5.2"
 bitflags = "2.6.0"
 font-kit = "0.14.2"

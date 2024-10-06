@@ -2,13 +2,12 @@ use maycoon_core::app::info::AppInfo;
 use maycoon_core::app::update::Update;
 use maycoon_core::layout::{Dimension, LayoutNode, LayoutStyle, StyleNode};
 use maycoon_core::state::{State, Val};
-use maycoon_core::vg::glyph::Glyph;
 use maycoon_core::vg::peniko::{Brush, Fill};
 use maycoon_core::vg::skrifa::instance::Size;
 use maycoon_core::vg::skrifa::raw::FileRef;
 use maycoon_core::vg::skrifa::setting::VariationSetting;
 use maycoon_core::vg::skrifa::MetadataProvider;
-use maycoon_core::vg::{peniko, Scene};
+use maycoon_core::vg::{peniko, Glyph, Scene};
 use maycoon_core::widget::Widget;
 use maycoon_theme::id::WidgetId;
 use maycoon_theme::theme::Theme;
@@ -147,7 +146,7 @@ impl<S: State> Widget<S> for Text<S> {
                     let x = pen_x;
                     pen_x += advance;
                     Some(Glyph {
-                        id: gid.to_u16() as u32,
+                        id: gid.to_u32(),
                         x,
                         y: pen_y,
                     })
