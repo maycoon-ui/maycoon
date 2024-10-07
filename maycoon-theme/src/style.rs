@@ -1,34 +1,34 @@
-use dashmap::DashMap;
+use indexmap::IndexMap;
 use peniko::{Brush, Color, Gradient};
 
 /// Styling map for defining widget appearance.
 #[derive(Clone, Debug)]
 pub struct Style {
-    map: DashMap<String, StyleVal>,
+    map: IndexMap<String, StyleVal>,
 }
 
 impl Style {
     /// Create a new empty style.
     pub fn new() -> Self {
         Self {
-            map: DashMap::with_capacity(16),
+            map: IndexMap::with_capacity(16),
         }
     }
 
     /// Create a style from an array of strings and style values.
     pub fn from_values(values: impl IntoIterator<Item = (String, StyleVal)>) -> Self {
         Self {
-            map: DashMap::from_iter(values),
+            map: IndexMap::from_iter(values),
         }
     }
 
     /// Removes the style value from the map with the give name.
     pub fn remove(&mut self, name: impl ToString) {
-        self.map.remove(&name.to_string());
+        self.map.swap_remove(&name.to_string());
     }
 
     /// Insert a style value with the given name into the style map.
-    pub fn with_value(self, name: impl ToString, value: StyleVal) -> Self {
+    pub fn with_value(mut self, name: impl ToString, value: StyleVal) -> Self {
         self.map.insert(name.to_string(), value);
         self
     }
@@ -82,7 +82,7 @@ impl Style {
     /// Get a color style value by name. Returns [None] if the value name does not exist.
     pub fn get_color(&self, name: impl ToString) -> Option<Color> {
         if let Some(val) = self.map.get(&name.to_string()) {
-            match val.value() {
+            match val {
                 StyleVal::Color(color) => Some(*color),
                 _ => None,
             }
@@ -94,7 +94,7 @@ impl Style {
     /// Get a gradient style value by name. Returns [None] if the value name does not exist.
     pub fn get_gradient(&self, name: impl ToString) -> Option<Gradient> {
         if let Some(val) = self.map.get(&name.to_string()) {
-            match val.value() {
+            match val {
                 StyleVal::Gradient(gradient) => Some(gradient.clone()),
                 _ => None,
             }
@@ -106,7 +106,7 @@ impl Style {
     /// Get a brush style value by name. Returns [None] if the value name does not exist.
     pub fn get_brush(&self, name: impl ToString) -> Option<Brush> {
         if let Some(val) = self.map.get(&name.to_string()) {
-            match val.value() {
+            match val {
                 StyleVal::Brush(brush) => Some(brush.clone()),
                 _ => None,
             }
@@ -118,7 +118,7 @@ impl Style {
     /// Get a float style value by name. Returns [None] if the value name does not exist.
     pub fn get_float(&self, name: impl ToString) -> Option<f32> {
         if let Some(val) = self.map.get(&name.to_string()) {
-            match val.value() {
+            match val {
                 StyleVal::Float(float) => Some(*float),
                 _ => None,
             }
@@ -130,7 +130,7 @@ impl Style {
     /// Get an int style value by name. Returns [None] if the value name does not exist.
     pub fn get_int(&self, name: impl ToString) -> Option<i32> {
         if let Some(val) = self.map.get(&name.to_string()) {
-            match val.value() {
+            match val {
                 StyleVal::Int(int) => Some(*int),
                 _ => None,
             }
@@ -142,7 +142,7 @@ impl Style {
     /// Get an unsized int style value by name. Returns [None] if the value name does not exist.
     pub fn get_uint(&self, name: impl ToString) -> Option<u32> {
         if let Some(val) = self.map.get(&name.to_string()) {
-            match val.value() {
+            match val {
                 StyleVal::UInt(uint) => Some(*uint),
                 _ => None,
             }
@@ -154,7 +154,7 @@ impl Style {
     /// Get a bool style value by name. Returns [None] if the value name does not exist.
     pub fn get_bool(&self, name: impl ToString) -> Option<bool> {
         if let Some(val) = self.map.get(&name.to_string()) {
-            match val.value() {
+            match val {
                 StyleVal::Bool(bool) => Some(*bool),
                 _ => None,
             }

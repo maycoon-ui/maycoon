@@ -18,7 +18,7 @@ bitflags = "2.6.0"
 font-kit = "0.14.2"
 maycoon-theme = { workspace = true }
 nalgebra = { workspace = true }
-dashmap = { workspace = true }
+indexmap = { workspace = true }
 peniko = { workspace = true }
 
 [features]

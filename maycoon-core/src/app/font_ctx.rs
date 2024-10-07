@@ -1,11 +1,11 @@
-use dashmap::DashMap;
+use indexmap::IndexMap;
 use peniko::{Blob, Font};
 
 /// The font context. Contains font data.
 #[derive(Clone, Debug)]
 pub struct FontContext {
     default: Font,
-    fonts: DashMap<String, Font>,
+    fonts: IndexMap<String, Font>,
 }
 
 impl FontContext {
@@ -21,7 +21,7 @@ impl FontContext {
 
     /// Removes a font. Returns [None] if the font does not exist.
     pub fn remove(&mut self, name: impl ToString) -> Option<()> {
-        self.fonts.remove(&name.to_string()).map(|_| ())
+        self.fonts.swap_remove(&name.to_string()).map(|_| ())
     }
 
     /// Returns the default font. [Roboto](https://fonts.google.com/specimen/Roboto) by default.
@@ -43,7 +43,7 @@ impl Default for FontContext {
 
         Self {
             default: Font::new(Blob::new(default_font), 0),
-            fonts: DashMap::new(),
+            fonts: IndexMap::new(),
         }
     }
 }

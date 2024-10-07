@@ -9,5 +9,5 @@ categories.workspace = true
 keywords.workspace = true
 
 [dependencies]
-dashmap = { workspace = true }
+indexmap = { workspace = true }
 peniko = { workspace = true }
