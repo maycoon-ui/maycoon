@@ -14,6 +14,25 @@ impl FontContext {
         self.fonts.insert(name.to_string(), font);
     }
 
+    /// Insert a system font with the given name which is loaded via the postscript name.
+    pub fn insert_system_font(
+        &mut self,
+        name: impl ToString,
+        postscript_name: impl ToString,
+    ) -> Option<()> {
+        let font = font_kit::source::SystemSource::new()
+            .select_by_postscript_name(postscript_name.to_string().as_str())
+            .ok()?
+            .load()
+            .ok()?
+            .copy_font_data()?;
+
+        self.fonts
+            .insert(name.to_string(), Font::new(Blob::new(font), 0))?;
+
+        Some(())
+    }
+
     /// Get a font by a specified name. Returns [None] if the font could not be found.
     pub fn get(&self, name: impl ToString) -> Option<Font> {
         self.fonts.get(&name.to_string()).map(|el| el.clone())
