@@ -47,6 +47,21 @@ impl<S: State> Slider<S> {
             dragging: false,
         }
     }
+
+    /// Sets the layout style of the slider and returns itself.
+    pub fn with_value(mut self, value: impl Into<Val<S, f32>>) -> Self {
+        self.value = value.into();
+        self
+    }
+
+    /// Sets the function to be called when the slider is clicked/changed.
+    pub fn with_on_change(
+        mut self,
+        on_change: impl FnMut(&mut S, f32) -> Update + 'static,
+    ) -> Self {
+        self.on_change = Box::new(on_change);
+        self
+    }
 }
 
 impl<S: State> Widget<S> for Slider<S> {
