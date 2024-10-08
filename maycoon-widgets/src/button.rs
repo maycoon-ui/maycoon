@@ -58,6 +58,12 @@ impl<S: State, W: Widget<S> + 'static> Button<S, W> {
         self.layout_style = layout_style.into();
         self
     }
+
+    /// Sets the child widget of the button.
+    pub fn with_child(mut self, child: impl Into<Val<S, W>>) -> Self {
+        self.child = child.into();
+        self
+    }
 }
 
 impl<S: State, W: Widget<S>> Widget<S> for Button<S, W> {
