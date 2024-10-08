@@ -42,6 +42,19 @@ impl<S: State> Image<S> {
         self.style = style.into();
         self
     }
+
+    /// Set the image.
+    pub fn with_image(mut self, image: impl Into<Val<S, ImageData>>) -> Self {
+        self.image = image.into().map(|data| {
+            peniko::Image::new(
+                Blob::from(data.image),
+                data.format,
+                data.size.x,
+                data.size.y,
+            )
+        });
+        self
+    }
 }
 
 impl<S: State> Widget<S> for Image<S> {
