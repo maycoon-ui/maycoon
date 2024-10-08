@@ -26,7 +26,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Rename crates and rework state value
 - Make may-macro optional
 - Add macros feature
-- Moved examples to seperate workspace
+- Moved examples to separate workspace
 - Format
 - Format
 - Update rustfmt.toml
