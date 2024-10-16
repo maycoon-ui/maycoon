@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.1](https://github.com/maycoon-ui/maycoon/compare/maycoon-widgets-v0.1.0...maycoon-widgets-v0.1.1) - 2024-10-16
+
+### Other
+
+- Add canvas widget
+- Add `with_value` and `with_on_change` method
+- Add `with_image` method
+- Add `with_child` method
+- Update to Vello 0.3
+
 ## [0.1.0](https://github.com/maycoon-ui/maycoon/releases/tag/maycoon-widgets-v0.1.0) - 2024-10-04
 
 ### Other
