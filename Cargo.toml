@@ -42,6 +42,7 @@ nalgebra = { workspace = true }
 default = ["macros"]
 macros = ["maycoon-macros"]
 vg = ["maycoon-core/vg"]
+canvas = ["maycoon-widgets/canvas"]
 
 [lib]
 name = "maycoon"
