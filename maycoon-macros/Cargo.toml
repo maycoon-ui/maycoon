@@ -9,10 +9,9 @@ categories.workspace = true
 keywords.workspace = true
 
 [dependencies]
-maycoon-core = { workspace = true }
-syn = "2.0.76"
-quote = "1.0.37"
-proc-macro2 = "1.0.86"
+syn = "2.0.93"
+quote = "1.0.38"
+proc-macro2 = "1.0.92"
 
 [lib]
 proc-macro = true
