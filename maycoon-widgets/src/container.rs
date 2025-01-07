@@ -1,3 +1,4 @@
+use crate::ext::{WidgetChildrenExt, WidgetLayoutExt};
 use maycoon_core::app::info::AppInfo;
 use maycoon_core::app::update::Update;
 use maycoon_core::layout::{LayoutNode, LayoutStyle, StyleNode};
@@ -29,12 +30,6 @@ impl<S: State> Container<S> {
         }
     }
 
-    /// Sets the layout style of the container.
-    pub fn with_layout_style(mut self, layout_style: impl Into<Val<S, LayoutStyle>>) -> Self {
-        self.style = layout_style.into();
-        self
-    }
-
     /// Adds the given children to the container.
     pub fn add_children(&mut self, children: Vec<Val<S, Box<dyn Widget<S>>>>) {
         self.children.extend(children);
@@ -55,6 +50,29 @@ impl<S: State> Container<S> {
     pub fn with_child(mut self, child: impl Into<Val<S, Box<dyn Widget<S>>>>) -> Self {
         self.add_child(child);
         self
+    }
+}
+
+impl<S: State> WidgetChildrenExt<S> for Container<S> {
+    fn set_children(&mut self, children: Vec<Val<S, impl Widget<S> + 'static>>) {
+        self.children = children
+            .into_iter()
+            .map(|val| val.map(|w| Box::new(w) as Box<dyn Widget<S> + 'static>))
+            .collect::<Vec<Val<S, Box<dyn Widget<S> + 'static>>>>();
+    }
+
+    fn add_child<W: Widget<S> + 'static>(&mut self, child: impl Into<Val<S, W>>) {
+        self.children.push(
+            child
+                .into()
+                .map(|w| Box::new(w) as Box<dyn Widget<S> + 'static>),
+        )
+    }
+}
+
+impl<S: State> WidgetLayoutExt<S> for Container<S> {
+    fn set_layout_style(&mut self, layout_style: impl Into<Val<S, LayoutStyle>>) {
+        self.style = layout_style.into();
     }
 }
 

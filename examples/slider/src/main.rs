@@ -6,6 +6,7 @@ use maycoon::core::state::Val;
 use maycoon::macros::{val, State};
 use maycoon::math::Vector2;
 use maycoon::widgets::container::Container;
+use maycoon::widgets::ext::WidgetLayoutExt;
 use maycoon::widgets::slider::Slider;
 use maycoon::widgets::text::Text;
 

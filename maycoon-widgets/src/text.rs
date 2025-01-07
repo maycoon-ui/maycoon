@@ -1,3 +1,4 @@
+use crate::ext::WidgetLayoutExt;
 use maycoon_core::app::info::AppInfo;
 use maycoon_core::app::update::Update;
 use maycoon_core::layout::{Dimension, LayoutNode, LayoutStyle, StyleNode};
@@ -63,11 +64,11 @@ impl<S: State> Text<S> {
         self.font_size = size.into();
         self
     }
+}
 
-    /// Set the layout style of the text.
-    pub fn with_layout(mut self, style: impl Into<Val<S, LayoutStyle>>) -> Self {
-        self.style = style.into();
-        self
+impl<S: State> WidgetLayoutExt<S> for Text<S> {
+    fn set_layout_style(&mut self, layout_style: impl Into<Val<S, LayoutStyle>>) {
+        self.style = layout_style.into();
     }
 }
 

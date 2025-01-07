@@ -1,3 +1,4 @@
+use crate::ext::WidgetLayoutExt;
 use maycoon_core::app::info::AppInfo;
 use maycoon_core::app::update::Update;
 use maycoon_core::layout;
@@ -61,6 +62,12 @@ impl<S: State> Slider<S> {
     ) -> Self {
         self.on_change = Box::new(on_change);
         self
+    }
+}
+
+impl<S: State> WidgetLayoutExt<S> for Slider<S> {
+    fn set_layout_style(&mut self, layout_style: impl Into<Val<S, LayoutStyle>>) {
+        self.layout_style = layout_style.into();
     }
 }
 

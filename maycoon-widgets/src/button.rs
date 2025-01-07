@@ -1,3 +1,4 @@
+use crate::ext::{WidgetChildExt, WidgetLayoutExt};
 use maycoon_core::app::info::AppInfo;
 use maycoon_core::app::update::Update;
 use maycoon_core::layout;
@@ -52,17 +53,17 @@ impl<S: State, W: Widget<S> + 'static> Button<S, W> {
         self.on_pressed = Box::new(on_pressed);
         self
     }
+}
 
-    /// Sets the layout style of the button.
-    pub fn with_layout_style(mut self, layout_style: impl Into<Val<S, LayoutStyle>>) -> Self {
-        self.layout_style = layout_style.into();
-        self
-    }
-
-    /// Sets the child widget of the button.
-    pub fn with_child(mut self, child: impl Into<Val<S, W>>) -> Self {
+impl<S: State, W: Widget<S>> WidgetChildExt<S, W> for Button<S, W> {
+    fn set_child(&mut self, child: impl Into<Val<S, W>>) {
         self.child = child.into();
-        self
+    }
+}
+
+impl<S: State, W: Widget<S>> WidgetLayoutExt<S> for Button<S, W> {
+    fn set_layout_style(&mut self, layout_style: impl Into<Val<S, LayoutStyle>>) {
+        self.layout_style = layout_style.into();
     }
 }
 

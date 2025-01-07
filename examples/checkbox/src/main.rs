@@ -7,6 +7,7 @@ use maycoon::macros::{val, State};
 use maycoon::math::Vector2;
 use maycoon::widgets::checkbox::Checkbox;
 use maycoon::widgets::container::Container;
+use maycoon::widgets::ext::WidgetLayoutExt;
 use maycoon::widgets::text::Text;
 
 #[derive(State)]

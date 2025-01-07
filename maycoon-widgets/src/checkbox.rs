@@ -1,3 +1,4 @@
+use crate::ext::WidgetLayoutExt;
 use maycoon_core::app::info::AppInfo;
 use maycoon_core::app::update::Update;
 use maycoon_core::layout;
@@ -55,18 +56,18 @@ impl<S: State> Checkbox<S> {
         self
     }
 
-    /// Sets the layout style of the checkbox and returns itself.
-    pub fn with_layout_style(mut self, layout_style: impl Into<Val<S, LayoutStyle>>) -> Self {
-        self.layout_style = layout_style.into();
-        self
-    }
-
     /// Sets the value of the checkbox and returns itself.
     ///
     /// The [Val] should be state dependent, so you can mutate it on change.
     pub fn with_value(mut self, value: impl Into<Val<S, bool>>) -> Self {
         self.value = value.into();
         self
+    }
+}
+
+impl<S: State> WidgetLayoutExt<S> for Checkbox<S> {
+    fn set_layout_style(&mut self, layout_style: impl Into<Val<S, LayoutStyle>>) {
+        self.layout_style = layout_style.into();
     }
 }
 

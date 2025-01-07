@@ -1,3 +1,4 @@
+use crate::ext::WidgetLayoutExt;
 use maycoon_core::app::info::AppInfo;
 use maycoon_core::app::update::Update;
 use maycoon_core::layout::{LayoutNode, LayoutStyle, StyleNode};
@@ -37,12 +38,6 @@ impl<S: State> Image<S> {
         }
     }
 
-    /// Set the layout style.
-    pub fn with_style(mut self, style: impl Into<Val<S, LayoutStyle>>) -> Self {
-        self.style = style.into();
-        self
-    }
-
     /// Set the image.
     pub fn with_image(mut self, image: impl Into<Val<S, ImageData>>) -> Self {
         self.image = image.into().map(|data| {
@@ -54,6 +49,12 @@ impl<S: State> Image<S> {
             )
         });
         self
+    }
+}
+
+impl<S: State> WidgetLayoutExt<S> for Image<S> {
+    fn set_layout_style(&mut self, layout_style: impl Into<Val<S, LayoutStyle>>) {
+        self.style = layout_style.into();
     }
 }
 
