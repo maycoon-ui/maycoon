@@ -9,7 +9,7 @@ categories.workspace = true
 keywords.workspace = true
 
 [dependencies]
-syn = "2.0.93"
+syn = "2.0.95"
 quote = "1.0.38"
 proc-macro2 = "1.0.92"
 
