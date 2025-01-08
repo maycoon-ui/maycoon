@@ -1,4 +1,5 @@
 use nalgebra::{Point2, Vector2};
+use std::num::NonZeroUsize;
 pub use vello::AaConfig;
 pub use wgpu_types::PresentMode;
 pub use winit::window::{
@@ -115,6 +116,7 @@ pub struct RenderConfig {
     pub cpu: bool,
     /// The presentation mode of the window/surface.
     pub present_mode: PresentMode,
+    pub init_threads: Option<NonZeroUsize>,
 }
 
 impl Default for RenderConfig {
@@ -123,6 +125,7 @@ impl Default for RenderConfig {
             antialiasing: AaConfig::Area,
             cpu: false,
             present_mode: PresentMode::AutoNoVsync,
+            init_threads: None,
         }
     }
 }

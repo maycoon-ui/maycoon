@@ -341,7 +341,7 @@ where
                             msaa16: true,
                         },
                     },
-                    num_init_threads: None,
+                    num_init_threads: self.config.render.init_threads,
                 },
             )
             .expect("Failed to create renderer"),
