@@ -28,6 +28,9 @@ pub mod checkbox;
 /// Contains the [slider::Slider] widget.
 pub mod slider;
 
+/// Contains the [fetcher::WidgetFetcher] widget.
+pub mod fetcher;
+
 /// Contains the [canvas::Canvas] widget.
 #[cfg(feature = "canvas")]
 pub mod canvas;
