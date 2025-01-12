@@ -154,9 +154,11 @@ impl<S: State> Widget<S> for Text<S> {
                         pen_x = layout_node.layout.location.x;
                         return None;
                     }
+
                     let gid = charmap.map(c).unwrap_or_default();
                     let advance = glyph_metrics.advance_width(gid).unwrap_or_default();
                     let x = pen_x;
+
                     pen_x += advance;
                     Some(Glyph {
                         id: gid.to_u32(),
