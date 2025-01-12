@@ -29,6 +29,11 @@ impl WidgetId {
         }
     }
 
+    /// Create an invalid widget id. This ID is not invalid in the usual context, but is not handled by any theme and therefore will be ignored.
+    pub fn invalid() -> Self {
+        Self::new("?", "?")
+    }
+
     /// Returns the namespace of the widget id.
     pub fn namespace(&self) -> &str {
         &self.namespace
