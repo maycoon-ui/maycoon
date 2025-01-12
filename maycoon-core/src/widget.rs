@@ -24,5 +24,5 @@ pub trait Widget<S: State> {
     /// Update the widget state with given info and layout. Returns if the app should be updated.
     fn update(&mut self, layout: &LayoutNode, state: &mut S, info: &AppInfo) -> Update;
     /// Return the widget id.
-    fn widget_id(&mut self) -> WidgetId;
+    fn widget_id(&self) -> WidgetId;
 }

@@ -27,7 +27,7 @@ impl<S: State> Widget<S> for DummyWidget {
         Update::empty()
     }
 
-    fn widget_id(&mut self) -> WidgetId {
+    fn widget_id(&self) -> WidgetId {
         WidgetId::new("maycoon-widgets", "DummyWidget")
     }
 }

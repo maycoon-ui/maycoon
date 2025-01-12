@@ -30,6 +30,7 @@ pub struct Text<S: State> {
     font: Val<S, Option<String>>,
     font_size: Val<S, f32>,
     hinting: Val<S, bool>,
+    line_gap: Val<S, f32>,
 }
 
 impl<S: State> Text<S> {
@@ -41,6 +42,7 @@ impl<S: State> Text<S> {
             font: None.into(),
             font_size: 30.0.into(),
             hinting: true.into(),
+            line_gap: 7.5.into(),
         }
     }
 
@@ -62,6 +64,14 @@ impl<S: State> Text<S> {
     /// Set the font size of the text.
     pub fn with_font_size(mut self, size: impl Into<Val<S, f32>>) -> Self {
         self.font_size = size.into();
+        self
+    }
+
+    /// Set the line gap of the text.
+    ///
+    /// The line gap is the space between lines of text. Defaults to `7.5`.
+    pub fn with_line_gap(mut self, gap: impl Into<Val<S, f32>>) -> Self {
+        self.line_gap = gap.into();
         self
     }
 }
@@ -120,6 +130,8 @@ impl<S: State> Widget<S> for Text<S> {
 
         let line_height = metrics.ascent + metrics.descent + metrics.leading;
 
+        let line_gap = *self.line_gap.get_ref(state);
+
         let charmap = font_ref.charmap();
 
         let mut pen_x = layout_node.layout.location.x;
@@ -138,7 +150,7 @@ impl<S: State> Widget<S> for Text<S> {
                 &peniko::Style::Fill(Fill::NonZero),
                 text.chars().filter_map(|c| {
                     if c == '\n' {
-                        pen_y += line_height;
+                        pen_y += line_height + line_gap;
                         pen_x = layout_node.layout.location.x;
                         return None;
                     }
@@ -183,7 +195,7 @@ impl<S: State> Widget<S> for Text<S> {
         Update::empty()
     }
 
-    fn widget_id(&mut self) -> WidgetId {
+    fn widget_id(&self) -> WidgetId {
         WidgetId::new("maycoon-widgets", "Text")
     }
 }

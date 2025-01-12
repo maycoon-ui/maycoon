@@ -128,7 +128,7 @@ impl<S: State> Widget<S> for Container<S> {
         update
     }
 
-    fn widget_id(&mut self) -> WidgetId {
+    fn widget_id(&self) -> WidgetId {
         WidgetId::new("maycoon-widgets", "Container")
     }
 }

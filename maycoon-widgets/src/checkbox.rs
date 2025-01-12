@@ -169,7 +169,7 @@ impl<S: State> Widget<S> for Checkbox<S> {
         update
     }
 
-    fn widget_id(&mut self) -> WidgetId {
+    fn widget_id(&self) -> WidgetId {
         WidgetId::new("maycoon-widgets", "Checkbox")
     }
 }

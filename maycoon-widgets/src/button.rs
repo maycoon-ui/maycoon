@@ -192,7 +192,7 @@ impl<S: State, W: Widget<S>> Widget<S> for Button<S, W> {
         update
     }
 
-    fn widget_id(&mut self) -> WidgetId {
+    fn widget_id(&self) -> WidgetId {
         WidgetId::new("maycoon-widgets", "Button")
     }
 }
