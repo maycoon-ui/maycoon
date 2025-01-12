@@ -16,6 +16,8 @@ pub struct AppInfo {
     pub diagnostics: Diagnostics,
     /// The current font context.
     pub font_context: FontContext,
+    /// The size of the window.
+    pub size: Vector2<f64>,
 }
 
 impl AppInfo {
@@ -34,6 +36,7 @@ impl Default for AppInfo {
             buttons: Vec::with_capacity(2),
             diagnostics: Diagnostics::default(),
             font_context: FontContext::default(),
+            size: Vector2::new(0.0, 0.0),
         }
     }
 }

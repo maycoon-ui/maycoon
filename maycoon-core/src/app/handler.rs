@@ -67,6 +67,8 @@ where
             .new_leaf(Style::default())
             .expect("Failed to create window node");
 
+        let size = config.window.size;
+
         Self {
             attrs,
             window: None,
@@ -79,6 +81,7 @@ where
             widget,
             info: AppInfo {
                 font_context,
+                size,
                 ..Default::default()
             },
             window_node,
@@ -105,7 +108,7 @@ where
     fn compute_layout(&mut self) -> TaffyResult<()> {
         self.taffy.compute_layout(
             self.window_node,
-            taffy::Size::<AvailableSpace> {
+            Size::<AvailableSpace> {
                 width: AvailableSpace::Definite(
                     self.window.as_ref().unwrap().inner_size().width as f32,
                 ),
@@ -380,6 +383,9 @@ where
                                     },
                                 )
                                 .expect("Failed to set window node style");
+
+                            self.info.size =
+                                Vector2::new(new_size.width as f64, new_size.height as f64);
 
                             self.request_redraw();
 
