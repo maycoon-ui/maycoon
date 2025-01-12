@@ -60,7 +60,7 @@ impl<S: State> Widget<S> for Canvas<S> {
         Update::DRAW | Update::LAYOUT
     }
 
-    fn widget_id(&mut self) -> WidgetId {
+    fn widget_id(&self) -> WidgetId {
         WidgetId::new("maycoon-widgets", "Canvas")
     }
 }
