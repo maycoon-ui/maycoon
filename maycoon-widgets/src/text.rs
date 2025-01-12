@@ -160,6 +160,7 @@ impl<S: State> Widget<S> for Text<S> {
                     let x = pen_x;
 
                     pen_x += advance;
+                    
                     Some(Glyph {
                         id: gid.to_u32(),
                         x,
