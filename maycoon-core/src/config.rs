@@ -11,12 +11,13 @@ use maycoon_theme::theme::Theme;
 
 /// Maycoon Application Configuration Structure.
 #[derive(Clone)]
-
 pub struct MayConfig<T: Theme> {
     /// Window Configuration
     pub window: WindowConfig,
     /// Renderer Configuration.
     pub render: RenderConfig,
+    /// Task Runner Configuration. If [None] (default), the task runner won't be enabled.
+    pub tasks: Option<TasksConfig>,
     /// Theme of the Application.
     pub theme: T,
 }
@@ -26,6 +27,7 @@ impl Default for MayConfig<CelesteTheme> {
         Self {
             window: WindowConfig::default(),
             render: RenderConfig::default(),
+            tasks: None,
             theme: CelesteTheme::light(),
         }
     }
@@ -33,7 +35,6 @@ impl Default for MayConfig<CelesteTheme> {
 
 /// Window configuration.
 #[derive(Clone)]
-
 pub struct WindowConfig {
     /// The title of the window.
     pub title: String,
@@ -106,7 +107,6 @@ impl Default for WindowConfig {
 
 /// Renderer configuration.
 #[derive(Clone)]
-
 pub struct RenderConfig {
     /// The antialiasing config
     pub antialiasing: AaConfig,
@@ -116,6 +116,7 @@ pub struct RenderConfig {
     pub cpu: bool,
     /// The presentation mode of the window/surface.
     pub present_mode: PresentMode,
+    /// The number of threads to use for initialization in [vello].
     pub init_threads: Option<NonZeroUsize>,
 }
 
@@ -132,7 +133,6 @@ impl Default for RenderConfig {
 
 /// The window mode.
 #[derive(Clone, Debug, Default)]
-
 pub enum WindowMode {
     /// The default windowed mode.
     #[default]
@@ -141,4 +141,30 @@ pub enum WindowMode {
     Borderless,
     /// Legacy Fullscreen mode.
     Fullscreen,
+}
+
+/// Configuration structure for the integrated [TaskRunner](crate::tasks::TaskRunner).
+///
+/// The task runner isn't used by maycoon internally, but can be used to spawn asynchronous tasks and integrate them with the UI.
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct TasksConfig {
+    /// The stack size of each thread of the task runner thread pool. Defaults to 1 MB.
+    pub stack_size: usize,
+    /// The amount of worker threads of the task runner thread pool. Defaults to half of the available threads.
+    pub workers: NonZeroUsize,
+}
+
+impl Default for TasksConfig {
+    fn default() -> Self {
+        Self {
+            stack_size: 1024 * 1024 * 1, // 2 MB
+            workers: NonZeroUsize::new(
+                std::thread::available_parallelism()
+                    .expect("Failed to get available threads")
+                    .get()
+                    / 2,
+            )
+            .unwrap(),
+        }
+    }
 }

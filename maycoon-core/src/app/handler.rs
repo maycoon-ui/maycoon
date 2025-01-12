@@ -303,7 +303,7 @@ where
             .expect("Failed to set window node style");
 
         self.surface = Some(
-            futures_lite::future::block_on(async {
+            crate::tasks::block_on(async {
                 render_ctx
                     .create_surface(
                         self.window.clone().unwrap(),

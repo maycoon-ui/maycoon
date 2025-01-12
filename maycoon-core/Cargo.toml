@@ -10,12 +10,12 @@ keywords.workspace = true
 
 [dependencies]
 winit = "0.30.7"
-futures-lite = "2.5.0"
 wgpu-types = "22.0.0"
 vello = "0.3.0"
 taffy = "0.7.1"
 bitflags = "2.6.0"
 font-kit = "0.14.2"
+futures = { version = "0.3.31", features = ["thread-pool"] }
 maycoon-theme = { workspace = true }
 nalgebra = { workspace = true }
 indexmap = { workspace = true }

@@ -27,3 +27,6 @@ pub mod state;
 
 /// Contains the core widget functionalities
 pub mod widget;
+
+/// Contains the task runner and utilities for running async
+pub mod tasks;

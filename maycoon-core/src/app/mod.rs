@@ -35,6 +35,14 @@ pub struct MayApp<T: Theme> {
 impl<T: Theme> MayApp<T> {
     /// Create a new App with the given [MayConfig].
     pub fn new(config: MayConfig<T>) -> Self {
+        // init task runner
+        if let Some(config) = &config.tasks {
+            crate::tasks::runner::TaskRunner::new(config.stack_size, config.workers)
+                .expect("Failed to create task runner")
+                .init()
+                .expect("Failed to init task runner");
+        }
+
         Self {
             config,
             font_ctx: FontContext::default(),
