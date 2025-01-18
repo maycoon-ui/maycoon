@@ -28,5 +28,8 @@ pub mod state;
 /// Contains the core widget functionalities
 pub mod widget;
 
+/// Contains structures to work with the component architecture
+pub mod component;
+
 /// Contains the task runner and utilities for running async
 pub mod tasks;
