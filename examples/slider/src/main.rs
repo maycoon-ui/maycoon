@@ -10,14 +10,14 @@ use maycoon::widgets::ext::WidgetLayoutExt;
 use maycoon::widgets::slider::Slider;
 use maycoon::widgets::text::Text;
 
-#[derive(State)]
+#[derive(Default, State)]
 struct MyState {
     value: f32,
 }
 
 fn main() {
     MayApp::new(MayConfig::default()).run(
-        MyState { value: 0.0 },
+        MyState::default(),
         Container::new(vec![
             Val::new_val(Box::new(Slider::new(
                 val!(|state: &MyState| state.value),

@@ -25,8 +25,7 @@ use std::sync::{Arc, Mutex};
 /// 3. Once the task is done, update the UI with the new result and trigger an [Update].
 ///
 /// ### Theming
-/// The widget itself only draws the underlying widget, so theming is useless. [WidgetFetcher::widget_id] returns an invalid [WidgetId] if the widget is not built yet or the widgets ID.
-///
+/// The widget itself only draws the underlying widget, so theming is useless.
 pub struct WidgetFetcher<S: State, T: Send + 'static, W: Widget<S>, F: Fn(Option<T>, &mut S) -> W> {
     result: Arc<Mutex<Option<T>>>,
     render: F,
@@ -111,7 +110,7 @@ impl<S: State, T: Send + 'static, W: Widget<S>, F: Fn(Option<T>, &mut S) -> W> W
         if let Some(widget) = &self.widget {
             widget.widget_id()
         } else {
-            WidgetId::invalid()
+            WidgetId::new("maycoon-widgets", "WidgetFetcher")
         }
     }
 }
