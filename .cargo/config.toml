@@ -1,4 +1,0 @@
-[profile.bench]
-lto = "thin"
-codegen-units = 1
-opt-level = 3
