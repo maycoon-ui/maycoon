@@ -10,14 +10,14 @@ use maycoon::widgets::container::Container;
 use maycoon::widgets::ext::WidgetLayoutExt;
 use maycoon::widgets::text::Text;
 
-#[derive(State)]
+#[derive(Default, State)]
 struct MyState {
     checked: bool,
 }
 
 fn main() {
     MayApp::new(MayConfig::default()).run(
-        MyState { checked: false },
+        MyState::default(),
         Container::new(vec![
             Val::new_val(Box::new(
                 Checkbox::new(val!(|state: &MyState| state.checked)).with_on_change(|state| {

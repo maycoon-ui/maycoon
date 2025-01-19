@@ -10,14 +10,14 @@ use maycoon::widgets::container::Container;
 use maycoon::widgets::ext::WidgetLayoutExt;
 use maycoon::widgets::text::Text;
 
-#[derive(State)]
+#[derive(Default, State)]
 struct MyState {
     count: i32,
 }
 
 fn main() {
     MayApp::new(MayConfig::default()).run(
-        MyState { count: 0 },
+        MyState::default(),
         Container::new(vec![
             Val::new_val(Box::new(
                 Button::new(Text::new("Increase".to_string())).with_on_pressed(
