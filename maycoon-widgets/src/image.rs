@@ -92,7 +92,7 @@ impl<S: State> Widget<S> for Image<S> {
     }
 
     fn widget_id(&self) -> WidgetId {
-        WidgetId::new("maycoon-widgets", "image")
+        WidgetId::new("maycoon-widgets", "Image")
     }
 }
 
