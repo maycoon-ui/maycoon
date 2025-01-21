@@ -10,8 +10,8 @@ keywords.workspace = true
 
 [dependencies]
 winit = "0.30.7"
-wgpu-types = "22.0.0"
-vello = "0.3.0"
+wgpu-types = "23.0.0"
+vello = "0.4.0"
 taffy = "0.7.1"
 bitflags = "2.6.0"
 font-kit = "0.14.2"
@@ -20,10 +20,11 @@ maycoon-theme = { workspace = true }
 nalgebra = { workspace = true }
 indexmap = { workspace = true }
 peniko = { workspace = true }
+skrifa = "0.26.4"
 
 [features]
 default = []
 
-# Re-exports `vello` for drawing vector graphics.
+# Re-exports `skrifa` and `vello` for drawing vector graphics.
 # Required if you want to make custom widgets or draw vector graphics.
 vg = []

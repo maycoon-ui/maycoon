@@ -2,12 +2,12 @@ use crate::ext::WidgetLayoutExt;
 use maycoon_core::app::info::AppInfo;
 use maycoon_core::app::update::Update;
 use maycoon_core::layout::{Dimension, LayoutNode, LayoutStyle, StyleNode};
+use maycoon_core::skrifa::instance::Size;
+use maycoon_core::skrifa::raw::FileRef;
+use maycoon_core::skrifa::setting::VariationSetting;
+use maycoon_core::skrifa::MetadataProvider;
 use maycoon_core::state::{State, Val};
 use maycoon_core::vg::peniko::{Brush, Fill};
-use maycoon_core::vg::skrifa::instance::Size;
-use maycoon_core::vg::skrifa::raw::FileRef;
-use maycoon_core::vg::skrifa::setting::VariationSetting;
-use maycoon_core::vg::skrifa::MetadataProvider;
 use maycoon_core::vg::{peniko, Glyph, Scene};
 use maycoon_core::widget::Widget;
 use maycoon_theme::id::WidgetId;
@@ -144,7 +144,7 @@ impl<S: State> Widget<S> for Text<S> {
             .draw_glyphs(&font)
             .font_size(font_size)
             .brush(&Brush::Solid(color))
-            .normalized_coords(location.coords())
+            .normalized_coords(bytemuck::cast_slice(location.coords()))
             .hint(hinting)
             .draw(
                 &peniko::Style::Fill(Fill::NonZero),

@@ -7,6 +7,9 @@
 #[cfg(feature = "vg")]
 pub use vello as vg;
 
+#[cfg(feature = "vg")]
+pub use skrifa;
+
 /// Contains useful types for interacting with winit.
 pub mod window {
     pub use winit::event::*;

@@ -19,7 +19,7 @@ fn main() {
         Image::new(ImageData::new(
             image_data.clone(),
             Vector2::new(427, 640),
-            peniko::Format::Rgba8,
+            peniko::ImageFormat::Rgba8,
         )),
     )
 }

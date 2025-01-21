@@ -1,4 +1,4 @@
-use peniko::Color;
+use peniko::{color::palette, Color};
 
 use crate::globals::Globals;
 use crate::id::WidgetId;
@@ -27,44 +27,47 @@ impl Theme for CelesteTheme {
         match id.namespace() {
             "maycoon-widgets" => match id.id() {
                 "Text" => Some(Style::from_values([
-                    ("color".to_string(), StyleVal::Color(Color::BLACK)),
-                    ("color_invert".to_string(), StyleVal::Color(Color::WHITE)),
+                    ("color".to_string(), StyleVal::Color(palette::css::BLACK)),
+                    (
+                        "color_invert".to_string(),
+                        StyleVal::Color(palette::css::WHITE),
+                    ),
                 ])),
 
                 "Button" => Some(Style::from_values([
                     (
                         "color_idle".to_string(),
-                        StyleVal::Color(Color::rgb8(150, 170, 250)),
+                        StyleVal::Color(Color::from_rgb8(150, 170, 250)),
                     ),
                     (
                         "color_pressed".to_string(),
-                        StyleVal::Color(Color::rgb8(130, 150, 230)),
+                        StyleVal::Color(Color::from_rgb8(130, 150, 230)),
                     ),
                     (
                         "color_hovered".to_string(),
-                        StyleVal::Color(Color::rgb8(140, 160, 240)),
+                        StyleVal::Color(Color::from_rgb8(140, 160, 240)),
                     ),
                 ])),
 
                 "Checkbox" => Some(Style::from_values([
                     (
                         "color_checked".to_string(),
-                        StyleVal::Color(Color::rgb8(130, 130, 230)),
+                        StyleVal::Color(Color::from_rgb8(130, 130, 230)),
                     ),
                     (
                         "color_unchecked".to_string(),
-                        StyleVal::Color(Color::rgb8(170, 170, 250)),
+                        StyleVal::Color(Color::from_rgb8(170, 170, 250)),
                     ),
                 ])),
 
                 "Slider" => Some(Style::from_values([
                     (
                         "color".to_string(),
-                        StyleVal::Color(Color::rgb8(130, 130, 230)),
+                        StyleVal::Color(Color::from_rgb8(130, 130, 230)),
                     ),
                     (
                         "color_ball".to_string(),
-                        StyleVal::Color(Color::rgb8(170, 170, 250)),
+                        StyleVal::Color(Color::from_rgb8(170, 170, 250)),
                     ),
                 ])),
 
@@ -76,13 +79,13 @@ impl Theme for CelesteTheme {
 
     fn defaults(&self) -> DefaultStyles {
         DefaultStyles::new(
-            DefaultTextStyles::new(Color::BLACK, Color::WHITE_SMOKE),
-            DefaultContainerStyles::new(Color::ANTIQUE_WHITE, Color::WHITE),
+            DefaultTextStyles::new(palette::css::BLACK, palette::css::WHITE_SMOKE),
+            DefaultContainerStyles::new(palette::css::ANTIQUE_WHITE, palette::css::WHITE),
             DefaultInteractiveStyles::new(
-                Color::rgb8(130, 150, 230),
-                Color::rgb8(150, 170, 250),
-                Color::rgb8(140, 160, 240),
-                Color::rgb8(110, 110, 110),
+                Color::from_rgb8(130, 150, 230),
+                Color::from_rgb8(150, 170, 250),
+                Color::from_rgb8(140, 160, 240),
+                Color::from_rgb8(110, 110, 110),
             ),
         )
     }
