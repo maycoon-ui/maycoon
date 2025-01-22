@@ -9,10 +9,10 @@ categories.workspace = true
 keywords.workspace = true
 
 [dependencies]
-winit = "0.30.7"
+winit = "0.30.8"
 wgpu-types = "22.0.0"
 vello = "0.3.0"
-taffy = "0.7.1"
+taffy = "0.7.2"
 bitflags = "2.6.0"
 font-kit = "0.14.2"
 futures = { version = "0.3.31", features = ["thread-pool"] }
