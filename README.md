@@ -1,4 +1,4 @@
-<div style="text-align: center">
+<div align="center">
 
 ![Maycoon Logo](assets/logo-256x256.png)
 
