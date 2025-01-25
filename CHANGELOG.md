@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0](https://github.com/maycoon-ui/maycoon/compare/maycoon-v0.1.0...maycoon-v0.2.0) - 2025-01-25
+
+### Other
+
+- Update build.yml
+- Update build.yml
+- Update README.md
+- Update build.yml
+- Update build.yml
+- Update release.yml
+- Update dependencies
+- Add canvas widget
+- Merge pull request [#28](https://github.com/maycoon-ui/maycoon/pull/28) from waywardmonkeys/update-to-vello-0.3
+- Replace dashmap with indexmap
+- Update issue templates
+- Update README.md
+
 ## [0.1.0](https://github.com/maycoon-ui/maycoon/releases/tag/maycoon-v0.1.0) - 2024-10-04
 
 ### Fixed

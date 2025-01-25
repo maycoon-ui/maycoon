@@ -7,6 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0](https://github.com/maycoon-ui/maycoon/compare/maycoon-widgets-v0.1.0...maycoon-widgets-v0.2.0) - 2025-01-25
+
+### Other
+
+- Update to Vello 0.4
+- Add GestureDetector widget and example
+- Fix WidgetId typo in image.rs
+- Update text.rs
+- Update text.rs
+- Update text.rs
+- Update fetcher.rs docs
+- Fix canvas example
+- Add WidgetFetcher Widget
+- Make self in widget_id immutable
+- Add extension traits
+- Add canvas widget
+- Add `with_value` and `with_on_change` method
+- Add `with_image` method
+- Add `with_child` method
+- Update to Vello 0.3
+
 ## [0.1.0](https://github.com/maycoon-ui/maycoon/releases/tag/maycoon-widgets-v0.1.0) - 2024-10-04
 
 ### Other
