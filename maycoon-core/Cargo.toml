@@ -12,7 +12,7 @@ keywords.workspace = true
 winit = "0.30.8"
 wgpu-types = "23.0.0"
 vello = "0.4.0"
-taffy = "0.7.2"
+taffy = "0.7.5"
 bitflags = "2.6.0"
 font-kit = "0.14.2"
 futures = { version = "0.3.31", features = ["thread-pool"] }
