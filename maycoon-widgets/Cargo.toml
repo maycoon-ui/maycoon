@@ -11,6 +11,7 @@ keywords.workspace = true
 [dependencies]
 maycoon-theme = { workspace = true }
 maycoon-core = { workspace = true, features = ["vg"] }
+bytemuck = { workspace = true }
 nalgebra = { workspace = true }
 
 [features]

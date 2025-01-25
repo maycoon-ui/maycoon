@@ -4,7 +4,7 @@ use maycoon_core::app::update::Update;
 use maycoon_core::layout::{LayoutNode, LayoutStyle, StyleNode};
 use maycoon_core::state::{State, Val};
 use maycoon_core::vg::kurbo::{Affine, Vec2};
-use maycoon_core::vg::peniko::{Blob, Format};
+use maycoon_core::vg::peniko::{Blob, ImageFormat};
 use maycoon_core::vg::{peniko, Scene};
 use maycoon_core::widget::Widget;
 use maycoon_theme::id::WidgetId;
@@ -103,12 +103,12 @@ impl<S: State> Widget<S> for Image<S> {
 pub struct ImageData {
     image: Vec<u8>,
     size: Vector2<u32>,
-    format: Format,
+    format: ImageFormat,
 }
 
 impl ImageData {
     /// Creates a new [ImageData] from the image itself, its size and the image format.
-    pub fn new(image: Vec<u8>, size: Vector2<u32>, format: Format) -> Self {
+    pub fn new(image: Vec<u8>, size: Vector2<u32>, format: ImageFormat) -> Self {
         Self {
             image,
             size,

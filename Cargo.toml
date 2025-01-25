@@ -12,7 +12,8 @@ categories = ["gui", "graphics", "rendering", "virtualization", "rendering::engi
 keywords = ["ui", "gui", "interface", "graphics", "user-interface"]
 
 [workspace.dependencies]
-peniko = "0.2.0"
+bytemuck = "1.21.0"
+peniko = "0.3.1"
 nalgebra = { version = "0.33.2", default-features = false, features = ["std"] }
 indexmap = "2.7.0"
 maycoon-core = { version = "0.1.0", path = "maycoon-core" }
