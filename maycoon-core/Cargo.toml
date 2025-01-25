@@ -16,7 +16,7 @@ taffy = "0.7.5"
 bitflags = "2.6.0"
 font-kit = "0.14.2"
 futures = { version = "0.3.31", features = ["thread-pool"] }
-skrifa = "0.26.5"
+skrifa = { version = "0.26.5", optional = true }
 maycoon-theme = { workspace = true }
 nalgebra = { workspace = true }
 indexmap = { workspace = true }
@@ -25,6 +25,6 @@ peniko = { workspace = true }
 [features]
 default = []
 
-# Re-exports `vello` for drawing vector graphics.
+# Re-exports `vello` and `skrifa` for drawing vector graphics.
 # Required if you want to make custom widgets or draw vector graphics.
-vg = []
+vg = ["skrifa"]
