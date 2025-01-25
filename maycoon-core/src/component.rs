@@ -11,21 +11,21 @@ use vello::Scene;
 
 /// The core trait for all components.
 ///
-/// A [Component] is composed out of an already existing [Widget].
+/// A [`Component`] is composed out of an already existing [`Widget`].
 /// The advantage of using a component is that you can easily create your own widgets
 /// with your own logic without handling rendering, updating and other things.
 ///
-/// In order to make it usable, you'll need to call [Component::build] on it,
-/// to convert it into a real widget (more specifically the [ComponentAdapter]).
+/// In order to make it usable, you'll need to call [`Component::build`] on it,
+/// to convert it into a real widget (more specifically the [`ComponentAdapter`]).
 /// This is required to not confuse the compiler with overlapping traits.
 pub trait Component<S: State> {
-    /// Returns a mutable reference to the inner [Widget].
+    /// Returns a mutable reference to the inner [`Widget`].
     fn get_widget(&mut self) -> &mut impl Widget<S>;
 
-    /// Get the ID of your component as a [WidgetId].
+    /// Get the ID of your component as a [`WidgetId`].
     fn get_widget_id(&self) -> WidgetId;
 
-    /// Converts the component into a widget by wrapping it in a [ComponentAdapter].
+    /// Converts the component into a widget by wrapping it in a [`ComponentAdapter`].
     fn build(self) -> ComponentAdapter<S, Self>
     where
         Self: Sized,
@@ -34,16 +34,16 @@ pub trait Component<S: State> {
     }
 }
 
-/// An adapter around a [Component] to make it usable as a [Widget].
+/// An adapter around a [`Component`] to make it usable as a [`Widget`].
 ///
-/// You can still call methods of the inner [Component], due to [Deref coercion](Deref)
+/// You can still call methods of the inner [`Component`], due to [`Deref` coercion](Deref)
 pub struct ComponentAdapter<S: State, C: Component<S>> {
     inner: C,
     phantom: PhantomData<S>,
 }
 
 impl<S: State, C: Component<S>> ComponentAdapter<S, C> {
-    /// Creates a new [ComponentAdapter] by using the given [Component].
+    /// Creates a new [`ComponentAdapter`] by using the given [`Component`].
     pub fn new(inner: C) -> Self {
         Self {
             inner,

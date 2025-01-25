@@ -23,7 +23,7 @@ pub struct Image<S: State> {
 }
 
 impl<S: State> Image<S> {
-    /// Create an image widget from the given [ImageData].
+    /// Create an image widget from the given [`ImageData`].
     pub fn new(image: impl Into<Val<S, ImageData>>) -> Self {
         Self {
             image: image.into().map(|data| {
@@ -107,7 +107,7 @@ pub struct ImageData {
 }
 
 impl ImageData {
-    /// Creates a new [ImageData] from the image itself, its size and the image format.
+    /// Creates a new [`ImageData`] from the image itself, its size and the image format.
     pub fn new(image: Vec<u8>, size: Vector2<u32>, format: ImageFormat) -> Self {
         Self {
             image,

@@ -9,9 +9,9 @@ pub mod celeste;
 
 /// Base trait for all themes.
 pub trait Theme {
-    /// Return the Style of the given widget using its ID.
-    /// Returns [None] if the theme does not have styles for the given widget.
-    /// In that case, you should use [Theme::defaults] to get widget style defaults.
+    /// Return the [`Style`] of the given widget using its ID.
+    /// Returns [`None`] if the theme does not have styles for the given widget.
+    /// In that case, you should use [`Theme::defaults`] to get widget style defaults.
     fn of(&self, id: WidgetId) -> Option<Style>;
     /// Get the default widget styles.
     fn defaults(&self) -> DefaultStyles;

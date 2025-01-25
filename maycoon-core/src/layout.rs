@@ -50,14 +50,14 @@ pub struct LayoutStyle {
     pub align_items: Option<AlignItems>,
 
     /// How this node should be aligned in the cross/block axis
-    /// Falls back to the parents [AlignItems] if not set.
+    /// Falls back to the parents [`AlignItems`] if not set.
     pub align_self: Option<AlignSelf>,
 
     /// How this node's children should be aligned in the inline axis.
     pub justify_items: Option<AlignItems>,
 
     /// How this node should be aligned in the inline axis
-    /// Falls back to the parents [JustifyItems] if not set.
+    /// Falls back to the parents [`JustifyItems`] if not set.
     pub justify_self: Option<AlignSelf>,
 
     /// How should content contained within this item be aligned in the cross/block axis?
