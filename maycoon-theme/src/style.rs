@@ -171,7 +171,7 @@ impl Default for Style {
 }
 
 /// Default widget styles.
-#[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Default, Debug)]
+#[derive(Clone, PartialEq, Debug)]
 pub struct DefaultStyles {
     text: DefaultTextStyles,
     container: DefaultContainerStyles,
@@ -209,7 +209,7 @@ impl DefaultStyles {
 }
 
 /// The default text widget styles.
-#[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Default, Debug)]
+#[derive(Clone, PartialEq, Debug)]
 pub struct DefaultTextStyles {
     foreground: Color,
     background: Color,
@@ -236,7 +236,7 @@ impl DefaultTextStyles {
 }
 
 /// The default container widget styles.
-#[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Default, Debug)]
+#[derive(Clone, PartialEq, Debug)]
 pub struct DefaultContainerStyles {
     foreground: Color,
     background: Color,
@@ -263,7 +263,7 @@ impl DefaultContainerStyles {
 }
 
 /// The default interactive widget styles.
-#[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Default, Debug)]
+#[derive(Clone, PartialEq, Debug)]
 pub struct DefaultInteractiveStyles {
     active: Color,
     inactive: Color,
