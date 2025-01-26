@@ -11,17 +11,17 @@ use std::future::Future;
 use std::marker::PhantomData;
 use std::sync::{Arc, Mutex};
 
-/// Widget builder to fetch data from an asynchronous task. The [TaskRunner](maycoon_core::tasks::runner::TaskRunner) needs to be initialized.
-/// This is similar to the [FutureBuilder](https://api.flutter.dev/flutter/widgets/FutureBuilder-class.html) from Flutter.
+/// Widget builder to fetch data from an asynchronous task. The [`TaskRunner`](maycoon_core::tasks::runner::TaskRunner) needs to be initialized.
+/// This is similar to the [`FutureBuilder`](https://api.flutter.dev/flutter/widgets/FutureBuilder-class.html) from Flutter.
 ///
 /// ### Async + UI
 /// Normally, a UI Application is not able to asynchronously spawn tasks and will block the UI thread instead of running tasks in the background.
-/// The [WidgetFetcher] is able to spawn asynchronous tasks on a global runner and construct a widget based on the result of the task.
+/// The [`WidgetFetcher`] is able to spawn asynchronous tasks on a global runner and construct a widget based on the result of the task.
 /// You can use it to fetch asynchronous data and either return something like a loading screen or the actual data.
 ///
-/// ### Workflow of a [WidgetFetcher].
-/// 1. Run the task in the background using the [TaskRunner](maycoon_core::tasks::runner::TaskRunner).
-/// 2. Construct the widget with [None] as the result (task is still loading).
+/// ### Workflow of a [`WidgetFetcher`].
+/// 1. Run the task in the background using the [`TaskRunner`](maycoon_core::tasks::runner::TaskRunner).
+/// 2. Construct the widget with [`None`] as the result (task is still loading).
 /// 3. Once the task is done, update the UI with the new result and trigger an [Update].
 ///
 /// ### Theming
@@ -37,7 +37,7 @@ pub struct WidgetFetcher<S: State, T: Send + 'static, W: Widget<S>, F: Fn(Option
 impl<S: State, T: Send + 'static, W: Widget<S>, F: Fn(Option<T>, &mut S) -> W>
     WidgetFetcher<S, T, W, F>
 {
-    /// Creates a new [WidgetFetcher] with parameters:
+    /// Creates a new [`WidgetFetcher`] with parameters:
     /// - `future`: The future to execute.
     /// - `update`: The update to trigger when the data is updated (from loading to done).
     /// - `render`: The function to render the widget. The first parameter is the result of the future and the second parameter is the mutable app state.

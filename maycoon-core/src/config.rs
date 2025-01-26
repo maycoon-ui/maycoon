@@ -16,7 +16,7 @@ pub struct MayConfig<T: Theme> {
     pub window: WindowConfig,
     /// Renderer Configuration.
     pub render: RenderConfig,
-    /// Task Runner Configuration. If [None] (default), the task runner won't be enabled.
+    /// Task Runner Configuration. If [`None`] (default), the task runner won't be enabled.
     pub tasks: Option<TasksConfig>,
     /// Theme of the Application.
     pub theme: T,
@@ -143,7 +143,7 @@ pub enum WindowMode {
     Fullscreen,
 }
 
-/// Configuration structure for the integrated [TaskRunner](crate::tasks::TaskRunner).
+/// Configuration structure for the integrated [`TaskRunner`](crate::tasks::TaskRunner).
 ///
 /// The task runner isn't used by maycoon internally, but can be used to spawn asynchronous tasks and integrate them with the UI.
 #[derive(Clone, Debug, Eq, PartialEq)]

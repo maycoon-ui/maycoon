@@ -8,13 +8,13 @@ impl State for EmptyState {}
 
 /// A value that's either dependent on the state or independent.
 ///
-/// Use [Val::new_state] or the `val!()` macro from the `maycoon-macros` crate to create a new state dependent value.
+/// Use [`Val::new_state`] or the `val!()` macro from the `maycoon-macros` crate to create a new state dependent value.
 ///
-/// Use [Val::new_val] or just `YourValue.into()` to create an independent value. You can also use `val!()`, because why not?
+/// Use [`Val::new_val`] or just `YourValue.into()` to create an independent value. You can also use `val!()`, because why not?
 ///
-/// **NOTE for Widget Developers:** Inside the [Widget::update] method, all values must be invalidated using [Val::invalidate].
+/// **NOTE for Widget Developers:** Inside the [`Widget::update`] method, all values must be invalidated using [`Val::invalidate`].
 ///
-/// [Widget::update]: crate::widget::Widget::update
+/// [`Widget::update`]: crate::widget::Widget::update
 pub enum Val<S: State, T: 'static> {
     /// A state dependent value.
     ///
@@ -52,7 +52,7 @@ impl<S: State, T: 'static> Val<S, T> {
         Self::Val(value)
     }
 
-    /// Get the inner value of this [Val].
+    /// Get the inner value of this [`Val`].
     ///
     /// This will compute the value if it's state dependent and not yet computed, so it will always return something.
     pub fn get(mut self, state: &S) -> T {
@@ -63,7 +63,7 @@ impl<S: State, T: 'static> Val<S, T> {
         self.value().unwrap()
     }
 
-    /// Get a reference to the inner value of this [Val].
+    /// Get a reference to the inner value of this [`Val`].
     ///
     /// This will compute the value if it's state dependent and not yet computed, so it will always return something.
     pub fn get_ref(&mut self, state: &S) -> &T {
@@ -74,7 +74,7 @@ impl<S: State, T: 'static> Val<S, T> {
         self.value_ref().unwrap()
     }
 
-    /// Get a mutable reference to the inner value of this [Val].
+    /// Get a mutable reference to the inner value of this [`Val`].
     ///
     /// This will compute the value if it's state dependent and not yet computed, so it will always return something.
     pub fn get_mut(&mut self, state: &S) -> &mut T {
@@ -103,7 +103,7 @@ impl<S: State, T: 'static> Val<S, T> {
 
     /// Invalidates the inner value, if it's state dependent.
     ///
-    /// This makes [Val::get] and other methods re-compute the value (if it's state dependent).
+    /// This makes [`Val::get`] and other methods re-compute the value (if it's state dependent).
     pub fn invalidate(&mut self) {
         match self {
             Val::State { value, .. } => *value = None,
@@ -111,7 +111,7 @@ impl<S: State, T: 'static> Val<S, T> {
         }
     }
 
-    /// Returns the inner value or [None] if it's state dependent and not yet computed.
+    /// Returns the inner value or [`None`] if it's state dependent and not yet computed.
     pub fn value(self) -> Option<T> {
         match self {
             Val::State { value, .. } => value,
@@ -119,7 +119,7 @@ impl<S: State, T: 'static> Val<S, T> {
         }
     }
 
-    /// Returns a reference to the inner value or [None] if it's state dependent and not yet computed.
+    /// Returns a reference to the inner value or [`None`] if it's state dependent and not yet computed.
     pub fn value_ref(&self) -> Option<&T> {
         match self {
             Val::State { value, .. } => value.as_ref(),
@@ -127,7 +127,7 @@ impl<S: State, T: 'static> Val<S, T> {
         }
     }
 
-    /// Returns a mutable reference to the inner value or [None] if it's state dependent and not yet computed.
+    /// Returns a mutable reference to the inner value or [`None`] if it's state dependent and not yet computed.
     pub fn value_mut(&mut self) -> Option<&mut T> {
         match self {
             Val::State { value, .. } => value.as_mut(),
@@ -137,7 +137,7 @@ impl<S: State, T: 'static> Val<S, T> {
 
     /// Applies a function to the inner value, transforming it into another value.
     ///
-    /// Similar to the [Option::map] method.
+    /// Similar to the [`Option::map`] method.
     pub fn map<U, F: Fn(T) -> U + 'static>(self, f: F) -> Val<S, U> {
         match self {
             Val::State { factory, .. } => Val::<S, U>::State {

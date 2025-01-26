@@ -10,9 +10,9 @@ use maycoon_theme::theme::Theme;
 
 /// A container widget that can display and layout multiple child widgets.
 ///
-/// The layout of the children (row, column, etc.) depends on the [LayoutStyle] of the container.
+/// The layout of the children (row, column, etc.) depends on the [`LayoutStyle`] of the container.
 ///
-/// See the [counter](https://github.com/maycoon-ui/maycoon/blob/master/examples/counter/src/main.rs) example for how to use it in practice.
+/// See the [`counter`](https://github.com/maycoon-ui/maycoon/blob/master/examples/counter/src/main.rs) example for how to use it in practice.
 ///
 /// ### Theming
 /// The container widget doesn't actually draw anything but the child widgets, so theming is useless.

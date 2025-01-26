@@ -23,7 +23,7 @@ use crate::layout::{LayoutNode, StyleNode};
 use crate::state::State;
 use crate::widget::Widget;
 
-/// The core application handler. You should use [MayApp](crate::app::MayApp) instead for running applications.
+/// The core application handler. You should use [`MayApp`](crate::app::MayApp) instead for running applications.
 pub struct AppHandler<'a, T, W, S>
 where
     T: Theme,
@@ -120,7 +120,7 @@ where
         Ok(())
     }
 
-    /// Collection the computed layout of the given node and its children. Make sure to call [AppHandler::compute_layout] before, to not get dirty results.
+    /// Collection the computed layout of the given node and its children. Make sure to call [`AppHandler::compute_layout`] before, to not get dirty results.
     fn collect_layout(&mut self, node: NodeId, style: &StyleNode) -> TaffyResult<LayoutNode> {
         let mut children = Vec::with_capacity(style.children.len());
 
