@@ -1,0 +1,4 @@
+[workspace]
+pr_branch_prefix = "release-"
+pr_name = "Release {{ package }} v{{ version }}"
+pr_labels = ["release"]
