@@ -147,16 +147,8 @@ impl<S: State> Widget<S> for Slider<S> {
                 && cursor.y as f32 <= layout.layout.location.y + layout.layout.size.height
             {
                 for (_, btn, el_state) in &info.buttons {
-                    match btn {
-                        MouseButton::Left => {
-                            if el_state.is_pressed() {
-                                self.dragging = true;
-                            } else {
-                                self.dragging = false;
-                            }
-                        },
-
-                        _ => (),
+                    if btn == &MouseButton::Left && el_state.is_pressed() {
+                        self.dragging = el_state.is_pressed();
                     }
                 }
 

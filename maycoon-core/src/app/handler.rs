@@ -46,7 +46,7 @@ where
     last_update: Instant,
 }
 
-impl<'a, T, W, S> AppHandler<'a, T, W, S>
+impl<T, W, S> AppHandler<'_, T, W, S>
 where
     T: Theme,
     W: Widget<S>,
@@ -273,7 +273,7 @@ where
     }
 }
 
-impl<'a, T, W, S> ApplicationHandler for AppHandler<'a, T, W, S>
+impl<T, W, S> ApplicationHandler for AppHandler<'_, T, W, S>
 where
     T: Theme,
     W: Widget<S>,

@@ -157,7 +157,7 @@ pub struct TasksConfig {
 impl Default for TasksConfig {
     fn default() -> Self {
         Self {
-            stack_size: 1024 * 1024 * 1, // 2 MB
+            stack_size: 1024 * 1024, // 1 MB
             workers: NonZeroUsize::new(
                 std::thread::available_parallelism()
                     .expect("Failed to get available threads")

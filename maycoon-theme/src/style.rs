@@ -76,7 +76,7 @@ impl Style {
 
     /// Get a style value by name. Returns [None] if the value name does not exist.
     pub fn get(&self, name: impl ToString) -> Option<StyleVal> {
-        self.map.get(&name.to_string()).map(|val| val.clone())
+        self.map.get(&name.to_string()).cloned()
     }
 
     /// Get a color style value by name. Returns [None] if the value name does not exist.

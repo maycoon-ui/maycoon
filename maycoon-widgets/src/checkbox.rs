@@ -88,12 +88,10 @@ impl<S: State> Widget<S> for Checkbox<S> {
             } else {
                 style.get_color("color_unchecked").unwrap()
             }
+        } else if checked {
+            theme.defaults().interactive().active()
         } else {
-            if checked {
-                theme.defaults().interactive().active()
-            } else {
-                theme.defaults().interactive().inactive()
-            }
+            theme.defaults().interactive().inactive()
         };
 
         scene.stroke(
@@ -153,14 +151,8 @@ impl<S: State> Widget<S> for Checkbox<S> {
                 && cursor.y as f32 <= layout.layout.location.y + layout.layout.size.height
             {
                 for (_, btn, el) in &info.buttons {
-                    match btn {
-                        MouseButton::Left => {
-                            if *el == ElementState::Released {
-                                update |= (self.on_change)(state);
-                            }
-                        },
-
-                        _ => (),
+                    if btn == &MouseButton::Left && *el == ElementState::Released {
+                        update |= (self.on_change)(state);
                     }
                 }
             }
