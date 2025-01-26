@@ -21,6 +21,12 @@ jobs:
 
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@stable
+
+      - name: Update apt-get
+        run: sudo apt-get update
+
+      - name: Install fontconfig
+        run: sudo apt install pkg-config libfreetype6-dev libfontconfig1-dev
         
       - name: Run release-plz
         uses: MarcoIeni/release-plz-action@v0.5
