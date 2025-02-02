@@ -1,5 +1,6 @@
 use nalgebra::{Point2, Vector2};
 use std::num::NonZeroUsize;
+use vello::util::DeviceHandle;
 pub use vello::AaConfig;
 pub use wgpu_types::PresentMode;
 pub use winit::window::{
@@ -118,6 +119,8 @@ pub struct RenderConfig {
     pub present_mode: PresentMode,
     /// The number of threads to use for initialization in [vello].
     pub init_threads: Option<NonZeroUsize>,
+    /// The selector function to determine which device to use for rendering. Defaults to using the first device found.
+    pub device_selector: fn(&Vec<DeviceHandle>) -> &DeviceHandle,
 }
 
 impl Default for RenderConfig {
@@ -127,6 +130,7 @@ impl Default for RenderConfig {
             cpu: false,
             present_mode: PresentMode::AutoNoVsync,
             init_threads: None,
+            device_selector: |devices| devices.first().expect("No devices found"),
         }
     }
 }

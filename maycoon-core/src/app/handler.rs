@@ -319,9 +319,7 @@ where
             .expect("Failed to create surface"),
         );
 
-        // select first device available
-        // TODO: support device filters
-        let device_handle = render_ctx.devices.first().expect("Failed to select device");
+        let device_handle = (self.config.render.device_selector)(&render_ctx.devices);
 
         self.renderer = Some(
             Renderer::new(
