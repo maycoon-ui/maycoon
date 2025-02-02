@@ -7,6 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0](https://github.com/maycoon-ui/maycoon/compare/maycoon-core-v0.1.0...maycoon-core-v0.2.0) - 2025-01-26
+
+### Other
+
+- Fix typo
+- Fix clippy lints
+- Fix `clippy::doc_markdown` lints
+- Fix updating vello
+- Update taffy and winit
+- Implement component architecture
+- Add size info
+- Add Task Runner
+- Make self in widget_id immutable
+- Add init_threads config parameter
+- Update dependencies
+- Merge pull request [#28](https://github.com/maycoon-ui/maycoon/pull/28) from waywardmonkeys/update-to-vello-0.3
+- Add way to load system fonts
+- Replace dashmap with indexmap
+
 ## [0.1.0](https://github.com/maycoon-ui/maycoon/releases/tag/maycoon-core-v0.1.0) - 2024-10-04
 
 ### Other
