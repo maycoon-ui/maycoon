@@ -10,6 +10,7 @@ repository = "https://github.com/maycoon-ui/maycoon"
 homepage = "https://maycoon-ui.github.io"
 categories = ["gui", "graphics", "rendering", "virtualization", "rendering::engine"]
 keywords = ["ui", "gui", "interface", "graphics", "user-interface"]
+include = ["assets/**/*"]
 
 [workspace.dependencies]
 bytemuck = "1.21.0"

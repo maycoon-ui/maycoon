@@ -34,6 +34,9 @@ pub mod fetcher;
 /// Contains the [`gesture_detector::GestureDetector`] widget.
 pub mod gesture_detector;
 
+/// Contains the [`icon::Icon`] widget.
+pub mod icon;
+
 /// Contains the [`canvas::Canvas`] widget.
 #[cfg(feature = "canvas")]
 pub mod canvas;

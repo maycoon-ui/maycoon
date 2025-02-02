@@ -9,6 +9,7 @@ categories.workspace = true
 keywords.workspace = true
 
 [dependencies]
+vello_svg = { version = "0.6.0", default-features = false }
 maycoon-theme = { workspace = true }
 maycoon-core = { workspace = true, features = ["vg"] }
 bytemuck = { workspace = true }
