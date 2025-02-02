@@ -1,3 +1,4 @@
+use crate::ext::WidgetLayoutExt;
 use maycoon_core::app::info::AppInfo;
 use maycoon_core::app::update::Update;
 use maycoon_core::layout::{Dimension, LayoutNode, LayoutStyle, StyleNode};
@@ -11,7 +12,6 @@ use nalgebra::Vector2;
 use vello_svg::usvg;
 use vello_svg::usvg::Options;
 
-use crate::ext::WidgetLayoutExt;
 pub use usvg::ImageRendering;
 pub use usvg::ShapeRendering;
 pub use usvg::TextRendering;
@@ -29,7 +29,7 @@ pub struct Icon<S: State> {
 }
 
 impl<S: State> Icon<S> {
-    /// Creates a new icon widget from the given icon.
+    /// Creates a new icon widget from the given svg icon.
     pub fn new(icon: impl Into<Val<S, SvgIcon>>) -> Self {
         Self {
             layout_style: Val::new_val(LayoutStyle {

@@ -17,4 +17,6 @@ nalgebra = { workspace = true }
 
 [features]
 default = []
+
+# Enables the `Canvas` widget for drawing to the screen.
 canvas = []
