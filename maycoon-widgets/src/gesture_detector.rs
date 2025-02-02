@@ -96,6 +96,8 @@ impl<S: State, W: Widget<S>> Widget<S> for GestureDetector<S, W> {
     }
 
     fn update(&mut self, layout: &LayoutNode, state: &mut S, info: &AppInfo) -> Update {
+        self.child.invalidate();
+
         let mut update = Update::empty();
 
         if let Some(cursor) = info.cursor_pos {
