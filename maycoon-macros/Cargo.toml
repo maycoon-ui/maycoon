@@ -9,9 +9,10 @@ categories.workspace = true
 keywords.workspace = true
 
 [dependencies]
-syn = "2.0.95"
+syn = "2.0.96"
 quote = "1.0.38"
-proc-macro2 = "1.0.92"
+proc-macro2 = "1.0.93"
+ureq = "3.0.3"
 
 [lib]
 proc-macro = true

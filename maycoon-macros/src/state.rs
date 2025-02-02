@@ -1,6 +1,6 @@
 use proc_macro2::TokenStream;
 use quote::quote;
-use syn::{DeriveInput, Expr};
+use syn::DeriveInput;
 
 #[inline]
 pub fn derive_state(input: TokenStream) -> TokenStream {
