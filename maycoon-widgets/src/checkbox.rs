@@ -58,7 +58,7 @@ impl<S: State> Checkbox<S> {
 
     /// Sets the value of the checkbox and returns itself.
     ///
-    /// The [Val] should be state dependent, so you can mutate it on change.
+    /// The [`Val`] should be state dependent, so you can mutate it on change.
     pub fn with_value(mut self, value: impl Into<Val<S, bool>>) -> Self {
         self.value = value.into();
         self
