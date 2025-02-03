@@ -74,12 +74,12 @@ impl Style {
         self.map.insert(name.to_string(), StyleVal::UInt(value));
     }
 
-    /// Get a style value by name. Returns [None] if the value name does not exist.
+    /// Get a style value by name. Returns [`None`] if the value name does not exist.
     pub fn get(&self, name: impl ToString) -> Option<StyleVal> {
         self.map.get(&name.to_string()).cloned()
     }
 
-    /// Get a color style value by name. Returns [None] if the value name does not exist.
+    /// Get a color style value by name. Returns [`None`] if the value name does not exist.
     pub fn get_color(&self, name: impl ToString) -> Option<Color> {
         if let Some(val) = self.map.get(&name.to_string()) {
             match val {
@@ -91,7 +91,7 @@ impl Style {
         }
     }
 
-    /// Get a gradient style value by name. Returns [None] if the value name does not exist.
+    /// Get a gradient style value by name. Returns [`None`] if the value name does not exist.
     pub fn get_gradient(&self, name: impl ToString) -> Option<Gradient> {
         if let Some(val) = self.map.get(&name.to_string()) {
             match val {
@@ -103,7 +103,7 @@ impl Style {
         }
     }
 
-    /// Get a brush style value by name. Returns [None] if the value name does not exist.
+    /// Get a brush style value by name. Returns [`None`] if the value name does not exist.
     pub fn get_brush(&self, name: impl ToString) -> Option<Brush> {
         if let Some(val) = self.map.get(&name.to_string()) {
             match val {
@@ -115,7 +115,7 @@ impl Style {
         }
     }
 
-    /// Get a float style value by name. Returns [None] if the value name does not exist.
+    /// Get a float style value by name. Returns [`None`] if the value name does not exist.
     pub fn get_float(&self, name: impl ToString) -> Option<f32> {
         if let Some(val) = self.map.get(&name.to_string()) {
             match val {
@@ -127,7 +127,7 @@ impl Style {
         }
     }
 
-    /// Get an int style value by name. Returns [None] if the value name does not exist.
+    /// Get an int style value by name. Returns [`None`] if the value name does not exist.
     pub fn get_int(&self, name: impl ToString) -> Option<i32> {
         if let Some(val) = self.map.get(&name.to_string()) {
             match val {
@@ -139,7 +139,7 @@ impl Style {
         }
     }
 
-    /// Get an unsized int style value by name. Returns [None] if the value name does not exist.
+    /// Get an unsized int style value by name. Returns [`None`] if the value name does not exist.
     pub fn get_uint(&self, name: impl ToString) -> Option<u32> {
         if let Some(val) = self.map.get(&name.to_string()) {
             match val {
@@ -151,7 +151,7 @@ impl Style {
         }
     }
 
-    /// Get a bool style value by name. Returns [None] if the value name does not exist.
+    /// Get a bool style value by name. Returns [`None`] if the value name does not exist.
     pub fn get_bool(&self, name: impl ToString) -> Option<bool> {
         if let Some(val) = self.map.get(&name.to_string()) {
             match val {

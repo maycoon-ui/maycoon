@@ -22,7 +22,7 @@ use std::sync::{Arc, Mutex};
 /// ### Workflow of a [`WidgetFetcher`].
 /// 1. Run the task in the background using the [`TaskRunner`](maycoon_core::tasks::runner::TaskRunner).
 /// 2. Construct the widget with [`None`] as the result (task is still loading).
-/// 3. Once the task is done, update the UI with the new result and trigger an [Update].
+/// 3. Once the task is done, update the UI with the new result and trigger an [`Update`].
 ///
 /// ### Theming
 /// The widget itself only draws the underlying widget, so theming is useless.
