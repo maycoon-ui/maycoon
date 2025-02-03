@@ -16,10 +16,10 @@ pub use usvg::ImageRendering;
 pub use usvg::ShapeRendering;
 pub use usvg::TextRendering;
 
-/// Error type for parsing SVGs with [usvg].
+/// Error type for parsing SVGs with [`usvg`].
 pub type SvgError = usvg::Error;
 
-/// A simple icon widget to display SVG icons using [vello_svg] and [usvg].
+/// A simple icon widget to display SVG icons using [`vello_svg`] and [`usvg`].
 ///
 /// ### Theming
 /// The widget itself only draws the underlying icon, so theming is useless.
@@ -89,17 +89,17 @@ impl<S: State> WidgetLayoutExt<S> for Icon<S> {
     }
 }
 
-/// An SVG icon rendered as a vello [Scene].
+/// An SVG icon rendered as a Vello [`Scene`].
 pub struct SvgIcon(Scene);
 
 impl SvgIcon {
     /// Creates a new icon from the given SVG source.
-    /// Returns [Ok] if the SVG could be parsed, [Err] otherwise.
+    /// Returns [`Ok`] if the SVG could be parsed, [`Err`] otherwise.
     ///
-    /// **This calls [Self::new_custom] with the following options:**
-    /// - [ShapeRendering::GeometricPrecision] for precise shape rendering.
-    /// - [TextRendering::OptimizeLegibility] for good text rendering.
-    /// - [ImageRendering::OptimizeSpeed] for fast image rendering.
+    /// **This calls [`Self::new_custom`] with the following options:**
+    /// - [`ShapeRendering::GeometricPrecision`] for precise shape rendering.
+    /// - [`TextRendering::OptimizeLegibility`] for good text rendering.
+    /// - [`ImageRendering::OptimizeSpeed`] for fast image rendering.
     pub fn new(source: impl AsRef<str>) -> Result<Self, SvgError> {
         Self::new_custom(
             source,
@@ -110,7 +110,7 @@ impl SvgIcon {
     }
 
     /// Creates a new icon from the given SVG source.
-    /// Returns [Ok] if the SVG could be parsed, [Err] otherwise.
+    /// Returns [`Ok`] if the SVG could be parsed, [`Err`] otherwise.
     ///
     /// This method allows customizing the SVG rendering options.
     pub fn new_custom(
@@ -134,7 +134,7 @@ impl SvgIcon {
         Ok(Self(scene))
     }
 
-    /// Returns the underlying [Scene].
+    /// Returns the underlying [`Scene`].
     pub fn scene(&self) -> &Scene {
         &self.0
     }

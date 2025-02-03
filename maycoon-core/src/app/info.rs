@@ -6,7 +6,7 @@ use crate::app::font_ctx::FontContext;
 
 /// The application information container.
 pub struct AppInfo {
-    /// The position of the cursor. If [None], the cursor left the window.
+    /// The position of the cursor. If [`None`], the cursor left the window.
     pub cursor_pos: Option<Vector2<f64>>,
     /// The fired key events.
     pub keys: Vec<(DeviceId, KeyEvent)>,
