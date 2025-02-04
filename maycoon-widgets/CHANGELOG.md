@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.0](https://github.com/maycoon-ui/maycoon/compare/maycoon-widgets-v0.2.0...maycoon-widgets-v0.3.0) - 2025-02-04
+
+### Added
+
+- Add new Icon Widget
+
+### Other
+
+- Merge branch 'master' of https://github.com/maycoon-ui/maycoon
+- Fix more `clippy::doc_markdown` lints
+- Add Icon widget and example
+- Fix gesture_detector.rs invalidation
+
 ## [0.2.0](https://github.com/maycoon-ui/maycoon/compare/maycoon-widgets-v0.1.0...maycoon-widgets-v0.2.0) - 2025-01-26
 
 ### Other
