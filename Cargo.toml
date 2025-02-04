@@ -42,8 +42,14 @@ nalgebra = { workspace = true }
 
 [features]
 default = ["macros"]
+
+# Exports useful macros for working with maycoon.
 macros = ["maycoon-macros"]
+
+# Exports `vello` and `skrifa` for drawing vector graphics. Useful if you want to create custom widgets.
 vg = ["maycoon-core/vg"]
+
+# Enables the `Canvas` widget for drawing to the screen.
 canvas = ["maycoon-widgets/canvas"]
 
 [lib]
