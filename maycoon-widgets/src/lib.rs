@@ -7,36 +7,36 @@
 /// Contains various traits for extending widget capability.
 pub mod ext;
 
-/// Contains the [`text::Text`] widget.
+/// Contains the [text::Text] widget.
 pub mod text;
 
-/// Contains the [`button::Button`] widget.
+/// Contains the [button::Button] widget.
 pub mod button;
 
-/// Contains the [`container::Container`] widget.
+/// Contains the [container::Container] widget.
 pub mod container;
 
-/// Contains the [`dummy::DummyWidget`] widget.
+/// Contains the [dummy::DummyWidget] widget.
 pub mod dummy;
 
-/// Contains the [`image::Image`] widget.
+/// Contains the [image::Image] widget.
 pub mod image;
 
-/// Contains the [`checkbox::Checkbox`] widget.
+/// Contains the [checkbox::Checkbox] widget.
 pub mod checkbox;
 
-/// Contains the [`slider::Slider`] widget.
+/// Contains the [slider::Slider] widget.
 pub mod slider;
 
-/// Contains the [`fetcher::WidgetFetcher`] widget.
+/// Contains the [fetcher::WidgetFetcher] widget.
 pub mod fetcher;
 
-/// Contains the [`gesture_detector::GestureDetector`] widget.
+/// Contains the [gesture_detector::GestureDetector] widget.
 pub mod gesture_detector;
 
-/// Contains the [`icon::Icon`] widget.
+/// Contains the [icon::Icon] widget.
 pub mod icon;
 
-/// Contains the [`canvas::Canvas`] widget.
+/// Contains the [canvas::Canvas] widget.
 #[cfg(feature = "canvas")]
 pub mod canvas;
