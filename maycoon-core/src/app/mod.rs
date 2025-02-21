@@ -55,6 +55,18 @@ impl<T: Theme> MayApp<T> {
         self
     }
 
+    /// Insert a new system font into the font context.
+    pub fn with_system_font(mut self, name: impl ToString, postscript_name: impl ToString) -> Self {
+        self.font_ctx.insert_system_font(name, postscript_name);
+        self
+    }
+
+    /// Set the font context. Can be used to configure fonts.
+    pub fn with_font_context(mut self, font_ctx: FontContext) -> Self {
+        self.font_ctx = font_ctx;
+        self
+    }
+
     /// Run the application with given widget and state.
     pub fn run<S, W>(self, state: S, widget: W)
     where
