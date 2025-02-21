@@ -23,7 +23,8 @@ indexmap = { workspace = true }
 peniko = { workspace = true }
 
 [features]
-default = []
+default = ["include-noto-sans"]
+include-noto-sans = []
 
 # Re-exports `vello` and `skrifa` for drawing vector graphics.
 # Required if you want to make custom widgets or draw vector graphics.
