@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.0](https://github.com/maycoon-ui/maycoon/compare/maycoon-core-v0.2.0...maycoon-core-v0.3.0) - 2025-02-21
+
+### Added
+
+- Add more font configuration options
+
+### Fixed
+
+- Font Insertion mechanism and documentation
+- Replace OS-loaded default font with embedded
+
+### Other
+
+- Fix more `clippy::doc_markdown` lints
+- Update bitflags
+- Add device selector
+
 ## [0.2.0](https://github.com/maycoon-ui/maycoon/compare/maycoon-core-v0.1.0...maycoon-core-v0.2.0) - 2025-01-26
 
 ### Other
