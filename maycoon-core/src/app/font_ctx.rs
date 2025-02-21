@@ -14,16 +14,24 @@ pub struct FontContext {
 
 impl FontContext {
     /// Insert a font with a custom name.
-    pub fn insert(&mut self, name: impl ToString, font: Font) {
-        self.fonts.insert(name.to_string(), font);
+    ///
+    /// If the font with the same name already exists, it will be overwritten and the old font will be returned.
+    pub fn insert(&mut self, name: impl ToString, font: Font) -> Option<Font> {
+        self.fonts.insert(name.to_string(), font)
     }
 
     /// Insert a system font with the given name which is loaded via the postscript name.
+    ///
+    /// If the font with the same name already exists, it will be overwritten and the old font will be returned.
+    ///
+    /// Also returns `None` if the font could not be loaded.
+    ///
+    /// Not recommended to use, since it's system dependent.
     pub fn insert_system_font(
         &mut self,
         name: impl ToString,
         postscript_name: impl ToString,
-    ) -> Option<()> {
+    ) -> Option<Font> {
         let font = font_kit::source::SystemSource::new()
             .select_by_postscript_name(postscript_name.to_string().as_str())
             .ok()?
@@ -32,9 +40,7 @@ impl FontContext {
             .copy_font_data()?;
 
         self.fonts
-            .insert(name.to_string(), Font::new(Blob::new(font), 0))?;
-
-        Some(())
+            .insert(name.to_string(), Font::new(Blob::new(font), 0))
     }
 
     /// Get a font by a specified name. Returns [`None`] if the font could not be found.
