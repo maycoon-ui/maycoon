@@ -1,5 +1,5 @@
 use nalgebra::Vector2;
-use winit::event::{DeviceId, ElementState, KeyEvent, MouseButton};
+use winit::event::{DeviceId, ElementState, KeyEvent, MouseButton, MouseScrollDelta};
 
 use crate::app::diagnostics::Diagnostics;
 use crate::app::font_ctx::FontContext;
@@ -12,6 +12,8 @@ pub struct AppInfo {
     pub keys: Vec<(DeviceId, KeyEvent)>,
     /// The fired mouse button events.
     pub buttons: Vec<(DeviceId, MouseButton, ElementState)>,
+    /// The mouse scroll delta, if a [winit::event::WindowEvent::MouseWheel] event was fired.
+    pub mouse_scroll_delta: Option<MouseScrollDelta>,
     /// App Diagnostics.
     pub diagnostics: Diagnostics,
     /// The current font context.
@@ -25,6 +27,7 @@ impl AppInfo {
     pub fn reset(&mut self) {
         self.buttons.clear();
         self.keys.clear();
+        self.mouse_scroll_delta = None;
     }
 }
 
@@ -34,6 +37,7 @@ impl Default for AppInfo {
             cursor_pos: None,
             keys: Vec::with_capacity(4),
             buttons: Vec::with_capacity(2),
+            mouse_scroll_delta: None,
             diagnostics: Diagnostics::default(),
             font_context: FontContext::default(),
             size: Vector2::new(0.0, 0.0),

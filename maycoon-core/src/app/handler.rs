@@ -473,6 +473,11 @@ where
                         self.request_redraw();
                     },
 
+                    WindowEvent::MouseWheel { delta, .. } => {
+                        self.info.mouse_scroll_delta = Some(delta);
+                        self.request_redraw();
+                    },
+
                     WindowEvent::Destroyed => log::info!("Window destroyed! Exiting..."),
 
                     _ => (),
