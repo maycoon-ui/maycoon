@@ -87,6 +87,8 @@ impl<S: State, T: 'static> Val<S, T> {
 
     /// If the inner value is state dependent, compute it using the given state.
     pub fn compute(&mut self, state: &S) {
+        log::trace!("Computing value...");
+
         match self {
             Val::State { factory, value } => {
                 *value = Some(factory(state));

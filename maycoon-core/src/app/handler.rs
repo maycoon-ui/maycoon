@@ -93,6 +93,8 @@ where
 
     /// Add the parent node and its children to the layout tree.
     fn layout_widget(&mut self, parent: NodeId, style: &StyleNode) -> TaffyResult<()> {
+        log::trace!("Laying out widget: {:?}", parent);
+
         let node = self.taffy.new_leaf(style.style.clone().into())?;
 
         self.taffy.add_child(parent, node)?;
@@ -106,6 +108,8 @@ where
 
     /// Compute the layout of the root node and its children.
     fn compute_layout(&mut self) -> TaffyResult<()> {
+        log::trace!("Computing root layout.");
+
         self.taffy.compute_layout(
             self.window_node,
             Size::<AvailableSpace> {
@@ -122,6 +126,8 @@ where
 
     /// Collect the computed layout of the given node and its children. Make sure to call [`AppHandler::compute_layout`] before, to not get dirty results.
     fn collect_layout(&mut self, node: NodeId, style: &StyleNode) -> TaffyResult<LayoutNode> {
+        log::trace!("Collecting layout for node: {:?}", node);
+
         let mut children = Vec::with_capacity(style.children.len());
 
         for (i, child) in style.children.iter().enumerate() {
@@ -136,6 +142,8 @@ where
 
     /// Request a window redraw.
     fn request_redraw(&self) {
+        log::trace!("Requesting redraw...");
+
         if let Some(window) = self.window.as_ref() {
             window.request_redraw();
         }
@@ -145,6 +153,8 @@ where
     fn update(&mut self, _: &ActiveEventLoop) {
         // completely layout widgets if taffy is not set up yet (e.g. during first update)
         if self.taffy.child_count(self.window_node) == 0 {
+            log::trace!("Setting up layout...");
+
             let style = self.widget.layout_style(&self.state);
 
             self.layout_widget(self.window_node, &style)
@@ -165,6 +175,7 @@ where
             .expect("Failed to collect layout");
 
         // update call to check if app should re-evaluate
+        log::trace!("Updating root widget...");
         self.update.insert(
             self.widget
                 .update(&layout_node, &mut self.state, &self.info),
@@ -172,6 +183,8 @@ where
 
         // check if app should re-evaluate layout
         if self.update.intersects(Update::LAYOUT | Update::FORCE) {
+            log::trace!("Layout update detected!");
+
             // clear all nodes (except root window node)
             self.taffy
                 .set_children(self.window_node, &[])
@@ -194,9 +207,12 @@ where
 
         // check if app should redraw
         if self.update.intersects(Update::FORCE | Update::DRAW) {
+            log::trace!("Draw update detected!");
+
             // clear scene
             self.scene.reset();
 
+            log::trace!("Rendering root widget...");
             self.widget.render(
                 &mut self.scene,
                 &mut self.config.theme,
@@ -242,11 +258,15 @@ where
                     .expect("Failed to render to surface");
 
                 surface_texture.present();
+            } else {
+                log::trace!("Surface invalid. Skipping render.");
             }
         }
 
         // check if app should re-evaluate
         if self.update.intersects(Update::EVAL | Update::FORCE) {
+            log::trace!("Evaluation update detected!");
+
             if let Some(window) = self.window.as_ref() {
                 window.request_redraw();
             }
@@ -270,6 +290,8 @@ where
             // increase updates per sec NOW by 1
             self.info.diagnostics.updates += 1;
         }
+
+        log::trace!("Updates per sec: {}", self.info.diagnostics.updates_per_sec);
     }
 }
 
@@ -280,8 +302,11 @@ where
     S: State,
 {
     fn resumed(&mut self, event_loop: &ActiveEventLoop) {
+        log::info!("Resuming/Starting app execution...");
+
         let mut render_ctx = RenderContext::new();
 
+        log::trace!("Creating window...");
         self.window = Some(Arc::new(
             event_loop
                 .create_window(self.attrs.clone())
@@ -307,6 +332,8 @@ where
 
         self.surface = Some(
             crate::tasks::block_on(async {
+                log::trace!("Creating surface...");
+
                 render_ctx
                     .create_surface(
                         self.window.clone().unwrap(),
@@ -319,8 +346,10 @@ where
             .expect("Failed to create surface"),
         );
 
+        log::trace!("Requesting device handle via selector...");
         let device_handle = (self.config.render.device_selector)(&render_ctx.devices);
 
+        log::trace!("Creating renderer...");
         self.renderer = Some(
             Renderer::new(
                 &device_handle.device,
@@ -363,6 +392,8 @@ where
                 match event {
                     WindowEvent::Resized(new_size) => {
                         if new_size.width != 0 && new_size.height != 0 {
+                            log::info!("Window resized to {}x{}", new_size.width, new_size.height);
+
                             if let Some(ctx) = &self.render_ctx {
                                 if let Some(surface) = &mut self.surface {
                                     ctx.resize_surface(surface, new_size.width, new_size.height);
@@ -388,10 +419,15 @@ where
                             self.request_redraw();
 
                             self.update.insert(Update::DRAW | Update::LAYOUT);
+                        } else {
+                            log::trace!("Window size is 0x0, ignoring resize event.");
                         }
                     },
 
                     WindowEvent::CloseRequested => {
+                        log::info!("Window Close requested...");
+
+                        log::trace!("Destroying device handles...");
                         if let Some(render_ctx) = self.render_ctx.as_mut() {
                             for handle in &render_ctx.devices {
                                 handle.device.destroy();
@@ -437,6 +473,8 @@ where
                         self.request_redraw();
                     },
 
+                    WindowEvent::Destroyed => log::info!("Window destroyed! Exiting..."),
+
                     _ => (),
                 }
             }
@@ -444,6 +482,8 @@ where
     }
 
     fn suspended(&mut self, _: &ActiveEventLoop) {
+        log::info!("Suspending application...");
+
         self.window = None;
         self.surface = None;
         self.render_ctx = None;

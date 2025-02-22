@@ -37,6 +37,8 @@ impl<T: Theme> MayApp<T> {
     pub fn new(config: MayConfig<T>) -> Self {
         // init task runner
         if let Some(config) = &config.tasks {
+            log::info!("Initializing task runner.");
+
             crate::tasks::runner::TaskRunner::new(config.stack_size, config.workers)
                 .expect("Failed to create task runner")
                 .init()
@@ -123,6 +125,8 @@ impl<T: Theme> MayApp<T> {
             .window
             .resize_increments
             .map(|v| Size::Logical(LogicalSize::new(v.x, v.y)));
+
+        log::info!("Launching Application...");
 
         event_loop
             .run_app(&mut AppHandler::new(

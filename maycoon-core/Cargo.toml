@@ -21,6 +21,7 @@ maycoon-theme = { workspace = true }
 nalgebra = { workspace = true }
 indexmap = { workspace = true }
 peniko = { workspace = true }
+log = { workspace = true }
 
 [features]
 default = ["include-noto-sans"]
