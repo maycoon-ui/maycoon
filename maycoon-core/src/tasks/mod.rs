@@ -28,7 +28,7 @@ where
     runner().expect("Task runner not initialized yet").run(fut)
 }
 
-/// Blocks on the given [`Future`] on the task runner thread pool and returns the output.
+/// Blocks the current thread until the given [`Future`] completes.
 pub fn block_on<Fut>(fut: Fut) -> Fut::Output
 where
     Fut: Future,
