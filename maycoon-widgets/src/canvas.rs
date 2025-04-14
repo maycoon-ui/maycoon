@@ -1,7 +1,7 @@
+use maycoon_core::app::context::AppContext;
 use maycoon_core::app::info::AppInfo;
 use maycoon_core::app::update::Update;
 use maycoon_core::layout::{LayoutNode, LayoutStyle, StyleNode};
-use maycoon_core::state::State;
 use maycoon_core::vg::Scene;
 use maycoon_core::widget::Widget;
 use maycoon_theme::id::WidgetId;
@@ -13,50 +13,49 @@ use maycoon_theme::theme::Theme;
 ///
 /// ### Theming
 /// The canvas cannot be themed, since it does not draw something on itself.
-pub struct Canvas<S: State> {
-    painter: Box<dyn FnMut(&mut Scene, &S)>,
+pub struct Canvas {
+    painter: Box<dyn FnMut(&mut Scene, &AppInfo)>,
 }
 
-impl<S: State> Canvas<S> {
+impl Canvas {
     /// Create a new Canvas widget from a painter function.
-    pub fn new(painter: impl FnMut(&mut Scene, &S) + 'static) -> Self {
+    pub fn new(painter: impl FnMut(&mut Scene, &AppInfo) + 'static) -> Self {
         Self {
             painter: Box::new(painter),
         }
     }
 
     /// Set a painter function and return itself.
-    pub fn with_painter(painter: impl FnMut(&mut Scene, &S) + 'static) -> Self {
-        Self {
-            painter: Box::new(painter),
-        }
+    pub fn with_painter(mut self, painter: impl FnMut(&mut Scene, &AppInfo) + 'static) -> Self {
+        self.painter = Box::new(painter);
+        self
     }
 }
 
-impl<S: State> Widget<S> for Canvas<S> {
+impl Widget for Canvas {
     fn render(
         &mut self,
         scene: &mut Scene,
         _: &mut dyn Theme,
-        _: &AppInfo,
         _: &LayoutNode,
-        state: &S,
+        info: &AppInfo,
+        _: AppContext,
     ) {
         let mut canvas = Scene::new();
 
-        (self.painter)(&mut canvas, state);
+        (self.painter)(&mut canvas, info);
 
         scene.append(&canvas, None);
     }
 
-    fn layout_style(&mut self, _: &S) -> StyleNode {
+    fn layout_style(&self) -> StyleNode {
         StyleNode {
             style: LayoutStyle::default(),
             children: Vec::new(),
         }
     }
 
-    fn update(&mut self, _: &LayoutNode, _: &mut S, _: &AppInfo) -> Update {
+    fn update(&mut self, _: &LayoutNode, _: AppContext, _: &AppInfo) -> Update {
         Update::DRAW | Update::LAYOUT
     }
 

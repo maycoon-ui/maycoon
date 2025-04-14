@@ -1,9 +1,10 @@
 use crate::ext::WidgetLayoutExt;
+use maycoon_core::app::context::AppContext;
 use maycoon_core::app::info::AppInfo;
 use maycoon_core::app::update::Update;
 use maycoon_core::layout;
 use maycoon_core::layout::{Dimension, LayoutNode, LayoutStyle, LengthPercentageAuto, StyleNode};
-use maycoon_core::state::{State, Val};
+use maycoon_core::signal::MaybeSignal;
 use maycoon_core::vg::kurbo::{Affine, Circle, Point, Rect, RoundedRect, RoundedRectRadii};
 use maycoon_core::vg::peniko::{Brush, Fill};
 use maycoon_core::vg::Scene;
@@ -19,21 +20,18 @@ use nalgebra::Vector2;
 /// You can style the slider using following properties:
 /// - `color` - The color of the slider bar.
 /// - `color_ball` - The color of the slider ball.
-pub struct Slider<S: State> {
-    layout_style: Val<S, LayoutStyle>,
-    value: Val<S, f32>,
-    on_change: Box<dyn FnMut(&mut S, f32) -> Update>,
+pub struct Slider {
+    layout_style: MaybeSignal<LayoutStyle>,
+    value: MaybeSignal<f32>,
+    on_change: MaybeSignal<Update>,
     dragging: bool,
 }
 
-impl<S: State> Slider<S> {
+impl Slider {
     /// Create a new Slider widget from a value (should be state bound) and an `on_change` callback.
-    pub fn new(
-        value: impl Into<Val<S, f32>>,
-        on_change: impl FnMut(&mut S, f32) -> Update + 'static,
-    ) -> Self {
+    pub fn new(value: impl Into<MaybeSignal<f32>>) -> Self {
         Self {
-            layout_style: Val::new_val(LayoutStyle {
+            layout_style: LayoutStyle {
                 size: Vector2::<Dimension>::new(Dimension::Length(100.0), Dimension::Length(10.0)),
                 margin: layout::Rect::<LengthPercentageAuto> {
                     left: LengthPercentageAuto::Length(10.0),
@@ -42,45 +40,43 @@ impl<S: State> Slider<S> {
                     bottom: LengthPercentageAuto::Length(10.0),
                 },
                 ..Default::default()
-            }),
+            }
+            .into(),
             value: value.into(),
-            on_change: Box::new(on_change),
+            on_change: MaybeSignal::value(Update::empty()),
             dragging: false,
         }
     }
 
     /// Sets the layout style of the slider and returns itself.
-    pub fn with_value(mut self, value: impl Into<Val<S, f32>>) -> Self {
+    pub fn with_value(mut self, value: impl Into<MaybeSignal<f32>>) -> Self {
         self.value = value.into();
         self
     }
 
     /// Sets the function to be called when the slider is clicked/changed.
-    pub fn with_on_change(
-        mut self,
-        on_change: impl FnMut(&mut S, f32) -> Update + 'static,
-    ) -> Self {
-        self.on_change = Box::new(on_change);
+    pub fn with_on_change(mut self, on_change: impl Into<MaybeSignal<Update>>) -> Self {
+        self.on_change = on_change.into();
         self
     }
 }
 
-impl<S: State> WidgetLayoutExt<S> for Slider<S> {
-    fn set_layout_style(&mut self, layout_style: impl Into<Val<S, LayoutStyle>>) {
+impl WidgetLayoutExt for Slider {
+    fn set_layout_style(&mut self, layout_style: impl Into<MaybeSignal<LayoutStyle>>) {
         self.layout_style = layout_style.into();
     }
 }
 
-impl<S: State> Widget<S> for Slider<S> {
+impl Widget for Slider {
     fn render(
         &mut self,
         scene: &mut Scene,
         theme: &mut dyn Theme,
-        _: &AppInfo,
         layout_node: &LayoutNode,
-        state: &S,
+        _: &AppInfo,
+        _: AppContext,
     ) {
-        let value = *self.value.get_ref(state);
+        let value = *self.value.get();
 
         let brush = if let Some(style) = theme.of(self.widget_id()) {
             Brush::Solid(style.get_color("color").unwrap())
@@ -127,17 +123,14 @@ impl<S: State> Widget<S> for Slider<S> {
         );
     }
 
-    fn layout_style(&mut self, state: &S) -> StyleNode {
+    fn layout_style(&self) -> StyleNode {
         StyleNode {
-            style: self.layout_style.get_ref(state).clone(),
+            style: self.layout_style.get().clone(),
             children: Vec::new(),
         }
     }
 
-    fn update(&mut self, layout: &LayoutNode, state: &mut S, info: &AppInfo) -> Update {
-        self.value.invalidate();
-        self.layout_style.invalidate();
-
+    fn update(&mut self, layout: &LayoutNode, _: AppContext, info: &AppInfo) -> Update {
         let mut update = Update::empty();
 
         if let Some(cursor) = info.cursor_pos {
@@ -156,7 +149,11 @@ impl<S: State> Widget<S> for Slider<S> {
                     let new_value =
                         (cursor.x as f32 - layout.layout.location.x) / layout.layout.size.width;
 
-                    update.insert((self.on_change)(state, new_value));
+                    if let Some(sig) = self.value.as_signal() {
+                        sig.set(new_value);
+                    }
+
+                    update.insert(*self.on_change.get());
                     update.insert(Update::DRAW);
                 }
             }

@@ -1,13 +1,13 @@
-use maycoon_core::state::{State, Val};
-use maycoon_core::widget::Widget;
+use maycoon_core::signal::MaybeSignal;
+use maycoon_core::widget::{BoxedWidget, Widget};
 
 /// An extension trait for widgets with a single child widget.
-pub trait WidgetChildExt<S: State, W: Widget<S> + 'static> {
+pub trait WidgetChildExt {
     /// Sets the child widget of the widget.
-    fn set_child(&mut self, child: impl Into<Val<S, W>>);
+    fn set_child(&mut self, child: impl Widget + 'static);
 
     /// Sets the child widget of the widget and returns self.
-    fn with_child(mut self, child: impl Into<Val<S, W>>) -> Self
+    fn with_child(mut self, child: impl Widget + 'static) -> Self
     where
         Self: Sized,
     {
@@ -17,12 +17,12 @@ pub trait WidgetChildExt<S: State, W: Widget<S> + 'static> {
 }
 
 /// An extension trait for widgets with multiple child widgets.
-pub trait WidgetChildrenExt<S: State> {
+pub trait WidgetChildrenExt {
     /// Sets the child widgets of the widget.
-    fn set_children(&mut self, children: Vec<Val<S, impl Widget<S> + 'static>>);
+    fn set_children(&mut self, children: Vec<BoxedWidget>);
 
     /// Sets the child widgets of the widget and returns self.
-    fn with_children(mut self, children: Vec<Val<S, impl Widget<S> + 'static>>) -> Self
+    fn with_children(mut self, children: Vec<BoxedWidget>) -> Self
     where
         Self: Sized,
     {
@@ -31,10 +31,10 @@ pub trait WidgetChildrenExt<S: State> {
     }
 
     /// Adds a child widget to the widget.
-    fn add_child<W: Widget<S> + 'static>(&mut self, child: impl Into<Val<S, W>>);
+    fn add_child(&mut self, child: impl Widget + 'static);
 
     /// Adds a child widget to the widget and returns self.
-    fn with_child<W: Widget<S> + 'static>(mut self, child: impl Into<Val<S, W>>) -> Self
+    fn with_child(mut self, child: impl Widget + 'static) -> Self
     where
         Self: Sized,
     {
@@ -44,17 +44,17 @@ pub trait WidgetChildrenExt<S: State> {
 }
 
 /// An extension trait for widgets with a layout style.
-pub trait WidgetLayoutExt<S: State> {
+pub trait WidgetLayoutExt {
     /// Sets the layout style of the widget.
     fn set_layout_style(
         &mut self,
-        layout_style: impl Into<Val<S, maycoon_core::layout::LayoutStyle>>,
+        layout_style: impl Into<MaybeSignal<maycoon_core::layout::LayoutStyle>>,
     );
 
     /// Sets the layout style of the widget and returns self.
     fn with_layout_style(
         mut self,
-        layout_style: impl Into<Val<S, maycoon_core::layout::LayoutStyle>>,
+        layout_style: impl Into<MaybeSignal<maycoon_core::layout::LayoutStyle>>,
     ) -> Self
     where
         Self: Sized,

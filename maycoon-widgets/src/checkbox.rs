@@ -1,9 +1,10 @@
 use crate::ext::WidgetLayoutExt;
+use maycoon_core::app::context::AppContext;
 use maycoon_core::app::info::AppInfo;
 use maycoon_core::app::update::Update;
 use maycoon_core::layout;
 use maycoon_core::layout::{Dimension, LayoutNode, LayoutStyle, LengthPercentageAuto, StyleNode};
-use maycoon_core::state::{State, Val};
+use maycoon_core::signal::MaybeSignal;
 use maycoon_core::vg::kurbo::{Affine, Rect, RoundedRect, RoundedRectRadii, Stroke};
 use maycoon_core::vg::peniko::{Brush, Fill};
 use maycoon_core::vg::Scene;
@@ -21,19 +22,19 @@ use nalgebra::Vector2;
 /// Styling the checkbox require following properties:
 /// - `color_unchecked` -  The color of the checkbox, when it's not checked (inner value is false).
 /// - `color_checked` - The color of the checkbox, when it's checked (inner value is true).
-pub struct Checkbox<S: State> {
-    layout_style: Val<S, LayoutStyle>,
-    on_change: Box<dyn FnMut(&mut S) -> Update>,
-    value: Val<S, bool>,
+pub struct Checkbox {
+    layout_style: MaybeSignal<LayoutStyle>,
+    value: MaybeSignal<bool>,
+    on_change: MaybeSignal<Update>,
 }
 
-impl<S: State> Checkbox<S> {
+impl Checkbox {
     /// Create a new checkbox with the given value.
     ///
     /// The value should be state dependent, so you can mutate it on change.
-    pub fn new(value: Val<S, bool>) -> Self {
+    pub fn new(value: impl Into<MaybeSignal<bool>>) -> Self {
         Self {
-            layout_style: Val::new_val(LayoutStyle {
+            layout_style: LayoutStyle {
                 size: Vector2::<Dimension>::new(Dimension::Length(20.0), Dimension::Length(20.0)),
                 margin: layout::Rect::<LengthPercentageAuto> {
                     left: LengthPercentageAuto::Length(0.5),
@@ -42,45 +43,42 @@ impl<S: State> Checkbox<S> {
                     bottom: LengthPercentageAuto::Length(0.5),
                 },
                 ..Default::default()
-            }),
-            on_change: Box::new(|_| Update::empty()),
-            value,
+            }
+            .into(),
+            value: value.into(),
+            on_change: Update::empty().into(),
         }
     }
 
-    /// Sets the function to be called when the checkbox is clicked/changed.
-    ///
-    /// You should mutate the inner value of the checkbox using the provided state.
-    pub fn with_on_change(mut self, on_change: impl FnMut(&mut S) -> Update + 'static) -> Self {
-        self.on_change = Box::new(on_change);
+    /// Sets the value of the checkbox and returns itself.
+    pub fn with_value(mut self, value: impl Into<MaybeSignal<bool>>) -> Self {
+        self.value = value.into();
         self
     }
 
-    /// Sets the value of the checkbox and returns itself.
-    ///
-    /// The [`Val`] should be state dependent, so you can mutate it on change.
-    pub fn with_value(mut self, value: impl Into<Val<S, bool>>) -> Self {
-        self.value = value.into();
+    /// Sets the update value to apply on changes.
+    pub fn with_on_change(mut self, on_change: impl Into<MaybeSignal<Update>>) -> Self {
+        self.on_change = on_change.into();
         self
     }
 }
 
-impl<S: State> WidgetLayoutExt<S> for Checkbox<S> {
-    fn set_layout_style(&mut self, layout_style: impl Into<Val<S, LayoutStyle>>) {
+impl WidgetLayoutExt for Checkbox {
+    fn set_layout_style(&mut self, layout_style: impl Into<MaybeSignal<LayoutStyle>>) {
         self.layout_style = layout_style.into();
     }
 }
 
-impl<S: State> Widget<S> for Checkbox<S> {
+impl Widget for Checkbox {
     fn render(
         &mut self,
         scene: &mut Scene,
         theme: &mut dyn Theme,
-        _: &AppInfo,
         layout_node: &LayoutNode,
-        state: &S,
+        _: &AppInfo,
+        _: AppContext,
     ) {
-        let checked = *self.value.get_ref(state);
+        let checked = *self.value.get();
 
         let color = if let Some(style) = theme.of(self.widget_id()) {
             if checked {
@@ -131,17 +129,14 @@ impl<S: State> Widget<S> for Checkbox<S> {
         }
     }
 
-    fn layout_style(&mut self, state: &S) -> StyleNode {
+    fn layout_style(&self) -> StyleNode {
         StyleNode {
-            style: self.layout_style.get_ref(state).clone(),
+            style: self.layout_style.get().clone(),
             children: Vec::new(),
         }
     }
 
-    fn update(&mut self, layout: &LayoutNode, state: &mut S, info: &AppInfo) -> Update {
-        self.value.invalidate();
-        self.layout_style.invalidate();
-
+    fn update(&mut self, layout: &LayoutNode, _: AppContext, info: &AppInfo) -> Update {
         let mut update = Update::empty();
 
         if let Some(cursor) = &info.cursor_pos {
@@ -152,7 +147,12 @@ impl<S: State> Widget<S> for Checkbox<S> {
             {
                 for (_, btn, el) in &info.buttons {
                     if btn == &MouseButton::Left && *el == ElementState::Released {
-                        update |= (self.on_change)(state);
+                        update |= *self.on_change.get();
+                        update |= Update::DRAW;
+
+                        if let Some(sig) = self.value.as_signal() {
+                            sig.set(!*sig.get());
+                        }
                     }
                 }
             }

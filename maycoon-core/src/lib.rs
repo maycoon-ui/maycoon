@@ -1,3 +1,6 @@
+// TODO: remove when stabilized
+#![feature(unboxed_closures)]
+#![feature(fn_traits)]
 #![warn(missing_docs)]
 
 //! Core library for Maycoon => See `maycoon` crate.
@@ -25,8 +28,8 @@ pub mod config;
 /// Contains useful types and functions for layout interaction.
 pub mod layout;
 
-/// Contains app state management features
-pub mod state;
+/// Contains the signal system for reactive programming
+pub mod signal;
 
 /// Contains the core widget functionalities
 pub mod widget;
@@ -36,3 +39,6 @@ pub mod component;
 
 /// Contains the task runner and utilities for running async
 pub mod tasks;
+
+/// Contains the [reference::Ref] for representing a reference to a value.
+pub mod reference;

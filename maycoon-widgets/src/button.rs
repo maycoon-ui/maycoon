@@ -1,13 +1,14 @@
 use crate::ext::{WidgetChildExt, WidgetLayoutExt};
+use maycoon_core::app::context::AppContext;
 use maycoon_core::app::info::AppInfo;
 use maycoon_core::app::update::Update;
 use maycoon_core::layout;
 use maycoon_core::layout::{LayoutNode, LayoutStyle, LengthPercentage, StyleNode};
-use maycoon_core::state::{State, Val};
+use maycoon_core::signal::MaybeSignal;
 use maycoon_core::vg::kurbo::{Affine, Rect, RoundedRect, RoundedRectRadii, Vec2};
 use maycoon_core::vg::peniko::{Brush, Fill};
 use maycoon_core::vg::Scene;
-use maycoon_core::widget::Widget;
+use maycoon_core::widget::{BoxedWidget, Widget};
 use maycoon_core::window::{ElementState, MouseButton};
 use maycoon_theme::id::WidgetId;
 use maycoon_theme::theme::Theme;
@@ -21,20 +22,20 @@ use maycoon_theme::theme::Theme;
 /// - `color_pressed` -  The color of the button when pressed.
 /// - `color_idle` - The color of the button when not pressed and not hovered (idling).
 /// - `color_hovered` - The color of the button when hovered on.
-pub struct Button<S: State, W: Widget<S> + 'static> {
-    child: Val<S, W>,
+pub struct Button {
+    child: BoxedWidget,
     state: ButtonState,
-    on_pressed: Box<dyn FnMut(&mut S) -> Update>,
-    layout_style: Val<S, LayoutStyle>,
+    on_pressed: MaybeSignal<Update>,
+    layout_style: MaybeSignal<LayoutStyle>,
 }
 
-impl<S: State, W: Widget<S> + 'static> Button<S, W> {
+impl Button {
     /// Create a new button with the given child widget.
-    pub fn new(child: impl Into<Val<S, W>>) -> Self {
+    pub fn new(child: impl Widget + 'static) -> Self {
         Self {
-            child: child.into(),
+            child: Box::new(child),
             state: ButtonState::Idle,
-            on_pressed: Box::new(|_| Update::empty()),
+            on_pressed: MaybeSignal::value(Update::empty()),
             layout_style: LayoutStyle {
                 padding: layout::Rect::<LengthPercentage> {
                     left: LengthPercentage::Length(12.0),
@@ -49,32 +50,32 @@ impl<S: State, W: Widget<S> + 'static> Button<S, W> {
     }
 
     /// Sets the function to be called when the button is pressed.
-    pub fn with_on_pressed(mut self, on_pressed: impl FnMut(&mut S) -> Update + 'static) -> Self {
-        self.on_pressed = Box::new(on_pressed);
+    pub fn with_on_pressed(mut self, on_pressed: impl Into<MaybeSignal<Update>>) -> Self {
+        self.on_pressed = on_pressed.into();
         self
     }
 }
 
-impl<S: State, W: Widget<S>> WidgetChildExt<S, W> for Button<S, W> {
-    fn set_child(&mut self, child: impl Into<Val<S, W>>) {
-        self.child = child.into();
+impl WidgetChildExt for Button {
+    fn set_child(&mut self, child: impl Widget + 'static) {
+        self.child = Box::new(child);
     }
 }
 
-impl<S: State, W: Widget<S>> WidgetLayoutExt<S> for Button<S, W> {
-    fn set_layout_style(&mut self, layout_style: impl Into<Val<S, LayoutStyle>>) {
+impl WidgetLayoutExt for Button {
+    fn set_layout_style(&mut self, layout_style: impl Into<MaybeSignal<LayoutStyle>>) {
         self.layout_style = layout_style.into();
     }
 }
 
-impl<S: State, W: Widget<S>> Widget<S> for Button<S, W> {
+impl Widget for Button {
     fn render(
         &mut self,
         scene: &mut Scene,
         theme: &mut dyn Theme,
-        info: &AppInfo,
         layout_node: &LayoutNode,
-        state: &S,
+        info: &AppInfo,
+        context: AppContext,
     ) {
         let brush = if let Some(style) = theme.of(self.widget_id()) {
             match self.state {
@@ -113,12 +114,12 @@ impl<S: State, W: Widget<S>> Widget<S> for Button<S, W> {
 
             let mut child_scene = Scene::new();
 
-            self.child.get_mut(state).render(
+            self.child.render(
                 &mut child_scene,
                 theme,
-                info,
                 &layout_node.children[0],
-                state,
+                info,
+                context,
             );
 
             scene.append(
@@ -133,17 +134,14 @@ impl<S: State, W: Widget<S>> Widget<S> for Button<S, W> {
         }
     }
 
-    fn layout_style(&mut self, state: &S) -> StyleNode {
+    fn layout_style(&self) -> StyleNode {
         StyleNode {
-            style: self.layout_style.get_ref(state).clone(),
-            children: vec![self.child.get_mut(state).layout_style(state)],
+            style: self.layout_style.get().clone(),
+            children: vec![self.child.layout_style()],
         }
     }
 
-    fn update(&mut self, layout: &LayoutNode, state: &mut S, info: &AppInfo) -> Update {
-        self.layout_style.invalidate();
-        self.child.invalidate();
-
+    fn update(&mut self, layout: &LayoutNode, _: AppContext, info: &AppInfo) -> Update {
         let mut update = Update::empty();
         let old_state = self.state;
 
@@ -170,7 +168,7 @@ impl<S: State, W: Widget<S>> Widget<S> for Button<S, W> {
                             // actually fire the event if the button is released
                             ElementState::Released => {
                                 self.state = ButtonState::Released;
-                                update |= (self.on_pressed)(state);
+                                update |= *self.on_pressed.get();
                             },
                         }
                     }

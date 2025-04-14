@@ -16,9 +16,6 @@ pub mod button;
 /// Contains the [container::Container] widget.
 pub mod container;
 
-/// Contains the [dummy::DummyWidget] widget.
-pub mod dummy;
-
 /// Contains the [image::Image] widget.
 pub mod image;
 
@@ -31,12 +28,12 @@ pub mod slider;
 /// Contains the [fetcher::WidgetFetcher] widget.
 pub mod fetcher;
 
+/// Contains the [canvas::Canvas] widget.
+#[cfg(feature = "canvas")]
+pub mod canvas;
+
 /// Contains the [gesture_detector::GestureDetector] widget.
 pub mod gesture_detector;
 
 /// Contains the [icon::Icon] widget.
 pub mod icon;
-
-/// Contains the [canvas::Canvas] widget.
-#[cfg(feature = "canvas")]
-pub mod canvas;

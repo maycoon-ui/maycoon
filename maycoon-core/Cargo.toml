@@ -17,6 +17,7 @@ bitflags = "2.8.0"
 font-kit = "0.14.2"
 futures = { version = "0.3.31", features = ["thread-pool"] }
 skrifa = { version = "0.26.5", optional = true }
+arc-swap = "1.7.1"
 maycoon-theme = { workspace = true }
 nalgebra = { workspace = true }
 indexmap = { workspace = true }

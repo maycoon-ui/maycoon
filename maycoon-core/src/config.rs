@@ -7,7 +7,6 @@ pub use winit::window::{
     BadIcon, Cursor, CursorIcon, CustomCursor, Icon as WindowIcon, WindowButtons, WindowLevel,
 };
 
-use maycoon_theme::theme::celeste::CelesteTheme;
 use maycoon_theme::theme::Theme;
 
 /// Maycoon Application Configuration Structure.
@@ -23,13 +22,13 @@ pub struct MayConfig<T: Theme> {
     pub theme: T,
 }
 
-impl Default for MayConfig<CelesteTheme> {
+impl<T: Default + Theme> Default for MayConfig<T> {
     fn default() -> Self {
         Self {
             window: WindowConfig::default(),
             render: RenderConfig::default(),
             tasks: None,
-            theme: CelesteTheme::light(),
+            theme: T::default(),
         }
     }
 }

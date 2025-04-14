@@ -13,22 +13,20 @@ use winit::event::WindowEvent;
 use winit::event_loop::ActiveEventLoop;
 use winit::window::{Window, WindowAttributes, WindowId};
 
-use maycoon_theme::theme::Theme;
-
+use crate::app::context::AppContext;
 use crate::app::font_ctx::FontContext;
 use crate::app::info::AppInfo;
-use crate::app::update::Update;
+use crate::app::update::{Update, UpdateManager};
 use crate::config::MayConfig;
 use crate::layout::{LayoutNode, StyleNode};
-use crate::state::State;
 use crate::widget::Widget;
+use maycoon_theme::theme::Theme;
 
 /// The core application handler. You should use [`MayApp`](crate::app::MayApp) instead for running applications.
-pub struct AppHandler<'a, T, W, S>
+pub struct AppHandler<'a, T, W>
 where
     T: Theme,
-    W: Widget<S>,
-    S: State,
+    W: Widget,
 {
     config: MayConfig<T>,
     attrs: WindowAttributes,
@@ -39,26 +37,24 @@ where
     taffy: TaffyTree,
     window_node: NodeId,
     widget: W,
-    state: S,
     info: AppInfo,
     render_ctx: Option<RenderContext>,
-    update: Update,
+    update: UpdateManager,
     last_update: Instant,
 }
 
-impl<T, W, S> AppHandler<'_, T, W, S>
+impl<T, W> AppHandler<'_, T, W>
 where
     T: Theme,
-    W: Widget<S>,
-    S: State,
+    W: Widget,
 {
     /// Create a new handler with given window attributes, config, widget and state.
     pub fn new(
         attrs: WindowAttributes,
         config: MayConfig<T>,
         widget: W,
-        state: S,
         font_context: FontContext,
+        update: UpdateManager,
     ) -> Self {
         let mut taffy = TaffyTree::with_capacity(16);
 
@@ -77,7 +73,6 @@ where
             scene: Scene::new(),
             surface: None,
             taffy,
-            state,
             widget,
             info: AppInfo {
                 font_context,
@@ -86,9 +81,14 @@ where
             },
             window_node,
             render_ctx: None,
-            update: Update::empty(),
+            update,
             last_update: Instant::now(),
         }
+    }
+
+    /// Get the application context.
+    pub fn context(&self) -> AppContext {
+        AppContext::new(self.update.clone())
     }
 
     /// Add the parent node and its children to the layout tree.
@@ -155,7 +155,7 @@ where
         if self.taffy.child_count(self.window_node) == 0 {
             log::trace!("Setting up layout...");
 
-            let style = self.widget.layout_style(&self.state);
+            let style = self.widget.layout_style();
 
             self.layout_widget(self.window_node, &style)
                 .expect("Failed to layout window");
@@ -165,7 +165,7 @@ where
             self.update.insert(Update::FORCE);
         }
 
-        let style = self.widget.layout_style(&self.state);
+        let style = self.widget.layout_style();
 
         let mut layout_node = self
             .collect_layout(
@@ -176,13 +176,11 @@ where
 
         // update call to check if app should re-evaluate
         log::trace!("Updating root widget...");
-        self.update.insert(
-            self.widget
-                .update(&layout_node, &mut self.state, &self.info),
-        );
+        self.update
+            .insert(self.widget.update(&layout_node, self.context(), &self.info));
 
         // check if app should re-evaluate layout
-        if self.update.intersects(Update::LAYOUT | Update::FORCE) {
+        if self.update.get().intersects(Update::LAYOUT | Update::FORCE) {
             log::trace!("Layout update detected!");
 
             // clear all nodes (except root window node)
@@ -190,7 +188,7 @@ where
                 .set_children(self.window_node, &[])
                 .expect("Failed to set children");
 
-            let style = self.widget.layout_style(&self.state);
+            let style = self.widget.layout_style();
 
             self.layout_widget(self.window_node, &style)
                 .expect("Failed to layout window");
@@ -206,19 +204,21 @@ where
         }
 
         // check if app should redraw
-        if self.update.intersects(Update::FORCE | Update::DRAW) {
+        if self.update.get().intersects(Update::FORCE | Update::DRAW) {
             log::trace!("Draw update detected!");
 
             // clear scene
             self.scene.reset();
 
+            let context = self.context();
+
             log::trace!("Rendering root widget...");
             self.widget.render(
                 &mut self.scene,
                 &mut self.config.theme,
-                &self.info,
                 &layout_node,
-                &self.state,
+                &self.info,
+                context,
             );
 
             let renderer = self.renderer.as_mut().expect("Renderer not initialized");
@@ -264,7 +264,7 @@ where
         }
 
         // check if app should re-evaluate
-        if self.update.intersects(Update::EVAL | Update::FORCE) {
+        if self.update.get().intersects(Update::EVAL | Update::FORCE) {
             log::trace!("Evaluation update detected!");
 
             if let Some(window) = self.window.as_ref() {
@@ -274,7 +274,7 @@ where
 
         // reset AppInfo and update states
         self.info.reset();
-        self.update = Update::empty();
+        self.update.clear();
 
         // update diagnostics
         if self.last_update.elapsed() >= Duration::from_secs(1) {
@@ -295,11 +295,10 @@ where
     }
 }
 
-impl<T, W, S> ApplicationHandler for AppHandler<'_, T, W, S>
+impl<T, W> ApplicationHandler for AppHandler<'_, T, W>
 where
     T: Theme,
-    W: Widget<S>,
-    S: State,
+    W: Widget,
 {
     fn resumed(&mut self, event_loop: &ActiveEventLoop) {
         log::info!("Resuming/Starting app execution...");
@@ -378,7 +377,7 @@ where
         );
 
         self.render_ctx = Some(render_ctx);
-        self.update = Update::FORCE;
+        self.update.set(Update::FORCE);
     }
 
     fn window_event(

@@ -2,7 +2,6 @@ use crate::ext::WidgetLayoutExt;
 use maycoon_core::app::info::AppInfo;
 use maycoon_core::app::update::Update;
 use maycoon_core::layout::{Dimension, LayoutNode, LayoutStyle, StyleNode};
-use maycoon_core::state::{State, Val};
 use maycoon_core::vg::kurbo::{Affine, Vec2};
 use maycoon_core::vg::Scene;
 use maycoon_core::widget::Widget;
@@ -12,6 +11,8 @@ use nalgebra::Vector2;
 use vello_svg::usvg;
 
 use crate::icon::svg::SvgIcon;
+use maycoon_core::app::context::AppContext;
+use maycoon_core::signal::MaybeSignal;
 pub use usvg::ImageRendering;
 pub use usvg::ShapeRendering;
 pub use usvg::TextRendering;
@@ -26,34 +27,35 @@ pub type SvgError = usvg::Error;
 ///
 /// ### Theming
 /// The widget itself only draws the underlying icon, so theming is useless.
-pub struct Icon<S: State> {
-    layout_style: Val<S, LayoutStyle>,
-    icon: Val<S, SvgIcon>,
+pub struct Icon {
+    layout_style: MaybeSignal<LayoutStyle>,
+    icon: MaybeSignal<SvgIcon>,
 }
 
-impl<S: State> Icon<S> {
+impl Icon {
     /// Creates a new icon widget from the given svg icon.
-    pub fn new(icon: impl Into<Val<S, SvgIcon>>) -> Self {
+    pub fn new(icon: impl Into<MaybeSignal<SvgIcon>>) -> Self {
         Self {
-            layout_style: Val::new_val(LayoutStyle {
+            layout_style: LayoutStyle {
                 size: Vector2::new(Dimension::Length(8.0), Dimension::Length(8.0)),
                 ..Default::default()
-            }),
+            }
+            .into(),
             icon: icon.into(),
         }
     }
 }
 
-impl<S: State> Widget<S> for Icon<S> {
+impl Widget for Icon {
     fn render(
         &mut self,
         scene: &mut Scene,
         _: &mut dyn Theme,
-        _: &AppInfo,
         layout_node: &LayoutNode,
-        state: &S,
+        _: &AppInfo,
+        _: AppContext,
     ) {
-        let icon = self.icon.get_mut(state);
+        let icon = self.icon.get();
 
         // The size is divided, as otherwise the icon would be either too large (with 1.0) or too tiny (with 0.1 somehow getting converted to 0.0)
         let affine = Affine::scale_non_uniform(
@@ -68,16 +70,14 @@ impl<S: State> Widget<S> for Icon<S> {
         scene.append(icon.scene(), Some(affine));
     }
 
-    fn layout_style(&mut self, state: &S) -> StyleNode {
+    fn layout_style(&self) -> StyleNode {
         StyleNode {
-            style: self.layout_style.get_ref(state).clone(),
+            style: self.layout_style.get().clone(),
             children: Vec::new(),
         }
     }
 
-    fn update(&mut self, _: &LayoutNode, _: &mut S, _: &AppInfo) -> Update {
-        self.icon.invalidate();
-
+    fn update(&mut self, _: &LayoutNode, _: AppContext, _: &AppInfo) -> Update {
         Update::empty()
     }
 
@@ -86,8 +86,8 @@ impl<S: State> Widget<S> for Icon<S> {
     }
 }
 
-impl<S: State> WidgetLayoutExt<S> for Icon<S> {
-    fn set_layout_style(&mut self, layout_style: impl Into<Val<S, LayoutStyle>>) {
+impl WidgetLayoutExt for Icon {
+    fn set_layout_style(&mut self, layout_style: impl Into<MaybeSignal<LayoutStyle>>) {
         self.layout_style = layout_style.into();
     }
 }
