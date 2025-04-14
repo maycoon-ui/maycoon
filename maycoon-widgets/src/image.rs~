@@ -26,7 +26,7 @@ pub struct Image {
 }
 
 impl Image {
-    /// Create an image widget from the given [ImageData].
+    /// Create an image widget from the given [`ImageData`].
     pub fn new(image: impl Into<MaybeSignal<ImageData>>) -> Self {
         Self {
             image: image.into(),

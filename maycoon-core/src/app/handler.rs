@@ -22,7 +22,7 @@ use crate::layout::{LayoutNode, StyleNode};
 use crate::widget::Widget;
 use maycoon_theme::theme::Theme;
 
-/// The core application handler. You should use [`MayApp`](crate::app::MayApp) instead for running applications.
+/// The core application handler. You should use [MayApp](crate::app::MayApp) instead for running applications.
 pub struct AppHandler<'a, T, W>
 where
     T: Theme,
@@ -124,7 +124,7 @@ where
         Ok(())
     }
 
-    /// Collect the computed layout of the given node and its children. Make sure to call [`AppHandler::compute_layout`] before, to not get dirty results.
+    /// Collect the computed layout of the given node and its children. Make sure to call [AppHandler::compute_layout] before, to not get dirty results.
     fn collect_layout(&mut self, node: NodeId, style: &StyleNode) -> TaffyResult<LayoutNode> {
         log::trace!("Collecting layout for node: {:?}", node);
 

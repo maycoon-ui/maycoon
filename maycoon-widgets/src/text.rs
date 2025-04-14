@@ -23,9 +23,9 @@ use std::ops::Deref;
 /// ### Theming
 /// You can style the text with the following properties:
 /// - `color` - The color of the text.
-/// - `color_invert` - The color to use when the `invert_color` property is set to `true` in the theme [`Globals`].
+/// - `color_invert` - The color to use when the `invert_color` property is set to `true` in the theme [Globals].
 ///
-/// [`Globals`]: maycoon_theme::globals::Globals
+/// [Globals]: maycoon_theme::globals::Globals
 pub struct Text {
     style: MaybeSignal<LayoutStyle>,
     text: MaybeSignal<String>,

@@ -11,7 +11,7 @@ use crate::theme::Theme;
 /// A smooth and minimalistic theme with a cold blue and purple touch.
 #[derive(Debug, Clone)]
 pub enum CelesteTheme {
-    /// Use [CelesteTheme::light] to use the light Celeste theme.
+    /// Use [`CelesteTheme::light`] to use the light Celeste theme.
     Light(Globals),
 }
 

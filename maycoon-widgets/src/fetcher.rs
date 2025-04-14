@@ -33,7 +33,7 @@ pub struct WidgetFetcher<T: Send + 'static, W: Widget, F: Fn(Option<T>) -> W> {
 }
 
 impl<T: Send + 'static, W: Widget, F: Fn(Option<T>) -> W> WidgetFetcher<T, W, F> {
-    /// Creates a new [`WidgetFetcher`] with parameters:
+    /// Creates a new [WidgetFetcher] with parameters:
     /// - `future`: The future to execute.
     /// - `update`: The update to trigger when the data is updated (from loading to done).
     /// - `render`: The function to render the widget. The first parameter is the result of the future and the second parameter is the mutable app state.

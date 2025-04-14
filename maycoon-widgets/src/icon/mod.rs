@@ -20,10 +20,10 @@ pub use usvg::TextRendering;
 /// Contains the [SvgIcon] struct for representing a rendered SVG Icon.
 pub mod svg;
 
-/// Error type for parsing SVGs with [`usvg`].
+/// Error type for parsing SVGs with [usvg].
 pub type SvgError = usvg::Error;
 
-/// A simple icon widget to display SVG icons using [`vello_svg`] and [`usvg`].
+/// A simple icon widget to display SVG icons using [vello_svg] and [usvg].
 ///
 /// ### Theming
 /// The widget itself only draws the underlying icon, so theming is useless.

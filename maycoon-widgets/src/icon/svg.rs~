@@ -10,10 +10,10 @@ impl SvgIcon {
     /// Creates a new icon from the given SVG source.
     /// Returns [Ok] if the SVG could be parsed, [Err] otherwise.
     ///
-    /// **This calls [Self::new_custom] with the following options:**
-    /// - [ShapeRendering::GeometricPrecision] for precise shape rendering.
-    /// - [TextRendering::OptimizeLegibility] for good text rendering.
-    /// - [ImageRendering::OptimizeSpeed] for fast image rendering.
+    /// **This calls [`Self::new_custom`] with the following options:**
+    /// - [`ShapeRendering::GeometricPrecision`] for precise shape rendering.
+    /// - [`TextRendering::OptimizeLegibility`] for good text rendering.
+    /// - [`ImageRendering::OptimizeSpeed`] for fast image rendering.
     pub fn new(source: impl AsRef<str>) -> Result<Self, SvgError> {
         Self::new_custom(
             source,

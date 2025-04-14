@@ -17,7 +17,7 @@ pub struct MayRunner<T: Theme> {
 }
 
 impl<T: Theme> MayRunner<T> {
-    /// Create a new App with the given [`MayConfig`].
+    /// Create a new App with the given [MayConfig].
     pub fn new(config: MayConfig<T>) -> Self {
         // init task runner
         if let Some(config) = &config.tasks {

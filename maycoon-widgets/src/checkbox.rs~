@@ -31,7 +31,7 @@ pub struct Checkbox {
 impl Checkbox {
     /// Create a new checkbox with the given value.
     ///
-    /// The value should be a signal, so it's mutable.
+    /// The value should be state dependent, so you can mutate it on change.
     pub fn new(value: impl Into<MaybeSignal<bool>>) -> Self {
         Self {
             layout_style: LayoutStyle {

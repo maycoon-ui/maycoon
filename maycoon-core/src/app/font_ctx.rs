@@ -45,12 +45,12 @@ impl FontContext {
             .insert(name.to_string(), Font::new(Blob::new(font), 0))
     }
 
-    /// Get a font by a specified name. Returns [`None`] if the font could not be found.
+    /// Get a font by a specified name. Returns [None] if the font could not be found.
     pub fn get(&self, name: impl ToString) -> Option<Font> {
         self.fonts.get(&name.to_string()).cloned()
     }
 
-    /// Removes a font. Returns [`None`] if the font does not exist.
+    /// Removes a font. Returns [None] if the font does not exist.
     pub fn remove(&mut self, name: impl ToString) -> Option<()> {
         self.fonts.swap_remove(&name.to_string()).map(|_| ())
     }

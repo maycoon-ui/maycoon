@@ -12,13 +12,13 @@ use maycoon_theme::theme::Theme;
 /// A widget to detect gestures like pressing or releasing the left mouse button.
 /// It can also contain a child widget.
 ///
-/// The [`GestureDetector`] has different callbacks that are called on different events:
+/// The [GestureDetector] has different callbacks that are called on different events:
 /// - `on_press` is called when the left mouse button is pressed.
 /// - `on_release` is called when the left mouse button is released.
 /// - `on_hover` is called when the mouse cursor hovers over the widget.
 ///
 /// ### Theming
-/// The [`GestureDetector`] should not be themed and does not draw anything on itself.
+/// The [GestureDetector] should not be themed and does not draw anything on itself.
 /// It just contains the given child widget.
 pub struct GestureDetector {
     child: BoxedWidget,
@@ -28,7 +28,7 @@ pub struct GestureDetector {
 }
 
 impl GestureDetector {
-    /// Creates a new [`GestureDetector`] with the given child widget.
+    /// Creates a new [GestureDetector] with the given child widget.
     pub fn new(child: impl Widget + 'static) -> Self {
         Self {
             child: Box::new(child),
@@ -38,41 +38,41 @@ impl GestureDetector {
         }
     }
 
-    /// Sets the child widget of the [`GestureDetector`] and returns self.
+    /// Sets the child widget of the [GestureDetector] and returns self.
     pub fn with_child(mut self, child: impl Widget + 'static) -> Self {
         self.child = Box::new(child);
         self
     }
 
-    /// Sets the `on_press` callback of the [`GestureDetector`] and returns self.
+    /// Sets the `on_press` callback of the [GestureDetector] and returns self.
     pub fn with_on_press(mut self, on_press: impl Into<MaybeSignal<Update>>) -> Self {
         self.on_press = on_press.into();
         self
     }
 
-    /// Sets the `on_release` callback of the [`GestureDetector`] and returns self.
+    /// Sets the `on_release` callback of the [GestureDetector] and returns self.
     pub fn with_on_release(mut self, on_release: impl Into<MaybeSignal<Update>>) -> Self {
         self.on_release = on_release.into();
         self
     }
 
-    /// Sets the `on_hover` callback of the [`GestureDetector`] and returns self.
+    /// Sets the `on_hover` callback of the [GestureDetector] and returns self.
     pub fn with_on_hover(mut self, on_hover: impl Into<MaybeSignal<Update>>) -> Self {
         self.on_hover = on_hover.into();
         self
     }
 
-    /// Call the `on_hover` callback of the [`GestureDetector`].
+    /// Call the `on_hover` callback of the [GestureDetector].
     pub fn on_hover(&mut self) -> Update {
         *self.on_hover.get()
     }
 
-    /// Call the `on_press` callback of the [`GestureDetector`].
+    /// Call the `on_press` callback of the [GestureDetector].
     pub fn on_press(&mut self) -> Update {
         *self.on_press.get()
     }
 
-    /// Call the `on_release` callback of the [`GestureDetector`].
+    /// Call the `on_release` callback of the [GestureDetector].
     pub fn on_release(&mut self) -> Update {
         *self.on_release.get()
     }

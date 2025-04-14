@@ -22,7 +22,7 @@ pub mod window {
 /// Contains app functionality.
 pub mod app;
 
-/// Contains the [`MayConfig`](config::MayConfig) struct.
+/// Contains the [MayConfig](config::MayConfig) struct.
 pub mod config;
 
 /// Contains useful types and functions for layout interaction.

@@ -28,7 +28,7 @@ pub struct Slider {
 }
 
 impl Slider {
-    /// Create a new Slider widget from a value (should be state bound) and an `on_change` callback.
+    /// Create a new Slider widget from a value (should be a signal) and an `on_change` callback.
     pub fn new(value: impl Into<MaybeSignal<f32>>) -> Self {
         Self {
             layout_style: LayoutStyle {
