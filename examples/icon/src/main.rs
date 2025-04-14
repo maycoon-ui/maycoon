@@ -1,14 +1,28 @@
-use maycoon::core::app::MayApp;
+use maycoon::core::app::context::AppContext;
+use maycoon::core::app::Application;
 use maycoon::core::config::MayConfig;
-use maycoon::macros::{svg_icon, State};
+use maycoon::core::widget::Widget;
+use maycoon::macros::svg_icon;
+use maycoon::theme::theme::celeste::CelesteTheme;
 use maycoon::widgets::icon::svg::SvgIcon;
 use maycoon::widgets::icon::Icon;
 
-#[derive(State)]
-struct MyState;
+struct MyApp;
+
+impl Application for MyApp {
+    type Theme = CelesteTheme;
+
+    fn build(_: AppContext) -> impl Widget {
+        let icon: SvgIcon = svg_icon!("./assets/logo.svg");
+
+        Icon::new(icon)
+    }
+
+    fn config(&self) -> MayConfig<Self::Theme> {
+        MayConfig::default()
+    }
+}
 
 fn main() {
-    let icon: SvgIcon = svg_icon!("./assets/logo.svg");
-
-    MayApp::new(MayConfig::default()).run(MyState, Icon::new(icon));
+    MyApp.run()
 }

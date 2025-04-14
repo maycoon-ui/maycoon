@@ -1,32 +1,46 @@
+use maycoon::core::app::context::AppContext;
 use maycoon::core::app::update::Update;
-use maycoon::core::app::MayApp;
+use maycoon::core::app::Application;
 use maycoon::core::config::MayConfig;
-use maycoon::macros::{val, State};
+use maycoon::core::signal::eval::EvalSignal;
+use maycoon::core::signal::MaybeSignal;
+use maycoon::core::widget::Widget;
+use maycoon::theme::theme::celeste::CelesteTheme;
 use maycoon::widgets::gesture_detector::GestureDetector;
 use maycoon::widgets::text::Text;
 
-#[derive(State)]
-struct MyState {
-    interaction: String,
+struct MyApp;
+
+impl Application for MyApp {
+    type Theme = CelesteTheme;
+
+    fn build(context: AppContext) -> impl Widget {
+        GestureDetector::new(Text::new("Gesture Detector".to_string()))
+            .with_on_hover(MaybeSignal::signal(context.use_signal(EvalSignal::new(
+                move || {
+                    println!("Hovered");
+                    Update::DRAW
+                },
+            ))))
+            .with_on_release(MaybeSignal::signal(context.use_signal(EvalSignal::new(
+                move || {
+                    println!("Release");
+                    Update::DRAW
+                },
+            ))))
+            .with_on_press(MaybeSignal::signal(context.use_signal(EvalSignal::new(
+                move || {
+                    println!("Press");
+                    Update::DRAW
+                },
+            ))))
+    }
+
+    fn config(&self) -> MayConfig<Self::Theme> {
+        MayConfig::default()
+    }
 }
 
 fn main() {
-    MayApp::new(MayConfig::default()).run(
-        MyState {
-            interaction: "None".to_string(),
-        },
-        GestureDetector::new(Text::new(val!(|state: &MyState| state.interaction.clone())))
-            .with_on_hover(|state| {
-                state.interaction = "Hovering".to_string();
-                Update::DRAW
-            })
-            .with_on_release(|state| {
-                state.interaction = "Released".to_string();
-                Update::DRAW
-            })
-            .with_on_press(|state| {
-                state.interaction = "Pressed".to_string();
-                Update::DRAW
-            }),
-    );
+    MyApp.run()
 }

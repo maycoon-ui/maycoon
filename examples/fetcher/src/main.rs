@@ -1,37 +1,38 @@
+use maycoon::core::app::context::AppContext;
 use maycoon::core::app::update::Update;
-use maycoon::core::app::MayApp;
-use maycoon::core::config::{MayConfig, TasksConfig, WindowConfig};
-use maycoon::macros::State;
-use maycoon::math::Vector2;
+use maycoon::core::app::Application;
+use maycoon::core::config::{MayConfig, TasksConfig};
+use maycoon::core::widget::Widget;
+use maycoon::theme::theme::celeste::CelesteTheme;
 use maycoon::widgets::fetcher::WidgetFetcher;
 use maycoon::widgets::text::Text;
 use serde::Deserialize;
 
-#[derive(State)]
-struct MyState;
+struct MyApp;
 
-fn main() {
-    MayApp::new(MayConfig {
-        window: WindowConfig {
-            // Make the window size larger to fit the quote
-            size: Vector2::new(1200.0, 600.0),
-            title: "Maycoon Fetcher Example".to_string(),
-            ..Default::default()
-        },
-        // IMPORTANT: Enable the task runner
-        tasks: Some(TasksConfig::default()),
-        ..Default::default()
-    })
-    .run(
-        MyState,
-        WidgetFetcher::new(get_random_quote(), Update::DRAW, |data, _| {
+impl Application for MyApp {
+    type Theme = CelesteTheme;
+
+    fn build(_: AppContext) -> impl Widget {
+        WidgetFetcher::new(get_random_quote(), Update::DRAW, |data| {
             if let Some(data) = data {
                 Text::new(format!(" \"{}\" \n - {}", data.quote, data.author))
             } else {
                 Text::new(" Loading Quote...".to_string())
             }
-        }),
-    );
+        })
+    }
+
+    fn config(&self) -> MayConfig<Self::Theme> {
+        MayConfig {
+            tasks: Some(TasksConfig::default()),
+            ..Default::default()
+        }
+    }
+}
+
+fn main() {
+    MyApp.run()
 }
 
 #[derive(Deserialize)]

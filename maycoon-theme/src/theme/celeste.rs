@@ -22,6 +22,12 @@ impl CelesteTheme {
     }
 }
 
+impl Default for CelesteTheme {
+    fn default() -> Self {
+        Self::light()
+    }
+}
+
 impl Theme for CelesteTheme {
     fn of(&self, id: WidgetId) -> Option<Style> {
         match id.namespace() {

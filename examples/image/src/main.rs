@@ -1,25 +1,41 @@
-use maycoon::core::app::MayApp;
+use maycoon::color::{Blob, ImageFormat};
+use maycoon::core::app::context::AppContext;
+use maycoon::core::app::Application;
 use maycoon::core::config::MayConfig;
-use maycoon::core::vg::peniko;
-use maycoon::macros::State;
-use maycoon::math::Vector2;
+use maycoon::core::signal::fixed::FixedSignal;
+use maycoon::core::signal::MaybeSignal;
+use maycoon::core::widget::Widget;
+use maycoon::theme::theme::celeste::CelesteTheme;
 use maycoon::widgets::image::{Image, ImageData};
 
-#[derive(State)]
-struct MyState;
+const IMAGE_DATA: &[u8] = include_bytes!("../pelican.jpg");
+
+struct MyApp;
+
+impl Application for MyApp {
+    type Theme = CelesteTheme;
+
+    fn build(context: AppContext) -> impl Widget {
+        let image = context.use_signal(FixedSignal::new(ImageData::new(
+            Blob::from(
+                image::load_from_memory(IMAGE_DATA)
+                    .unwrap()
+                    .into_rgba8()
+                    .to_vec(),
+            ),
+            ImageFormat::Rgba8,
+            427,
+            640,
+        )));
+
+        Image::new(MaybeSignal::signal(image))
+    }
+
+    fn config(&self) -> MayConfig<Self::Theme> {
+        MayConfig::default()
+    }
+}
 
 fn main() {
-    let image_data = image::open("../image/pelican.jpg")
-        .unwrap()
-        .into_rgba8()
-        .to_vec();
-
-    MayApp::new(MayConfig::default()).run(
-        MyState,
-        Image::new(ImageData::new(
-            image_data.clone(),
-            Vector2::new(427, 640),
-            peniko::ImageFormat::Rgba8,
-        )),
-    )
+    MyApp.run()
 }

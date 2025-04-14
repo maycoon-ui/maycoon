@@ -1,43 +1,51 @@
-use maycoon::core::app::update::Update;
-use maycoon::core::app::MayApp;
+use maycoon::core::app::context::AppContext;
+use maycoon::core::app::Application;
 use maycoon::core::config::MayConfig;
 use maycoon::core::layout::{AlignItems, Dimension, FlexDirection, LayoutStyle};
-use maycoon::core::state::Val;
-use maycoon::macros::{val, State};
+use maycoon::core::reference::Ref;
+use maycoon::core::signal::state::StateSignal;
+use maycoon::core::signal::{MaybeSignal, Signal};
+use maycoon::core::widget::Widget;
 use maycoon::math::Vector2;
+use maycoon::theme::theme::celeste::CelesteTheme;
 use maycoon::widgets::checkbox::Checkbox;
 use maycoon::widgets::container::Container;
 use maycoon::widgets::ext::WidgetLayoutExt;
 use maycoon::widgets::text::Text;
 
-#[derive(Default, State)]
-struct MyState {
-    checked: bool,
-}
+struct MyApp;
 
-fn main() {
-    MayApp::new(MayConfig::default()).run(
-        MyState::default(),
+impl Application for MyApp {
+    type Theme = CelesteTheme;
+
+    fn build(context: AppContext) -> impl Widget {
+        let checked = context.use_signal(StateSignal::new(false));
+
         Container::new(vec![
-            Val::new_val(Box::new(
-                Checkbox::new(val!(|state: &MyState| state.checked)).with_on_change(|state| {
-                    state.checked = !state.checked;
-                    Update::DRAW
-                }),
-            )),
-            Val::new_val(Box::new(Text::new(val!(
-                |state: &MyState| if state.checked {
-                    "Checked".to_string()
-                } else {
-                    "Unchecked".to_string()
-                }
-            )))),
+            {
+                let checked = checked.clone();
+
+                Box::new(Checkbox::new(MaybeSignal::signal(checked)))
+            },
+            {
+                let checked = checked.clone();
+
+                Box::new(Text::new(checked.map(|val| Ref::Owned(val.to_string()))))
+            },
         ])
         .with_layout_style(LayoutStyle {
             size: Vector2::<Dimension>::new(Dimension::Percent(1.0), Dimension::Percent(1.0)),
             flex_direction: FlexDirection::Column,
             align_items: Some(AlignItems::Center),
             ..Default::default()
-        }),
-    );
+        })
+    }
+
+    fn config(&self) -> MayConfig<Self::Theme> {
+        MayConfig::default()
+    }
+}
+
+fn main() {
+    MyApp.run()
 }
