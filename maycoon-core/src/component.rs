@@ -2,9 +2,11 @@ use crate::app::context::AppContext;
 use crate::app::info::AppInfo;
 use crate::app::update::Update;
 use crate::layout::{LayoutNode, LayoutStyle, StyleNode};
-use crate::widget::{BoxedWidget, Widget};
+use crate::signal::MaybeSignal;
+use crate::widget::{BoxedWidget, Widget, WidgetChildExt, WidgetChildrenExt, WidgetLayoutExt};
 use maycoon_theme::id::WidgetId;
 use maycoon_theme::theme::Theme;
+use std::fmt::Debug;
 use std::ops::{Deref, DerefMut};
 use vello::Scene;
 
@@ -19,11 +21,11 @@ pub trait Component {
     fn widget_id(&self) -> WidgetId;
 
     /// Composes this component into a [Widget] using [ComposedWidget].
-    fn compose(self) -> ComposedWidget<Self>
+    fn compose(self) -> Composed<Self>
     where
         Self: Sized,
     {
-        ComposedWidget {
+        Composed {
             component: self,
             widget: None,
         }
@@ -31,13 +33,13 @@ pub trait Component {
 }
 
 /// A [Widget] created from a [Component].
-pub struct ComposedWidget<C: Component> {
+pub struct Composed<C: Component> {
     component: C,
     widget: Option<BoxedWidget>,
 }
 
-impl<C: Component> ComposedWidget<C> {
-    /// Creates a new [ComposedWidget] from a [Component].
+impl<C: Component> Composed<C> {
+    /// Creates a new [Composed] widget from a [Component].
     pub fn new(component: C) -> Self {
         Self {
             component,
@@ -46,7 +48,7 @@ impl<C: Component> ComposedWidget<C> {
     }
 }
 
-impl<C: Component> Widget for ComposedWidget<C> {
+impl<C: Component> Widget for Composed<C> {
     fn render(
         &mut self,
         scene: &mut Scene,
@@ -87,7 +89,75 @@ impl<C: Component> Widget for ComposedWidget<C> {
     }
 }
 
-impl<C: Component> Deref for ComposedWidget<C> {
+impl<C: Component + WidgetChildrenExt> WidgetChildrenExt for Composed<C> {
+    fn set_children(&mut self, children: Vec<BoxedWidget>) {
+        self.component.set_children(children)
+    }
+
+    fn with_children(self, children: Vec<BoxedWidget>) -> Self
+    where
+        Self: Sized,
+    {
+        self.component.with_children(children).compose()
+    }
+
+    fn add_child(&mut self, child: impl Widget + 'static) {
+        self.component.add_child(child)
+    }
+
+    fn with_child(self, child: impl Widget + 'static) -> Self
+    where
+        Self: Sized,
+    {
+        self.component.with_child(child).compose()
+    }
+}
+
+impl<C: Component + WidgetChildExt> WidgetChildExt for Composed<C> {
+    fn set_child(&mut self, child: impl Widget + 'static) {
+        self.component.set_child(child)
+    }
+
+    fn with_child(self, child: impl Widget + 'static) -> Self
+    where
+        Self: Sized,
+    {
+        self.component.with_child(child).compose()
+    }
+}
+
+impl<C: Component + WidgetLayoutExt> WidgetLayoutExt for Composed<C> {
+    fn set_layout_style(&mut self, layout_style: impl Into<MaybeSignal<LayoutStyle>>) {
+        self.component.set_layout_style(layout_style)
+    }
+
+    fn with_layout_style(self, layout_style: impl Into<MaybeSignal<LayoutStyle>>) -> Self
+    where
+        Self: Sized,
+    {
+        self.component.with_layout_style(layout_style).compose()
+    }
+}
+
+impl<C: Component + Clone> Clone for Composed<C> {
+    fn clone(&self) -> Self {
+        Self {
+            component: self.component.clone(),
+            widget: None,
+        }
+    }
+}
+
+impl<C: Component + Debug> Debug for Composed<C> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("ComposedWidget")
+            .field("component", &self.component)
+            .field("widget", &self.widget.as_ref().map(|_| "?".to_string()))
+            .finish()
+    }
+}
+
+impl<C: Component> Deref for Composed<C> {
     type Target = C;
 
     fn deref(&self) -> &Self::Target {
@@ -95,7 +165,7 @@ impl<C: Component> Deref for ComposedWidget<C> {
     }
 }
 
-impl<C: Component> DerefMut for ComposedWidget<C> {
+impl<C: Component> DerefMut for Composed<C> {
     fn deref_mut(&mut self) -> &mut Self::Target {
         &mut self.component
     }

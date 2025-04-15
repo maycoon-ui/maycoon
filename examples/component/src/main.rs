@@ -1,7 +1,6 @@
 use crate::counter::Counter;
 use maycoon::core::app::context::AppContext;
 use maycoon::core::app::Application;
-use maycoon::core::component::Component;
 use maycoon::core::config::MayConfig;
 use maycoon::core::layout::{AlignItems, Dimension, FlexDirection, LayoutStyle};
 use maycoon::core::signal::state::StateSignal;
@@ -19,14 +18,12 @@ impl Application for MyApp {
     fn build(context: AppContext) -> impl Widget {
         let counter = context.use_signal(StateSignal::new(0));
 
-        Counter::new(counter)
-            .with_layout_style(LayoutStyle {
-                size: Vector2::<Dimension>::new(Dimension::Percent(1.0), Dimension::Percent(1.0)),
-                flex_direction: FlexDirection::Column,
-                align_items: Some(AlignItems::Center),
-                ..Default::default()
-            })
-            .compose()
+        Counter::new(counter).with_layout_style(LayoutStyle {
+            size: Vector2::<Dimension>::new(Dimension::Percent(1.0), Dimension::Percent(1.0)),
+            flex_direction: FlexDirection::Column,
+            align_items: Some(AlignItems::Center),
+            ..Default::default()
+        })
     }
 
     fn config(&self) -> MayConfig<Self::Theme> {

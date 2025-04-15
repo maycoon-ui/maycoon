@@ -1,6 +1,6 @@
 use maycoon::core::app::context::AppContext;
 use maycoon::core::app::update::Update;
-use maycoon::core::component::Component;
+use maycoon::core::component::{Component, Composed};
 use maycoon::core::layout::LayoutStyle;
 use maycoon::core::reference::Ref;
 use maycoon::core::signal::eval::EvalSignal;
@@ -17,11 +17,12 @@ pub struct Counter {
 }
 
 impl Counter {
-    pub fn new(counter: ArcSignal<i32>) -> Self {
+    pub fn new(counter: ArcSignal<i32>) -> Composed<Self> {
         Counter {
             counter,
             layout: LayoutStyle::default().into(),
         }
+        .compose()
     }
 }
 
