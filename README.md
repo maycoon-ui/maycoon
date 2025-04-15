@@ -53,10 +53,3 @@ Thanks to everyone who has contributed to Maycoon!
 
 <!-- readme: contributors -start -->
 <!-- readme: contributors -end -->
-
-## Team
-
-Thanks to the maycoon development team!
-
-<!-- readme: collaborators -start -->
-<!-- readme: collaborators -end -->
