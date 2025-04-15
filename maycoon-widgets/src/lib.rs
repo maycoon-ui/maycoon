@@ -4,9 +4,6 @@
 //!
 //! Contains a collection of beautiful maycoon widgets.
 
-/// Contains various traits for extending widget capability.
-pub mod ext;
-
 /// Contains the [text::Text] widget.
 pub mod text;
 

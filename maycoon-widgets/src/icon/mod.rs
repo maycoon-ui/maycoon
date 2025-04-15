@@ -1,10 +1,9 @@
-use crate::ext::WidgetLayoutExt;
 use maycoon_core::app::info::AppInfo;
 use maycoon_core::app::update::Update;
 use maycoon_core::layout::{Dimension, LayoutNode, LayoutStyle, StyleNode};
 use maycoon_core::vg::kurbo::{Affine, Vec2};
 use maycoon_core::vg::Scene;
-use maycoon_core::widget::Widget;
+use maycoon_core::widget::{Widget, WidgetLayoutExt};
 use maycoon_theme::id::WidgetId;
 use maycoon_theme::theme::Theme;
 use nalgebra::Vector2;

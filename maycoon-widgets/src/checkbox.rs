@@ -1,4 +1,3 @@
-use crate::ext::WidgetLayoutExt;
 use maycoon_core::app::context::AppContext;
 use maycoon_core::app::info::AppInfo;
 use maycoon_core::app::update::Update;
@@ -8,7 +7,7 @@ use maycoon_core::signal::MaybeSignal;
 use maycoon_core::vg::kurbo::{Affine, Rect, RoundedRect, RoundedRectRadii, Stroke};
 use maycoon_core::vg::peniko::{Brush, Fill};
 use maycoon_core::vg::Scene;
-use maycoon_core::widget::Widget;
+use maycoon_core::widget::{Widget, WidgetLayoutExt};
 use maycoon_core::window::{ElementState, MouseButton};
 use maycoon_theme::id::WidgetId;
 use maycoon_theme::theme::Theme;

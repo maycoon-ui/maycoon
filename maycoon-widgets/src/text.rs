@@ -1,4 +1,3 @@
-use crate::ext::WidgetLayoutExt;
 use maycoon_core::app::context::AppContext;
 use maycoon_core::app::info::AppInfo;
 use maycoon_core::app::update::Update;
@@ -10,7 +9,7 @@ use maycoon_core::skrifa::setting::VariationSetting;
 use maycoon_core::skrifa::MetadataProvider;
 use maycoon_core::vg::peniko::{Brush, Fill};
 use maycoon_core::vg::{peniko, Glyph, Scene};
-use maycoon_core::widget::Widget;
+use maycoon_core::widget::{Widget, WidgetLayoutExt};
 use maycoon_theme::id::WidgetId;
 use maycoon_theme::theme::Theme;
 use nalgebra::Vector2;

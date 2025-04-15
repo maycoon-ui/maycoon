@@ -5,11 +5,10 @@ use maycoon::core::layout::LayoutStyle;
 use maycoon::core::reference::Ref;
 use maycoon::core::signal::eval::EvalSignal;
 use maycoon::core::signal::{ArcSignal, MaybeSignal};
-use maycoon::core::widget::Widget;
+use maycoon::core::widget::{Widget, WidgetLayoutExt};
 use maycoon::theme::id::WidgetId;
 use maycoon::widgets::button::Button;
 use maycoon::widgets::container::Container;
-use maycoon::widgets::ext::WidgetLayoutExt;
 use maycoon::widgets::text::Text;
 
 pub struct Counter {

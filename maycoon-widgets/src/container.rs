@@ -1,11 +1,10 @@
-use crate::ext::{WidgetChildrenExt, WidgetLayoutExt};
 use maycoon_core::app::context::AppContext;
 use maycoon_core::app::info::AppInfo;
 use maycoon_core::app::update::Update;
 use maycoon_core::layout::{LayoutNode, LayoutStyle, StyleNode};
 use maycoon_core::signal::MaybeSignal;
 use maycoon_core::vg::Scene;
-use maycoon_core::widget::{BoxedWidget, Widget};
+use maycoon_core::widget::{BoxedWidget, Widget, WidgetChildrenExt, WidgetLayoutExt};
 use maycoon_theme::id::WidgetId;
 use maycoon_theme::theme::Theme;
 

@@ -19,7 +19,7 @@ use std::sync::{Arc, Mutex};
 /// You can use it to fetch asynchronous data and either return something like a loading screen or the actual data.
 ///
 /// ### Workflow of a [WidgetFetcher].
-/// 1. Run the task in the background using the [TaskRunner](maycoon_core::tasks::runner::TaskRunner).
+/// 1. Run the task in the background using the [TaskRunner](tasks::runner::TaskRunner).
 /// 2. Construct the widget with [None] as the result (task is still loading).
 /// 3. Once the task is done, update the UI with the new result and trigger an [Update].
 ///

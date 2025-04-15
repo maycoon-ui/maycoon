@@ -5,10 +5,9 @@ use maycoon::core::component::Component;
 use maycoon::core::config::MayConfig;
 use maycoon::core::layout::{AlignItems, Dimension, FlexDirection, LayoutStyle};
 use maycoon::core::signal::state::StateSignal;
-use maycoon::core::widget::Widget;
+use maycoon::core::widget::{Widget, WidgetLayoutExt};
 use maycoon::math::Vector2;
 use maycoon::theme::theme::celeste::CelesteTheme;
-use maycoon::widgets::ext::WidgetLayoutExt;
 
 mod counter;
 

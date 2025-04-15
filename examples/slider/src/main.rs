@@ -5,11 +5,10 @@ use maycoon::core::layout::{AlignItems, Dimension, FlexDirection, LayoutStyle};
 use maycoon::core::reference::Ref;
 use maycoon::core::signal::state::StateSignal;
 use maycoon::core::signal::{MaybeSignal, Signal};
-use maycoon::core::widget::Widget;
+use maycoon::core::widget::{Widget, WidgetLayoutExt};
 use maycoon::math::Vector2;
 use maycoon::theme::theme::celeste::CelesteTheme;
 use maycoon::widgets::container::Container;
-use maycoon::widgets::ext::WidgetLayoutExt;
 use maycoon::widgets::slider::Slider;
 use maycoon::widgets::text::Text;
 
