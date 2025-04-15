@@ -24,11 +24,12 @@
 - 🎨 **Customizable**
     - Maycoon provides a variety of widgets and themes to customize the look and feel of your application with ease.
 - 🚀 **Lightning Fast**
-    - Applications are quickly launched and our innovative state management system ensures fast updates and efficient
-      memory management.
+    - Your application will startup fast and run even faster.
+    - The UI uses [vello](https://github.com/linebender/vello) for GPU-accelerated rendering and top performance.
 - 📦 **Modular**
     - Every crate and feature is optional, so you can only enable what you really need and avoid unnecessary
       dependencies or features.
+    - Build widgets using components or using raw vector graphics.
 
 ## Getting Started
 
@@ -46,3 +47,13 @@ This project is dual licensed under the [MIT license](LICENSE-MIT) and the [Apac
 
 Any contributions are, unless otherwise stated, licensed under the same terms.
 
+## Contributors
+
+<!-- ALL-CONTRIBUTORS-LIST:START -->
+<!-- prettier-ignore-start -->
+<!-- markdownlint-disable -->
+
+<!-- markdownlint-restore -->
+<!-- prettier-ignore-end -->
+
+<!-- ALL-CONTRIBUTORS-LIST:END -->
