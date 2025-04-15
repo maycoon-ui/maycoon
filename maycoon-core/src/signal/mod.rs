@@ -1,3 +1,4 @@
+use crate::app::context::AppContext;
 use crate::reference::Ref;
 use crate::signal::fixed::FixedSignal;
 use crate::signal::map::MapSignal;
@@ -69,6 +70,17 @@ pub trait Signal<T: 'static>: 'static {
         Self: Sized,
     {
         self.maybe().map(map)
+    }
+
+    /// Hooks the signal into the given [AppContext].
+    ///
+    /// Required for the signal to become reactive with the app lifecycle.
+    fn hook(mut self, context: AppContext) -> Self
+    where
+        Self: Sized,
+    {
+        context.hook_signal(&mut self);
+        self
     }
 }
 
