@@ -52,4 +52,24 @@ Any contributions are, unless otherwise stated, licensed under the same terms.
 Thanks to everyone who has contributed to Maycoon!
 
 <!-- readme: contributors -start -->
+<table>
+	<tbody>
+		<tr>
+            <td align="center">
+                <a href="https://github.com/DraftedDev">
+                    <img src="https://avatars.githubusercontent.com/u/70287588?v=4" width="100;" alt="DraftedDev"/>
+                    <br />
+                    <sub><b>Mikail Plotzky</b></sub>
+                </a>
+            </td>
+            <td align="center">
+                <a href="https://github.com/waywardmonkeys">
+                    <img src="https://avatars.githubusercontent.com/u/178582?v=4" width="100;" alt="waywardmonkeys"/>
+                    <br />
+                    <sub><b>Bruce Mitchener</b></sub>
+                </a>
+            </td>
+		</tr>
+	<tbody>
+</table>
 <!-- readme: contributors -end -->
