@@ -49,11 +49,14 @@ Any contributions are, unless otherwise stated, licensed under the same terms.
 
 ## Contributors
 
-<!-- ALL-CONTRIBUTORS-LIST:START -->
-<!-- prettier-ignore-start -->
-<!-- markdownlint-disable -->
+Thanks to everyone who has contributed to Maycoon!
 
-<!-- markdownlint-restore -->
-<!-- prettier-ignore-end -->
+<!-- readme: contributors -start -->
+<!-- readme: contributors -end -->
 
-<!-- ALL-CONTRIBUTORS-LIST:END -->
+## Team
+
+Thanks to the maycoon development team!
+
+<!-- readme: collaborators -start -->
+<!-- readme: collaborators -end -->
