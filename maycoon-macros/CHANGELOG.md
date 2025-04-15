@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.0](https://github.com/maycoon-ui/maycoon/compare/maycoon-macros-v0.2.0...maycoon-macros-v0.3.0) - 2025-04-15
+
+### Added
+
+- Remake state management with signals
+- Add static_asset and svg_icon macro
+
+### Other
+
+- Add svg_icon macro
+- Restructure macros
+
 ## [0.2.0](https://github.com/maycoon-ui/maycoon/compare/maycoon-macros-v0.1.0...maycoon-macros-v0.2.0) - 2025-01-26
 
 ### Other

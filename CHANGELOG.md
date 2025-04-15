@@ -7,6 +7,44 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.0](https://github.com/maycoon-ui/maycoon/compare/maycoon-v0.2.0...maycoon-v0.3.0) - 2025-04-15
+
+### Added
+
+- Remake state management with signals
+- Added Mouse Wheel Support
+- Add more font configuration options
+- Add static_asset and svg_icon macro
+- Add new Icon Widget
+
+### Fixed
+
+- Docs for new state changes
+- Make examples compatible with new state management
+- Docs of block_on
+- Font Insertion mechanism and documentation
+- Replace OS-loaded default font with embedded
+
+### Other
+
+- Update README.md
+- Remove unused rust features
+- Create AppContext
+- Added logging
+- Fix doc links
+- Rewrite Icon Example
+- Add feature comments
+- Merge branch 'master' of https://github.com/maycoon-ui/maycoon
+- Fix more `clippy::doc_markdown` lints
+- Update icon example
+- Add svg_icon macro
+- Restructure macros
+- Update bitflags
+- Merge branch 'master' of https://github.com/maycoon-ui/maycoon
+- Add device selector
+- Add Icon widget and example
+- Fix gesture_detector.rs invalidation
+
 ## [0.2.0](https://github.com/maycoon-ui/maycoon/compare/maycoon-v0.1.0...maycoon-v0.2.0) - 2025-01-26
 
 ### Other
