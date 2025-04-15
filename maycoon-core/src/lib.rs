@@ -1,6 +1,3 @@
-// TODO: remove when stabilized
-#![feature(unboxed_closures)]
-#![feature(fn_traits)]
 #![warn(missing_docs)]
 
 //! Core library for Maycoon => See `maycoon` crate.
