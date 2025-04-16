@@ -16,7 +16,7 @@ include = ["assets/**/*"]
 bytemuck = "1.22.0"
 peniko = "0.3.1"
 nalgebra = { version = "0.33.2", default-features = false, features = ["std"] }
-indexmap = "2.7.0"
+indexmap = "2.9.0"
 log = "0.4.22"
 maycoon-core = { version = "0.2.0", path = "maycoon-core" }
 maycoon-macros = { version = "0.2.0", path = "maycoon-macros" }
