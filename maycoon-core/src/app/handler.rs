@@ -128,7 +128,7 @@ where
     fn collect_layout(&mut self, node: NodeId, style: &StyleNode) -> TaffyResult<LayoutNode> {
         log::trace!("Collecting layout for node: {:?}", node);
 
-        let mut children = Vec::with_capacity(style.children.len());
+        let mut children = Vec::with_capacity(style.children.capacity());
 
         for (i, child) in style.children.iter().enumerate() {
             children.push(self.collect_layout(self.taffy.child_at_index(node, i)?, child)?);
