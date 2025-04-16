@@ -182,8 +182,8 @@ impl Widget for Text {
         StyleNode {
             style: LayoutStyle {
                 size: Vector2::new(
-                    Dimension::Length(font_size * text.len() as f32),
-                    Dimension::Length(font_size),
+                    Dimension::length(font_size * text.len() as f32),
+                    Dimension::length(font_size),
                 ),
                 ..style
             },

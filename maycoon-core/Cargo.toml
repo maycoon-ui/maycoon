@@ -11,9 +11,9 @@ keywords.workspace = true
 [dependencies]
 winit = "0.30.9"
 wgpu-types = "23.0.0"
-taffy = "0.7.5"
 vello = "0.4.1"
 bitflags = "2.8.0"
+taffy = "0.8.0"
 font-kit = "0.14.2"
 futures = { version = "0.3.31", features = ["thread-pool"] }
 skrifa = { version = "0.26.5", optional = true }

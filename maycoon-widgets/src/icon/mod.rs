@@ -36,7 +36,7 @@ impl Icon {
     pub fn new(icon: impl Into<MaybeSignal<SvgIcon>>) -> Self {
         Self {
             layout_style: LayoutStyle {
-                size: Vector2::new(Dimension::Length(8.0), Dimension::Length(8.0)),
+                size: Vector2::new(Dimension::length(8.0), Dimension::length(8.0)),
                 ..Default::default()
             }
             .into(),

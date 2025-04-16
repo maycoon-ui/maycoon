@@ -34,12 +34,12 @@ impl Checkbox {
     pub fn new(value: impl Into<MaybeSignal<bool>>) -> Self {
         Self {
             layout_style: LayoutStyle {
-                size: Vector2::<Dimension>::new(Dimension::Length(20.0), Dimension::Length(20.0)),
+                size: Vector2::<Dimension>::new(Dimension::length(20.0), Dimension::length(20.0)),
                 margin: layout::Rect::<LengthPercentageAuto> {
-                    left: LengthPercentageAuto::Length(0.5),
-                    right: LengthPercentageAuto::Length(0.5),
-                    top: LengthPercentageAuto::Length(0.5),
-                    bottom: LengthPercentageAuto::Length(0.5),
+                    left: LengthPercentageAuto::length(0.5),
+                    right: LengthPercentageAuto::length(0.5),
+                    top: LengthPercentageAuto::length(0.5),
+                    bottom: LengthPercentageAuto::length(0.5),
                 },
                 ..Default::default()
             }

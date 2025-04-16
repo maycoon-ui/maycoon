@@ -37,10 +37,10 @@ impl Button {
             on_pressed: MaybeSignal::value(Update::empty()),
             layout_style: LayoutStyle {
                 padding: layout::Rect::<LengthPercentage> {
-                    left: LengthPercentage::Length(12.0),
-                    right: LengthPercentage::Length(12.0),
-                    top: LengthPercentage::Length(2.0),
-                    bottom: LengthPercentage::Length(10.0),
+                    left: LengthPercentage::length(12.0),
+                    right: LengthPercentage::length(12.0),
+                    top: LengthPercentage::length(2.0),
+                    bottom: LengthPercentage::length(10.0),
                 },
                 ..Default::default()
             }

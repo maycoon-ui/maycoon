@@ -317,10 +317,10 @@ where
                 self.window_node,
                 Style {
                     size: Size::<Dimension> {
-                        width: Dimension::Length(
+                        width: Dimension::length(
                             self.window.as_ref().unwrap().inner_size().width as f32,
                         ),
-                        height: Dimension::Length(
+                        height: Dimension::length(
                             self.window.as_ref().unwrap().inner_size().height as f32,
                         ),
                     },
@@ -404,8 +404,8 @@ where
                                     self.window_node,
                                     Style {
                                         size: Size::<Dimension> {
-                                            width: Dimension::Length(new_size.width as f32),
-                                            height: Dimension::Length(new_size.height as f32),
+                                            width: Dimension::length(new_size.width as f32),
+                                            height: Dimension::length(new_size.height as f32),
                                         },
                                         ..Default::default()
                                     },

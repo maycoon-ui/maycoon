@@ -25,7 +25,7 @@ impl Application for MyApp {
             Box::new(Text::new(value.map(|i| Ref::Owned(i.to_string())))),
         ])
         .with_layout_style(LayoutStyle {
-            size: Vector2::<Dimension>::new(Dimension::Percent(1.0), Dimension::Percent(1.0)),
+            size: Vector2::<Dimension>::new(Dimension::percent(1.0), Dimension::percent(1.0)),
             flex_direction: FlexDirection::Column,
             align_items: Some(AlignItems::Center),
             ..Default::default()

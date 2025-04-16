@@ -31,12 +31,12 @@ impl Slider {
     pub fn new(value: impl Into<MaybeSignal<f32>>) -> Self {
         Self {
             layout_style: LayoutStyle {
-                size: Vector2::<Dimension>::new(Dimension::Length(100.0), Dimension::Length(10.0)),
+                size: Vector2::<Dimension>::new(Dimension::length(100.0), Dimension::length(10.0)),
                 margin: layout::Rect::<LengthPercentageAuto> {
-                    left: LengthPercentageAuto::Length(10.0),
-                    right: LengthPercentageAuto::Length(0.0),
-                    top: LengthPercentageAuto::Length(10.0),
-                    bottom: LengthPercentageAuto::Length(10.0),
+                    left: LengthPercentageAuto::length(10.0),
+                    right: LengthPercentageAuto::length(0.0),
+                    top: LengthPercentageAuto::length(10.0),
+                    bottom: LengthPercentageAuto::length(10.0),
                 },
                 ..Default::default()
             }
