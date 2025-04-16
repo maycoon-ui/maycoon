@@ -31,7 +31,7 @@ pub type ArcSignal<T> = Arc<dyn Signal<T>>;
 ///
 /// **NOTE:** By default, signals don't have any listeners. To "hook" a signal into the application cycle, call [use_signal].
 ///
-/// [use_signal]: crate::app::context::AppContext::use_signal
+/// [use_signal]: AppContext::use_signal
 pub trait Signal<T: 'static>: 'static {
     /// Get a reference to the current value of the signal.
     fn get(&self) -> Ref<T>;
