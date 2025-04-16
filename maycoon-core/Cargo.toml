@@ -9,7 +9,7 @@ categories.workspace = true
 keywords.workspace = true
 
 [dependencies]
-winit = "0.30.8"
+winit = "0.30.9"
 wgpu-types = "23.0.0"
 vello = "0.4.0"
 taffy = "0.7.5"
