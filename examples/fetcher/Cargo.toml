@@ -7,4 +7,4 @@ publish = false
 [dependencies]
 maycoon = { path = "../.." }
 surf = "2.3.2"
-serde = { version = "1.0.217", features = ["derive"] }
+serde = { version = "1", features = ["derive"] }
