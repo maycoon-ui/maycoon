@@ -7,6 +7,69 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.0](https://github.com/maycoon-ui/maycoon/compare/maycoon-v0.2.0...maycoon-v0.3.0) - 2025-04-17
+
+### Added
+
+- Plugin System
+- Implement widget extensions for components
+- hook function to Signal trait
+- Remake state management with signals
+- Added Mouse Wheel Support
+- Add more font configuration options
+- Add static_asset and svg_icon macro
+- Add new Icon Widget
+
+### Fixed
+
+- IDE Backup files
+- Docs for new state changes
+- Make examples compatible with new state management
+- Docs of block_on
+- Font Insertion mechanism and documentation
+- Replace OS-loaded default font with embedded
+
+### Other
+
+- Replace trace logs with debug logs
+- Update clippy.toml
+- Replace len with capacity for collecting layout
+- Update mod.rs
+- Omit image patch version in example
+- Only specify major serde version in example
+- Update skrifa to 0.30.0
+- Update bitflags to 2.9.0
+- Update taffy to 0.8.0
+- Update vello
+- Update winit
+- Update dependencies
+- Update indexmap
+- Update bytemuck
+- Move ext.rs to maycoon-core
+- *(contributor)* contrib-readme-action has updated readme
+- Update contributors.yml
+- Update README.md
+- Update contributors.yml
+- Update contributors.yml
+- Add contributors
+- Update README.md
+- Remove unused rust features
+- Create AppContext
+- Added logging
+- Fix doc links
+- Rewrite Icon Example
+- Add feature comments
+- Merge branch 'master' of https://github.com/maycoon-ui/maycoon
+- Fix more `clippy::doc_markdown` lints
+- Update icon example
+- Add svg_icon macro
+- Restructure macros
+- Update bitflags
+- Merge branch 'master' of https://github.com/maycoon-ui/maycoon
+- Add device selector
+- Add Icon widget and example
+- Fix gesture_detector.rs invalidation
+
 ## [0.2.0](https://github.com/maycoon-ui/maycoon/compare/maycoon-v0.1.0...maycoon-v0.2.0) - 2025-01-26
 
 ### Other
