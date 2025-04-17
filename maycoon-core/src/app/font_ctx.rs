@@ -32,7 +32,7 @@ impl FontContext {
         name: impl ToString,
         postscript_name: impl ToString,
     ) -> Option<Font> {
-        log::trace!("Loading system font: {}", postscript_name.to_string());
+        log::debug!("Loading system font: {}", postscript_name.to_string());
 
         let font = font_kit::source::SystemSource::new()
             .select_by_postscript_name(postscript_name.to_string().as_str())
