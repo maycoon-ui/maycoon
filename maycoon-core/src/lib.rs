@@ -13,7 +13,9 @@ pub use skrifa;
 /// Contains useful types for interacting with winit.
 pub mod window {
     pub use winit::event::*;
+    pub use winit::event_loop::*;
     pub use winit::keyboard::*;
+    pub use winit::window::*;
 }
 
 /// Contains app functionality.
@@ -39,3 +41,6 @@ pub mod tasks;
 
 /// Contains the [reference::Ref] for representing a reference to a value.
 pub mod reference;
+
+/// Contains the plugin system.
+pub mod plugin;

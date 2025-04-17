@@ -19,6 +19,7 @@ use crate::app::info::AppInfo;
 use crate::app::update::{Update, UpdateManager};
 use crate::config::MayConfig;
 use crate::layout::{LayoutNode, StyleNode};
+use crate::plugin::PluginManager;
 use crate::widget::Widget;
 use maycoon_theme::theme::Theme;
 
@@ -41,6 +42,7 @@ where
     render_ctx: Option<RenderContext>,
     update: UpdateManager,
     last_update: Instant,
+    plugins: PluginManager<T>,
 }
 
 impl<T, W> AppHandler<'_, T, W>
@@ -55,6 +57,7 @@ where
         widget: W,
         font_context: FontContext,
         update: UpdateManager,
+        plugins: PluginManager<T>,
     ) -> Self {
         let mut taffy = TaffyTree::with_capacity(16);
 
@@ -83,6 +86,7 @@ where
             render_ctx: None,
             update,
             last_update: Instant::now(),
+            plugins,
         }
     }
 
@@ -150,7 +154,27 @@ where
     }
 
     /// Update the app and process events.
-    fn update(&mut self, _: &ActiveEventLoop) {
+    fn update(&mut self, event_loop: &ActiveEventLoop) {
+        // update plugins
+        self.plugins.run(|pl| {
+            pl.on_update(
+                &mut self.config,
+                self.window.as_ref().expect("Window not initialized"),
+                self.renderer.as_mut().expect("Renderer not initialized"),
+                &mut self.scene,
+                self.surface.as_mut().expect("Surface not initialized"),
+                &mut self.taffy,
+                self.window_node,
+                &mut self.info,
+                self.render_ctx
+                    .as_mut()
+                    .expect("Render context not initialized"),
+                &self.update,
+                &mut self.last_update,
+                event_loop,
+            )
+        });
+
         // completely layout widgets if taffy is not set up yet (e.g. during first update)
         if self.taffy.child_count(self.window_node) == 0 {
             log::trace!("Setting up layout...");
@@ -303,6 +327,19 @@ where
     fn resumed(&mut self, event_loop: &ActiveEventLoop) {
         log::info!("Resuming/Starting app execution...");
 
+        self.plugins.run(|pl| {
+            pl.on_resume(
+                &mut self.config,
+                &mut self.scene,
+                &mut self.taffy,
+                self.window_node,
+                &mut self.info,
+                &self.update,
+                &mut self.last_update,
+                event_loop,
+            )
+        });
+
         let mut render_ctx = RenderContext::new();
 
         log::trace!("Creating window...");
@@ -384,8 +421,26 @@ where
         &mut self,
         event_loop: &ActiveEventLoop,
         window_id: WindowId,
-        event: WindowEvent,
+        mut event: WindowEvent,
     ) {
+        self.plugins.run(|pl| {
+            pl.on_window_event(
+                &mut event,
+                &mut self.config,
+                self.window.as_ref().unwrap(),
+                self.renderer.as_mut().unwrap(),
+                &mut self.scene,
+                self.surface.as_mut().unwrap(),
+                &mut self.taffy,
+                self.window_node,
+                &mut self.info,
+                self.render_ctx.as_mut().unwrap(),
+                &self.update,
+                &mut self.last_update,
+                event_loop,
+            )
+        });
+
         if let Some(window) = &self.window {
             if window.id() == window_id {
                 match event {
@@ -485,13 +540,27 @@ where
         }
     }
 
-    fn suspended(&mut self, _: &ActiveEventLoop) {
+    fn suspended(&mut self, event_loop: &ActiveEventLoop) {
         log::info!("Suspending application...");
 
         self.window = None;
         self.surface = None;
         self.render_ctx = None;
         self.renderer = None;
+
+        self.plugins.run(|pl| {
+            pl.on_suspended(
+                &mut self.config,
+                &mut self.scene,
+                &mut self.taffy,
+                self.window_node,
+                &mut self.info,
+                &self.update,
+                &mut self.last_update,
+                event_loop,
+            )
+        });
+
         self.info.reset();
     }
 }

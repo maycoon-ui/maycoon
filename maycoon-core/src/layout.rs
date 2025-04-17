@@ -2,7 +2,8 @@ use nalgebra::Vector2;
 pub use taffy::{
     AlignContent, AlignItems, AlignSelf, Dimension, Display, FlexDirection, FlexWrap, GridAutoFlow,
     GridPlacement, JustifyContent, JustifyItems, JustifySelf, Layout, LengthPercentage,
-    LengthPercentageAuto, Line, Overflow, Position, Rect,
+    LengthPercentageAuto, Line, NodeId, Overflow, Position, Rect, TaffyError, TaffyResult,
+    TaffyTree,
 };
 
 /// Defines different aspects and properties of a widget layout.

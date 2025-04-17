@@ -3,6 +3,7 @@ use crate::app::font_ctx::FontContext;
 use crate::app::handler::AppHandler;
 use crate::app::update::UpdateManager;
 use crate::config::MayConfig;
+use crate::plugin::PluginManager;
 use crate::widget::Widget;
 use maycoon_theme::theme::Theme;
 use peniko::Font;
@@ -54,12 +55,12 @@ impl<T: Theme> MayRunner<T> {
     }
 
     /// Run the application with given widget and state.
-    pub fn run<W, F>(self, builder: F)
+    pub fn run<W, F>(mut self, builder: F, mut plugins: PluginManager<T>)
     where
         W: Widget,
         F: FnOnce(AppContext) -> W,
     {
-        let event_loop = EventLoopBuilder::default()
+        let mut event_loop = EventLoopBuilder::default()
             .build()
             .expect("Failed to create event loop");
 
@@ -116,6 +117,8 @@ impl<T: Theme> MayRunner<T> {
 
         let widget = builder(AppContext::new(update.clone()));
 
+        plugins.run(|pl| pl.init(&mut event_loop, &update, &mut attrs, &mut self.config));
+
         event_loop
             .run_app(&mut AppHandler::new(
                 attrs,
@@ -123,6 +126,7 @@ impl<T: Theme> MayRunner<T> {
                 widget,
                 self.font_ctx,
                 update,
+                plugins,
             ))
             .expect("Failed to run event loop");
     }

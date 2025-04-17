@@ -1,6 +1,7 @@
 use crate::app::context::AppContext;
 use crate::app::runner::MayRunner;
 use crate::config::MayConfig;
+use crate::plugin::PluginManager;
 use crate::widget::Widget;
 use maycoon_theme::theme::Theme;
 
@@ -42,10 +43,15 @@ pub trait Application: Sized {
     /// Returns the [MayConfig] for the application.
     fn config(&self) -> MayConfig<Self::Theme>;
 
+    /// Builds and returns the [PluginManager] for the application.
+    fn plugins(&self) -> PluginManager<Self::Theme> {
+        PluginManager::new()
+    }
+
     /// Runs the application using the [MayRunner].
     ///
     /// Override this method if you want to use a custom event loop.
     fn run(self) {
-        MayRunner::<Self::Theme>::new(self.config()).run(Self::build);
+        MayRunner::<Self::Theme>::new(self.config()).run(Self::build, self.plugins());
     }
 }
