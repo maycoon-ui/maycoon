@@ -3,7 +3,7 @@ use maycoon::core::app::context::AppContext;
 use maycoon::core::app::Application;
 use maycoon::core::config::MayConfig;
 use maycoon::core::signal::fixed::FixedSignal;
-use maycoon::core::signal::MaybeSignal;
+use maycoon::core::signal::Signal;
 use maycoon::core::widget::Widget;
 use maycoon::theme::theme::celeste::CelesteTheme;
 use maycoon::widgets::image::{Image, ImageData};
@@ -16,7 +16,7 @@ impl Application for MyApp {
     type Theme = CelesteTheme;
 
     fn build(context: AppContext) -> impl Widget {
-        let image = context.use_signal(FixedSignal::new(ImageData::new(
+        let image = FixedSignal::new(ImageData::new(
             Blob::from(
                 image::load_from_memory(IMAGE_DATA)
                     .unwrap()
@@ -26,9 +26,10 @@ impl Application for MyApp {
             ImageFormat::Rgba8,
             427,
             640,
-        )));
+        ))
+        .hook(&context);
 
-        Image::new(MaybeSignal::signal(image))
+        Image::new(image.maybe())
     }
 
     fn config(&self) -> MayConfig<Self::Theme> {

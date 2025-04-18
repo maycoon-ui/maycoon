@@ -55,11 +55,11 @@ pub trait Signal<T: 'static>: 'static {
     }
 
     /// Converts the signal into a [MaybeSignal].
-    fn maybe(self: Arc<Self>) -> MaybeSignal<T>
+    fn maybe(self: &Arc<Self>) -> MaybeSignal<T>
     where
         Self: Sized,
     {
-        MaybeSignal::signal(self)
+        MaybeSignal::signal(self.clone())
     }
 
     /// Converts this signal into a [MaybeSignal] and applies the given mapping function.
@@ -75,12 +75,11 @@ pub trait Signal<T: 'static>: 'static {
     /// Hooks the signal into the given [AppContext].
     ///
     /// Required for the signal to become reactive with the app lifecycle.
-    fn hook(mut self, context: AppContext) -> Self
+    fn hook(self, context: &AppContext) -> Arc<Self>
     where
         Self: Sized,
     {
-        context.hook_signal(&mut self);
-        self
+        context.use_signal(self)
     }
 }
 

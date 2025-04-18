@@ -4,7 +4,7 @@ use maycoon::core::component::{Component, Composed};
 use maycoon::core::layout::LayoutStyle;
 use maycoon::core::reference::Ref;
 use maycoon::core::signal::eval::EvalSignal;
-use maycoon::core::signal::{ArcSignal, MaybeSignal};
+use maycoon::core::signal::{ArcSignal, MaybeSignal, Signal};
 use maycoon::core::widget::{Widget, WidgetLayoutExt};
 use maycoon::theme::id::WidgetId;
 use maycoon::widgets::button::Button;
@@ -36,10 +36,12 @@ impl Component for Counter {
 
                 Box::new(
                     Button::new(Text::new("Increase".to_string())).with_on_pressed(
-                        MaybeSignal::signal(context.use_signal(EvalSignal::new(move || {
+                        EvalSignal::new(move || {
                             counter.set(*counter.get() + 1);
                             Update::DRAW
-                        }))),
+                        })
+                        .hook(&context)
+                        .maybe(),
                     ),
                 )
             },
@@ -48,10 +50,12 @@ impl Component for Counter {
 
                 Box::new(
                     Button::new(Text::new("Decrease".to_string())).with_on_pressed(
-                        MaybeSignal::signal(context.use_signal(EvalSignal::new(move || {
+                        EvalSignal::new(move || {
                             counter.set(*counter.get() - 1);
                             Update::DRAW
-                        }))),
+                        })
+                        .hook(&context)
+                        .maybe(),
                     ),
                 )
             },

@@ -4,7 +4,7 @@ use maycoon::core::config::MayConfig;
 use maycoon::core::layout::{AlignItems, Dimension, FlexDirection, LayoutStyle};
 use maycoon::core::reference::Ref;
 use maycoon::core::signal::state::StateSignal;
-use maycoon::core::signal::{MaybeSignal, Signal};
+use maycoon::core::signal::Signal;
 use maycoon::core::widget::{Widget, WidgetLayoutExt};
 use maycoon::math::Vector2;
 use maycoon::theme::theme::celeste::CelesteTheme;
@@ -21,7 +21,7 @@ impl Application for MyApp {
         let value = context.use_signal(StateSignal::new(0.0f32));
 
         Container::new(vec![
-            Box::new(Slider::new(MaybeSignal::signal(value.clone()))),
+            Box::new(Slider::new(value.maybe())),
             Box::new(Text::new(value.map(|i| Ref::Owned(i.to_string())))),
         ])
         .with_layout_style(LayoutStyle {

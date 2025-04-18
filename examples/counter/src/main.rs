@@ -28,11 +28,13 @@ impl Application for MyApp {
 
                 Box::new(
                     Button::new(Text::new("Increase".to_string())).with_on_pressed(
-                        MaybeSignal::signal(context.use_signal(EvalSignal::new(move || {
+                        EvalSignal::new(move || {
                             counter.set(*counter.get() + 1);
 
                             Update::DRAW
-                        }))),
+                        })
+                        .hook(&context)
+                        .maybe(),
                     ),
                 )
             },
@@ -41,18 +43,17 @@ impl Application for MyApp {
 
                 Box::new(
                     Button::new(Text::new("Decrease".to_string())).with_on_pressed(
-                        MaybeSignal::signal(context.use_signal(EvalSignal::new(move || {
+                        EvalSignal::new(move || {
                             counter.set(*counter.get() - 1);
 
                             Update::DRAW
-                        }))),
+                        })
+                        .hook(&context)
+                        .maybe(),
                     ),
                 )
             },
-            {
-                let counter = counter.clone();
-                Box::new(Text::new(counter.map(|i| Ref::Owned(i.to_string()))))
-            },
+            Box::new(Text::new(counter.map(|i| Ref::Owned(i.to_string())))),
         ])
         .with_layout_style(LayoutStyle {
             size: Vector2::<Dimension>::new(Dimension::percent(1.0), Dimension::percent(1.0)),
