@@ -3,8 +3,7 @@ use peniko::{Blob, Font};
 use std::sync::Arc;
 
 #[cfg(feature = "include-noto-sans")]
-const NOTO_SANS: &[u8] =
-    include_bytes!("../../../../../assets/Noto Sans Font/NotoSans-VariableFont.ttf");
+const NOTO_SANS: &[u8] = include_bytes!("./../../assets/Noto Sans Font/NotoSans-VariableFont.ttf");
 
 /// The font context. Contains font data.
 #[derive(Clone, Debug)]

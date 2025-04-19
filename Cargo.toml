@@ -26,7 +26,6 @@ maycoon-widgets = { version = "0.3.0", path = "maycoon-widgets" }
 name = "maycoon"
 description = "Lightning fast and powerful UI Framework for Rust."
 version = "0.3.0"
-include = ["README.md", "Cargo.toml", "src/**/*", "./assets/**/*"]
 edition.workspace = true
 license.workspace = true
 authors.workspace = true
