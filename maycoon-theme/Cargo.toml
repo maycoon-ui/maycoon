@@ -1,7 +1,7 @@
 [package]
 name = "maycoon-theme"
 description = "Themes & Styling for Maycoon UI => See the `maycoon` crate for more."
-version.workspace = true
+version = "0.3.0"
 edition.workspace = true
 license.workspace = true
 authors.workspace = true
