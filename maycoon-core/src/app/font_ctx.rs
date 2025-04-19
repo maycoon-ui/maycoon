@@ -1,9 +1,5 @@
 use indexmap::IndexMap;
 use peniko::{Blob, Font};
-use std::sync::Arc;
-
-#[cfg(feature = "include-noto-sans")]
-const NOTO_SANS: &[u8] = include_bytes!("./../../assets/Noto Sans Font/NotoSans-VariableFont.ttf");
 
 /// The font context. Contains font data.
 #[derive(Clone, Debug)]
@@ -65,7 +61,30 @@ impl FontContext {
 impl Default for FontContext {
     fn default() -> Self {
         Self {
-            default: Font::new(Blob::new(Arc::new(NOTO_SANS)), 0),
+            default: Font::new(
+                Blob::new(
+                    font_kit::source::SystemSource::new()
+                        .select_by_postscript_name(
+                            if cfg!(any(
+                                target_os = "linux",
+                                target_os = "dragonfly",
+                                target_os = "freebsd",
+                                target_os = "netbsd",
+                                target_os = "openbsd"
+                            )) {
+                                "NotoSans"
+                            } else {
+                                "ArialMT"
+                            },
+                        )
+                        .expect("Failed to select default font")
+                        .load()
+                        .expect("Failed to load default font")
+                        .copy_font_data()
+                        .expect("Failed to copy font data"),
+                ),
+                0,
+            ),
             fonts: IndexMap::new(),
         }
     }
