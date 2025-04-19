@@ -1,7 +1,7 @@
 [package]
 name = "maycoon-core"
 description = "Core Functionality for Maycoon UI => See the `maycoon` crate for more."
-version = "0.3.0"
+version = "0.3.1"
 edition.workspace = true
 license.workspace = true
 authors.workspace = true
