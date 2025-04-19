@@ -20,7 +20,7 @@ indexmap = "2.9.0"
 log = "0.4.22"
 maycoon-core = { version = "0.2.0", path = "maycoon-core" }
 maycoon-macros = { version = "0.2.0", path = "maycoon-macros" }
-maycoon-theme = { version = "0.2.0", path = "maycoon-theme" }
+maycoon-theme = { version = "0.3.0", path = "maycoon-theme" }
 maycoon-widgets = { version = "0.2.0", path = "maycoon-widgets" }
 
 [package]
