@@ -18,15 +18,15 @@ peniko = "0.3.1"
 nalgebra = { version = "0.33.2", default-features = false, features = ["std"] }
 indexmap = "2.9.0"
 log = "0.4.22"
-maycoon-core = { version = "0.2.0", path = "maycoon-core" }
-maycoon-macros = { version = "0.2.0", path = "maycoon-macros" }
+maycoon-core = { version = "0.3.0", path = "maycoon-core" }
+maycoon-macros = { version = "0.3.0", path = "maycoon-macros" }
 maycoon-theme = { version = "0.3.0", path = "maycoon-theme" }
-maycoon-widgets = { version = "0.2.0", path = "maycoon-widgets" }
+maycoon-widgets = { version = "0.3.0", path = "maycoon-widgets" }
 
 [package]
 name = "maycoon"
 description = "Lightning fast and powerful UI Framework for Rust."
-version.workspace = true
+version = "0.3.0"
 edition.workspace = true
 license.workspace = true
 authors.workspace = true
