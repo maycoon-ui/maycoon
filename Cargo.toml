@@ -32,6 +32,8 @@ license.workspace = true
 authors.workspace = true
 categories.workspace = true
 keywords.workspace = true
+repository.workspace = true
+homepage.workspace = true
 
 [dependencies]
 maycoon-core = { workspace = true }
