@@ -1,4 +1,8 @@
 use crate::app::update::{Update, UpdateManager};
+use crate::signal::eval::EvalSignal;
+use crate::signal::fixed::FixedSignal;
+use crate::signal::memoized::MemoizedSignal;
+use crate::signal::state::StateSignal;
 use crate::signal::Signal;
 use std::sync::Arc;
 
@@ -37,5 +41,25 @@ impl AppContext {
         self.hook_signal(&mut signal);
 
         Arc::new(signal)
+    }
+
+    /// Shortcut for creating and hooking a [StateSignal] into the application lifecycle.
+    pub fn use_state<T: 'static>(&self, value: T) -> Arc<StateSignal<T>> {
+        self.use_signal(StateSignal::new(value))
+    }
+
+    /// Shortcut for creating and hooking a [MemoizedSignal] into the application lifecycle.
+    pub fn use_memoized<T: 'static>(&self, value: T) -> Arc<MemoizedSignal<T>> {
+        self.use_signal(MemoizedSignal::new(value))
+    }
+
+    /// Shortcut for creating and hooking a [FixedSignal] into the application lifecycle.
+    pub fn use_fixed<T: 'static>(&self, value: T) -> Arc<FixedSignal<T>> {
+        self.use_signal(FixedSignal::new(value))
+    }
+
+    /// Shortcut for creating and hooking an [EvalSignal] into the application lifecycle.
+    pub fn use_eval<T: 'static>(&self, eval: impl Fn() -> T) -> Arc<EvalSignal<T>> {
+        self.use_signal(EvalSignal::new(eval))
     }
 }
