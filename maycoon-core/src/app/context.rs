@@ -49,7 +49,10 @@ impl AppContext {
     }
 
     /// Shortcut for creating and hooking a [MemoizedSignal] into the application lifecycle.
-    pub fn use_memoized<T: 'static>(&self, value: T) -> Arc<MemoizedSignal<T>> {
+    pub fn use_memoized<T: 'static>(
+        &self,
+        value: impl Fn() -> T + 'static,
+    ) -> Arc<MemoizedSignal<T>> {
         self.use_signal(MemoizedSignal::new(value))
     }
 
@@ -59,7 +62,7 @@ impl AppContext {
     }
 
     /// Shortcut for creating and hooking an [EvalSignal] into the application lifecycle.
-    pub fn use_eval<T: 'static>(&self, eval: impl Fn() -> T) -> Arc<EvalSignal<T>> {
+    pub fn use_eval<T: 'static>(&self, eval: impl Fn() -> T + 'static) -> Arc<EvalSignal<T>> {
         self.use_signal(EvalSignal::new(eval))
     }
 }

@@ -34,3 +34,6 @@ pub mod gesture_detector;
 
 /// Contains the [icon::Icon] widget.
 pub mod icon;
+
+/// Contains the [animator::Animator] widget and associated structures.
+pub mod animator;
