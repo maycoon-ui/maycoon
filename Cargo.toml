@@ -54,7 +54,7 @@ vg = ["maycoon-core/vg"]
 # Enables the `Canvas` widget for drawing to the screen.
 canvas = ["maycoon-widgets/canvas"]
 
-# Include the `Noto Sans` font as a default font. If disabled, you must specify a font using the `FontContext`.
+# Include the `Noto Sans` font as a default font. If disabled, you must specify a default font using the `FontContext`.
 include-noto-sans = ["maycoon-core/include-noto-sans"]
 
 [lib]
