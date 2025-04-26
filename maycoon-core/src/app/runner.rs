@@ -36,15 +36,19 @@ impl<T: Theme> MayRunner<T> {
         }
     }
 
-    /// Insert a new font into the font context.
+    /// Loads a new font into the font context.
+    ///
+    /// See [FontContext::load] for more.
     pub fn with_font(mut self, name: impl ToString, font: Font) -> Self {
-        self.font_ctx.insert(name, font);
+        self.font_ctx.load(name, font);
         self
     }
 
-    /// Insert a new system font into the font context.
+    /// Loads a new system font into the font context.
+    ///
+    /// See [FontContext::load_system] for more.
     pub fn with_system_font(mut self, name: impl ToString, postscript_name: impl ToString) -> Self {
-        self.font_ctx.insert_system_font(name, postscript_name);
+        self.font_ctx.load_system(name, postscript_name);
         self
     }
 
