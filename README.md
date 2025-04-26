@@ -47,6 +47,10 @@ This project is dual licensed under the [MIT license](LICENSE-MIT) and the [Apac
 
 Any contributions are, unless otherwise stated, licensed under the same terms.
 
+**NOTE:** The [Noto Sans](https://fonts.google.com/noto/specimen/Noto+Sans) font, that is embedded by default with the
+`include-noto-sans` feature is licensed under
+the [SIL Open Font License 1.1](https://openfontlicense.org/open-font-license-official-text/).
+
 ## Contributors
 
 Thanks to everyone who has contributed to Maycoon!
