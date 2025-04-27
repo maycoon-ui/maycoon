@@ -24,7 +24,7 @@
 - 🎨 **Customizable**
     - Maycoon provides a variety of widgets and themes to customize the look and feel of your application with ease.
 - 🚀 **Lightning Fast**
-    - Your application will startup fast and run even faster.
+    - Your application will start up fast and run even faster.
     - The UI uses [vello](https://github.com/linebender/vello) for GPU-accelerated rendering and top performance.
 - 📦 **Modular**
     - Every crate and feature is optional, so you can only enable what you really need and avoid unnecessary
