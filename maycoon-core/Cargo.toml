@@ -14,7 +14,7 @@ homepage.workspace = true
 winit = "0.30.9"
 wgpu-types = "23.0.0"
 vello = "0.4.1"
-taffy = "0.8.0"
+taffy = "0.8.1"
 bitflags = "2.9.0"
 font-kit = "0.14.2"
 futures = { version = "0.3.31", features = ["thread-pool"] }
