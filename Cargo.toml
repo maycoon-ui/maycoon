@@ -17,10 +17,10 @@ peniko = "0.3.1"
 nalgebra = { version = "0.33.2", default-features = false, features = ["std"] }
 indexmap = "2.9.0"
 log = "0.4.22"
-maycoon-core = { version = "0.3.1", path = "maycoon-core" }
-maycoon-macros = { version = "0.3.0", path = "maycoon-macros" }
-maycoon-theme = { version = "0.3.1", path = "maycoon-theme" }
-maycoon-widgets = { version = "0.3.0", path = "maycoon-widgets" }
+maycoon-core = { version = "0.3.2", path = "maycoon-core" }
+maycoon-macros = { version = "0.3.2", path = "maycoon-macros" }
+maycoon-theme = { version = "0.3.2", path = "maycoon-theme" }
+maycoon-widgets = { version = "0.3.2", path = "maycoon-widgets" }
 
 [package]
 name = "maycoon"
