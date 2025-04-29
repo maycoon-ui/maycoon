@@ -11,7 +11,7 @@ repository.workspace = true
 homepage.workspace = true
 
 [dependencies]
-syn = "2.0.100"
+syn = "2.0.101"
 quote = "1.0.40"
 proc-macro2 = "1.0.95"
 ureq = "3.0.11"
