@@ -6,7 +6,7 @@ use maycoon::core::layout::{AlignItems, Dimension, FlexDirection, LayoutStyle};
 use maycoon::core::reference::Ref;
 use maycoon::core::signal::eval::EvalSignal;
 use maycoon::core::signal::state::StateSignal;
-use maycoon::core::signal::{MaybeSignal, Signal};
+use maycoon::core::signal::Signal;
 use maycoon::core::widget::{Widget, WidgetLayoutExt};
 use maycoon::math::Vector2;
 use maycoon::theme::theme::celeste::CelesteTheme;
@@ -18,8 +18,9 @@ struct MyApp;
 
 impl Application for MyApp {
     type Theme = CelesteTheme;
+    type State = ();
 
-    fn build(context: AppContext) -> impl Widget {
+    fn build(context: AppContext, _: Self::State) -> impl Widget {
         let counter = context.use_signal(StateSignal::new(0));
 
         Container::new(vec![
@@ -69,5 +70,5 @@ impl Application for MyApp {
 }
 
 fn main() {
-    MyApp.run()
+    MyApp.run(())
 }

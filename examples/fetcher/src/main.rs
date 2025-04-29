@@ -12,8 +12,9 @@ struct MyApp;
 
 impl Application for MyApp {
     type Theme = CelesteTheme;
+    type State = ();
 
-    fn build(_: AppContext) -> impl Widget {
+    fn build(_: AppContext, _: Self::State) -> impl Widget {
         WidgetFetcher::new(get_random_quote(), Update::DRAW, |data| {
             if let Some(data) = data {
                 Text::new(format!(" \"{}\" \n - {}", data.quote, data.author))
@@ -32,7 +33,7 @@ impl Application for MyApp {
 }
 
 fn main() {
-    MyApp.run()
+    MyApp.run(())
 }
 
 #[derive(Deserialize)]

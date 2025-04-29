@@ -12,8 +12,9 @@ struct MyApp;
 
 impl Application for MyApp {
     type Theme = CelesteTheme;
+    type State = ();
 
-    fn build(_: AppContext) -> impl Widget {
+    fn build(_: AppContext, _: Self::State) -> impl Widget {
         Canvas::new(|scene, _| {
             scene.stroke(
                 &Stroke::new(10.0),
@@ -31,5 +32,5 @@ impl Application for MyApp {
 }
 
 fn main() {
-    MyApp.run()
+    MyApp.run(())
 }

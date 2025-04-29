@@ -59,10 +59,10 @@ impl<T: Theme> MayRunner<T> {
     }
 
     /// Run the application with given widget and state.
-    pub fn run<W, F>(mut self, builder: F, mut plugins: PluginManager<T>)
+    pub fn run<S, W, F>(mut self, state: S, builder: F, mut plugins: PluginManager<T>)
     where
         W: Widget,
-        F: FnOnce(AppContext) -> W,
+        F: FnOnce(AppContext, S) -> W,
     {
         let mut event_loop = EventLoopBuilder::default()
             .build()
@@ -119,7 +119,7 @@ impl<T: Theme> MayRunner<T> {
 
         let update = UpdateManager::new();
 
-        let widget = builder(AppContext::new(update.clone()));
+        let widget = builder(AppContext::new(update.clone()), state);
 
         plugins.run(|pl| pl.init(&mut event_loop, &update, &mut attrs, &mut self.config));
 

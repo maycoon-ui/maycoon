@@ -16,8 +16,9 @@ struct MyApp;
 
 impl Application for MyApp {
     type Theme = CelesteTheme;
+    type State = ();
 
-    fn build(context: AppContext) -> impl Widget {
+    fn build(context: AppContext, _: Self::State) -> impl Widget {
         let value = context.use_signal(StateSignal::new(0.0f32));
 
         Container::new(vec![
@@ -38,5 +39,5 @@ impl Application for MyApp {
 }
 
 fn main() {
-    MyApp.run()
+    MyApp.run(())
 }

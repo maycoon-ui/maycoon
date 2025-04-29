@@ -13,8 +13,9 @@ struct MyApp;
 
 impl Application for MyApp {
     type Theme = CelesteTheme;
+    type State = ();
 
-    fn build(context: AppContext) -> impl Widget {
+    fn build(context: AppContext, _: Self::State) -> impl Widget {
         GestureDetector::new(Text::new("Gesture Detector".to_string()))
             .with_on_hover(
                 EvalSignal::new(move || {
@@ -48,5 +49,5 @@ impl Application for MyApp {
 }
 
 fn main() {
-    MyApp.run()
+    MyApp.run(())
 }

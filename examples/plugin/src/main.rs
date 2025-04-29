@@ -13,8 +13,9 @@ struct MyApp;
 
 impl Application for MyApp {
     type Theme = CelesteTheme;
+    type State = ();
 
-    fn build(_: AppContext) -> impl Widget {
+    fn build(_: AppContext, _: Self::State) -> impl Widget {
         Text::new("Drop a file!".to_string())
     }
 
@@ -32,5 +33,5 @@ impl Application for MyApp {
 }
 
 fn main() {
-    MyApp.run()
+    MyApp.run(())
 }

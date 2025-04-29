@@ -13,8 +13,9 @@ struct MyApp;
 
 impl Application for MyApp {
     type Theme = CelesteTheme;
+    type State = ();
 
-    fn build(context: AppContext) -> impl Widget {
+    fn build(context: AppContext, _: Self::State) -> impl Widget {
         let font_size = context.use_state(0.0);
 
         Animator::new(
@@ -34,5 +35,5 @@ impl Application for MyApp {
 }
 
 fn main() {
-    MyApp.run()
+    MyApp.run(())
 }

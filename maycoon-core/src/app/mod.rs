@@ -35,10 +35,13 @@ pub trait Application: Sized {
     /// See [maycoon_theme::theme] for built-in themes.
     type Theme: Theme;
 
+    /// The global state of the application.
+    type State;
+
     /// Renders/builds the application's widgets.
     ///
     /// This function will be passed to the [MayRunner] to create and run the application.
-    fn build(context: AppContext) -> impl Widget;
+    fn build(context: AppContext, state: Self::State) -> impl Widget;
 
     /// Returns the [MayConfig] for the application.
     fn config(&self) -> MayConfig<Self::Theme>;
@@ -51,7 +54,7 @@ pub trait Application: Sized {
     /// Runs the application using the [MayRunner].
     ///
     /// Override this method if you want to use a custom event loop.
-    fn run(self) {
-        MayRunner::<Self::Theme>::new(self.config()).run(Self::build, self.plugins());
+    fn run(self, state: Self::State) {
+        MayRunner::<Self::Theme>::new(self.config()).run(state, Self::build, self.plugins());
     }
 }
