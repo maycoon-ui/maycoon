@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.0](https://github.com/maycoon-ui/maycoon/compare/maycoon-core-v0.3.2...maycoon-core-v0.4.0) - 2025-04-29
+
+### Added
+
+- Global State Management
+
+### Fixed
+
+- Default Font Selection
+
+### Other
+
+- Remove parking_lot dependency
+- Update taffy to 0.8.1
+
 ## [0.3.1](https://github.com/maycoon-ui/maycoon/compare/maycoon-core-v0.3.0...maycoon-core-v0.3.1) - 2025-04-19
 
 ### Other
