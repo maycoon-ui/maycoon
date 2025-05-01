@@ -2,10 +2,10 @@ use crate::app::update::{Update, UpdateManager};
 use crate::signal::eval::EvalSignal;
 use crate::signal::fixed::FixedSignal;
 use crate::signal::memoized::MemoizedSignal;
+use crate::signal::rw::RwSignal;
 use crate::signal::state::StateSignal;
 use crate::signal::Signal;
 use std::sync::Arc;
-use crate::signal::rw::RwSignal;
 
 /// The application context for managing the application lifecycle.
 #[derive(Clone, Debug)]
