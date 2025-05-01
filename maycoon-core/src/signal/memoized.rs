@@ -1,6 +1,6 @@
 use crate::reference::Ref;
 use crate::signal::{Listener, Signal};
-use std::sync::{Arc, OnceLock};
+use std::sync::OnceLock;
 
 /// A signal for creating a value once, when requested.
 /// The value is immutable after creation.

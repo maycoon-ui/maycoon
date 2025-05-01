@@ -5,6 +5,7 @@ use crate::signal::memoized::MemoizedSignal;
 use crate::signal::state::StateSignal;
 use crate::signal::Signal;
 use std::sync::Arc;
+use crate::signal::rw::RwSignal;
 
 /// The application context for managing the application lifecycle.
 #[derive(Clone, Debug)]
@@ -64,5 +65,9 @@ impl AppContext {
     /// Shortcut for creating and hooking an [EvalSignal] into the application lifecycle.
     pub fn use_eval<T: 'static>(&self, eval: impl Fn() -> T + 'static) -> Arc<EvalSignal<T>> {
         self.use_signal(EvalSignal::new(eval))
+    }
+
+    pub fn use_rw<T: 'static>(&self, value: T) -> Arc<RwSignal<T>> {
+        self.use_signal(RwSignal::new(value))
     }
 }
