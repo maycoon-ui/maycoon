@@ -1,5 +1,4 @@
 use crate::app::context::AppContext;
-use crate::app::diagnostics::Diagnostics;
 use crate::app::font_ctx::FontContext;
 use crate::app::handler::AppHandler;
 use crate::app::update::UpdateManager;
@@ -63,7 +62,7 @@ impl<T: Theme> MayRunner<T> {
     pub fn run<S, W, F>(mut self, state: S, builder: F, mut plugins: PluginManager<T>)
     where
         W: Widget,
-        F: FnOnce(AppContext, S) -> W,
+        F: Fn(AppContext, S) -> W,
     {
         let mut event_loop = EventLoopBuilder::default()
             .build()
@@ -120,18 +119,14 @@ impl<T: Theme> MayRunner<T> {
 
         let update = UpdateManager::new();
 
-        let widget = builder(
-            AppContext::new(update.clone(), Diagnostics::default()),
-            state,
-        );
-
         plugins.run(|pl| pl.init(&mut event_loop, &update, &mut attrs, &mut self.config));
 
         event_loop
             .run_app(&mut AppHandler::new(
                 attrs,
                 self.config,
-                widget,
+                builder,
+                state,
                 self.font_ctx,
                 update,
                 plugins,

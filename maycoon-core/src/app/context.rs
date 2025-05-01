@@ -8,29 +8,41 @@ use crate::signal::rw::RwSignal;
 use crate::signal::state::StateSignal;
 use crate::signal::Signal;
 use std::sync::Arc;
+use vello::util::RenderContext;
 
 /// The application context for managing the application lifecycle.
-#[derive(Clone, Debug)]
+#[derive(Clone)]
 pub struct AppContext {
     update: UpdateManager,
     diagnostics: Diagnostics,
+    render: Arc<RenderContext>,
 }
 
 impl AppContext {
     /// Create a new application context using the given [UpdateManager].
-    pub fn new(update: UpdateManager, diagnostics: Diagnostics) -> Self {
+    pub fn new(
+        update: UpdateManager,
+        diagnostics: Diagnostics,
+        render: Arc<RenderContext>,
+    ) -> Self {
         Self {
             update,
             diagnostics,
+            render,
         }
     }
 
-    /// Get the [Diagnostics] of this application context.
+    /// Get the [Diagnostics] of the application.
     pub fn diagnostics(&self) -> Diagnostics {
         self.diagnostics.clone()
     }
 
-    /// Get the [UpdateManager] of this application context.
+    /// Get the [RenderContext] of the application.
+    pub fn render_ctx(&self) -> Arc<RenderContext> {
+        self.render.clone()
+    }
+
+    /// Get the [UpdateManager] of the application.
     pub fn update(&self) -> UpdateManager {
         self.update.clone()
     }

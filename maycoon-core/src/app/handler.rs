@@ -24,10 +24,11 @@ use crate::widget::Widget;
 use maycoon_theme::theme::Theme;
 
 /// The core application handler. You should use [MayApp](crate::app::MayApp) instead for running applications.
-pub struct AppHandler<'a, T, W>
+pub struct AppHandler<'a, T, W, S, F>
 where
     T: Theme,
     W: Widget,
+    F: Fn(AppContext, S) -> W,
 {
     config: MayConfig<T>,
     attrs: WindowAttributes,
@@ -37,24 +38,28 @@ where
     surface: Option<RenderSurface<'a>>,
     taffy: TaffyTree,
     window_node: NodeId,
-    widget: W,
+    builder: F,
+    state: Option<S>,
+    widget: Option<W>,
     info: AppInfo,
-    render_ctx: Option<RenderContext>,
+    render_ctx: Option<Arc<RenderContext>>,
     update: UpdateManager,
     last_update: Instant,
     plugins: PluginManager<T>,
 }
 
-impl<T, W> AppHandler<'_, T, W>
+impl<T, W, S, F> AppHandler<'_, T, W, S, F>
 where
     T: Theme,
     W: Widget,
+    F: Fn(AppContext, S) -> W,
 {
     /// Create a new handler with given window attributes, config, widget and state.
     pub fn new(
         attrs: WindowAttributes,
         config: MayConfig<T>,
-        widget: W,
+        builder: F,
+        state: S,
         font_context: FontContext,
         update: UpdateManager,
         plugins: PluginManager<T>,
@@ -76,13 +81,15 @@ where
             scene: Scene::new(),
             surface: None,
             taffy,
-            widget,
+            widget: None,
             info: AppInfo {
                 font_context,
                 size,
                 ..Default::default()
             },
             window_node,
+            builder,
+            state: Some(state),
             render_ctx: None,
             update,
             last_update: Instant::now(),
@@ -92,7 +99,11 @@ where
 
     /// Get the application context.
     pub fn context(&self) -> AppContext {
-        AppContext::new(self.update.clone(), self.info.diagnostics)
+        AppContext::new(
+            self.update.clone(),
+            self.info.diagnostics,
+            self.render_ctx.clone().unwrap(),
+        )
     }
 
     /// Add the parent node and its children to the layout tree.
@@ -179,7 +190,7 @@ where
         if self.taffy.child_count(self.window_node) == 0 {
             log::debug!("Setting up layout...");
 
-            let style = self.widget.layout_style();
+            let style = self.widget.as_ref().unwrap().layout_style();
 
             self.layout_widget(self.window_node, &style)
                 .expect("Failed to layout window");
@@ -189,7 +200,7 @@ where
             self.update.insert(Update::FORCE);
         }
 
-        let style = self.widget.layout_style();
+        let style = self.widget.as_ref().unwrap().layout_style();
 
         let mut layout_node = self
             .collect_layout(
@@ -200,8 +211,13 @@ where
 
         // update call to check if app should re-evaluate
         log::debug!("Updating root widget...");
-        self.update
-            .insert(self.widget.update(&layout_node, self.context(), &self.info));
+        let context = self.context();
+        self.update.insert(
+            self.widget
+                .as_mut()
+                .unwrap()
+                .update(&layout_node, context, &self.info),
+        );
 
         // check if app should re-evaluate layout
         if self.update.get().intersects(Update::LAYOUT | Update::FORCE) {
@@ -212,7 +228,7 @@ where
                 .set_children(self.window_node, &[])
                 .expect("Failed to set children");
 
-            let style = self.widget.layout_style();
+            let style = self.widget.as_ref().unwrap().layout_style();
 
             self.layout_widget(self.window_node, &style)
                 .expect("Failed to layout window");
@@ -237,7 +253,7 @@ where
             let context = self.context();
 
             log::debug!("Rendering root widget...");
-            self.widget.render(
+            self.widget.as_mut().unwrap().render(
                 &mut self.scene,
                 &mut self.config.theme,
                 &layout_node,
@@ -319,10 +335,11 @@ where
     }
 }
 
-impl<T, W> ApplicationHandler for AppHandler<'_, T, W>
+impl<T, W, S, F> ApplicationHandler for AppHandler<'_, T, W, S, F>
 where
     T: Theme,
     W: Widget,
+    F: Fn(AppContext, S) -> W,
 {
     fn resumed(&mut self, event_loop: &ActiveEventLoop) {
         log::info!("Resuming/Starting app execution...");
@@ -413,8 +430,17 @@ where
             .expect("Failed to create renderer"),
         );
 
-        self.render_ctx = Some(render_ctx);
+        self.render_ctx = Some(Arc::new(render_ctx));
         self.update.set(Update::FORCE);
+
+        self.widget = Some((self.builder)(
+            AppContext::new(
+                self.update.clone(),
+                self.info.diagnostics,
+                self.render_ctx.clone().unwrap(),
+            ),
+            self.state.take().unwrap(),
+        ));
     }
 
     fn window_event(
@@ -434,7 +460,7 @@ where
                 &mut self.taffy,
                 self.window_node,
                 &mut self.info,
-                self.render_ctx.as_mut().unwrap(),
+                self.render_ctx.as_ref().unwrap(),
                 &self.update,
                 &mut self.last_update,
                 event_loop,
