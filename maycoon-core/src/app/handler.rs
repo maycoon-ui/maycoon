@@ -92,7 +92,7 @@ where
 
     /// Get the application context.
     pub fn context(&self) -> AppContext {
-        AppContext::new(self.update.clone())
+        AppContext::new(self.update.clone(), self.info.diagnostics)
     }
 
     /// Add the parent node and its children to the layout tree.

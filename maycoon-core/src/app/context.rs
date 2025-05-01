@@ -1,3 +1,4 @@
+use crate::app::diagnostics::Diagnostics;
 use crate::app::update::{Update, UpdateManager};
 use crate::signal::actor::ActorSignal;
 use crate::signal::eval::EvalSignal;
@@ -12,12 +13,21 @@ use std::sync::Arc;
 #[derive(Clone, Debug)]
 pub struct AppContext {
     update: UpdateManager,
+    diagnostics: Diagnostics,
 }
 
 impl AppContext {
     /// Create a new application context using the given [UpdateManager].
-    pub fn new(update: UpdateManager) -> Self {
-        Self { update }
+    pub fn new(update: UpdateManager, diagnostics: Diagnostics) -> Self {
+        Self {
+            update,
+            diagnostics,
+        }
+    }
+
+    /// Get the [Diagnostics] of this application context.
+    pub fn diagnostics(&self) -> Diagnostics {
+        self.diagnostics.clone()
     }
 
     /// Get the [UpdateManager] of this application context.
