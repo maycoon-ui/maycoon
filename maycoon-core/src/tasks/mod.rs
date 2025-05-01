@@ -12,8 +12,13 @@ pub type TaskHandle<T> = future::RemoteHandle<T>;
 
 static RUNNER: OnceLock<TaskRunner> = OnceLock::new();
 
+/// Returns the global [TaskRunner] or panics if it hasn't been initialized yet.
+pub fn runner<'a>() -> &'a TaskRunner {
+    try_runner().expect("Task runner not initialized yet")
+}
+
 /// Returns the global [TaskRunner] or [None] if it hasn't been initialized yet.
-pub fn runner<'a>() -> Option<&'a TaskRunner> {
+pub fn try_runner<'a>() -> Option<&'a TaskRunner> {
     RUNNER.get()
 }
 
@@ -25,7 +30,7 @@ where
     Fut: Future + Send + 'static,
     Fut::Output: Send,
 {
-    runner().expect("Task runner not initialized yet").run(fut)
+    runner().run(fut)
 }
 
 /// Blocks the current thread until the given [Future] completes.
