@@ -26,6 +26,11 @@ impl<T> RwSignal<T> {
     pub fn get_mut(&self) -> MutRef<T> {
         MutRef::ParkingLotWriteGuard(self.lock.write())
     }
+
+    /// Check if the signal is locked.
+    pub fn is_locked(&self) -> bool {
+        self.lock.is_locked()
+    }
 }
 
 impl<T: 'static> Signal<T> for RwSignal<T> {
