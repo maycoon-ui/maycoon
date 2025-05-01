@@ -19,6 +19,9 @@ pub mod map;
 /// Contains the [eval::EvalSignal] signal.
 pub mod eval;
 
+/// Contains the [rw::RwSignal] signal.
+pub mod rw;
+
 /// Listener function for [Signal].
 pub type Listener<T> = Box<dyn Fn(Ref<T>)>;
 
