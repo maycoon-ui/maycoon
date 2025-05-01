@@ -4,7 +4,7 @@ use std::sync::Arc;
 
 /// Simple signal implementation based on [ArcSwap] to load/store a value and notify listeners when it changes.
 pub struct StateSignal<T> {
-    value: Arc<ArcSwap<T>>,
+    value: ArcSwap<T>,
     listeners: Vec<Listener<T>>,
 }
 
@@ -12,7 +12,7 @@ impl<T> StateSignal<T> {
     /// Creates a new signal with the given value.
     pub fn new(value: T) -> Self {
         Self {
-            value: Arc::new(ArcSwap::new(Arc::new(value))),
+            value: ArcSwap::new(Arc::new(value)),
             listeners: Vec::with_capacity(1),
         }
     }
