@@ -22,6 +22,9 @@ pub mod eval;
 /// Contains the [rw::RwSignal] signal.
 pub mod rw;
 
+/// Contains the [actor::ActorSignal] signal.
+pub mod actor;
+
 /// Listener function for [Signal].
 pub type Listener<T> = Box<dyn Fn(Ref<T>)>;
 

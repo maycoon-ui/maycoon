@@ -1,4 +1,5 @@
 use crate::app::update::{Update, UpdateManager};
+use crate::signal::actor::ActorSignal;
 use crate::signal::eval::EvalSignal;
 use crate::signal::fixed::FixedSignal;
 use crate::signal::memoized::MemoizedSignal;
@@ -67,7 +68,13 @@ impl AppContext {
         self.use_signal(EvalSignal::new(eval))
     }
 
+    /// Shortcut for creating and hooking a [RwSignal] into the application lifecycle.
     pub fn use_rw<T: 'static>(&self, value: T) -> Arc<RwSignal<T>> {
         self.use_signal(RwSignal::new(value))
+    }
+
+    /// Shortcut for creating and hooking an [ActorSignal] into the application lifecycle.
+    pub fn use_actor<T: 'static>(&self, value: T) -> Arc<ActorSignal<T>> {
+        self.use_signal(ActorSignal::new(value))
     }
 }
