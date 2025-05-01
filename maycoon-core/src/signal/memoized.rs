@@ -8,7 +8,7 @@ use std::sync::{Arc, OnceLock};
 ///
 /// **NOTE:** The inner factory function will only be called once the value is requested via [Signal::get].
 pub struct MemoizedSignal<T> {
-    inner: Arc<OnceLock<T>>,
+    inner: OnceLock<T>,
     factory: Box<dyn Fn() -> T>,
 }
 
@@ -16,7 +16,7 @@ impl<T> MemoizedSignal<T> {
     /// Create a new memoized signal using the given factory function.
     pub fn new(factory: impl Fn() -> T + 'static) -> Self {
         Self {
-            inner: Arc::new(OnceLock::new()),
+            inner: OnceLock::new(),
             factory: Box::new(factory),
         }
     }
