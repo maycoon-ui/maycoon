@@ -27,7 +27,7 @@ peniko = { workspace = true }
 log = { workspace = true }
 
 [features]
-default = ["include-noto-sans"]
+default = []
 include-noto-sans = []
 
 # Re-exports `vello` and `skrifa` for drawing vector graphics.

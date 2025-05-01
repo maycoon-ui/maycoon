@@ -43,7 +43,7 @@ peniko = { workspace = true }
 nalgebra = { workspace = true }
 
 [features]
-default = ["macros"]
+default = ["macros", "include-noto-sans"]
 
 # Exports useful macros for working with maycoon.
 macros = ["maycoon-macros"]
