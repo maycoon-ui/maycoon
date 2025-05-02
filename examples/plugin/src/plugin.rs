@@ -36,7 +36,7 @@ impl<T: Theme> Plugin<T> for MyPlugin {
         _taffy: &mut TaffyTree,
         _window_node: NodeId,
         _info: &mut AppInfo,
-        _render_ctx: &mut RenderContext,
+        _render_ctx: &Arc<RenderContext>,
         _update: &UpdateManager,
         _last_update: &mut Instant,
         _event_loop: &ActiveEventLoop,
