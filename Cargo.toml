@@ -14,7 +14,7 @@ keywords = ["ui", "gui", "interface", "graphics", "user-interface"]
 [workspace.dependencies]
 bytemuck = "1.24.0"
 peniko = "0.3.1"
-nalgebra = { version = "0.33.2", default-features = false, features = ["std"] }
+nalgebra = { version = "0.34.1", default-features = false, features = ["std"] }
 indexmap = "2.9.0"
 log = "0.4.27"
 maycoon-core = { version = "0.4.0", path = "maycoon-core" }
