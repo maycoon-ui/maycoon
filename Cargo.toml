@@ -12,7 +12,7 @@ categories = ["gui", "graphics", "rendering", "virtualization", "rendering::engi
 keywords = ["ui", "gui", "interface", "graphics", "user-interface"]
 
 [workspace.dependencies]
-bytemuck = "1.23.0"
+bytemuck = "1.24.0"
 peniko = "0.3.1"
 nalgebra = { version = "0.33.2", default-features = false, features = ["std"] }
 indexmap = "2.9.0"
