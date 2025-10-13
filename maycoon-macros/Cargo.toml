@@ -11,10 +11,10 @@ repository.workspace = true
 homepage.workspace = true
 
 [dependencies]
-syn = "2.0.101"
-quote = "1.0.40"
-proc-macro2 = "1.0.95"
-ureq = "3.0.11"
+syn = "2.0.106"
+quote = "1.0.41"
+proc-macro2 = "1.0.101"
+ureq = "3.1.2"
 
 [lib]
 proc-macro = true
