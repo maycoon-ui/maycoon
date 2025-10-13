@@ -47,6 +47,7 @@ impl FontContext {
     ) -> Option<()> {
         log::debug!("Loading system font: {}", postscript_name.to_string());
 
+        // TODO: find a more lightweight solution to finding system source fonts
         let font = font_kit::source::SystemSource::new()
             .select_by_postscript_name(postscript_name.to_string().as_str())
             .ok()?
