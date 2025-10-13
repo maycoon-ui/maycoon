@@ -11,7 +11,7 @@ repository.workspace = true
 homepage.workspace = true
 
 [dependencies]
-winit = "0.30.9"
+winit = "0.30.12"
 wgpu-types = "23.0.0"
 vello = "0.4.1"
 taffy = "0.8.1"
