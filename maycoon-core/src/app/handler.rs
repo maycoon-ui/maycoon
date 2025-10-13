@@ -150,7 +150,7 @@ where
         }
 
         Ok(LayoutNode {
-            layout: *self.taffy.get_final_layout(node),
+            layout: self.taffy.get_final_layout(node).clone(),
             children,
         })
     }
