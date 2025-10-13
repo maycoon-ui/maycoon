@@ -28,7 +28,7 @@ impl<T> ActorSignal<T> {
     /// Get a mutable reference to the value.
     ///
     /// This calls [ActorSignal::run] if the inner value is not locked yet and returns the final value.
-    pub fn get_mut(&self) -> MutRef<T> {
+    pub fn get_mut(&self) -> MutRef<'_, T> {
         let value = self.rw.get_mut();
 
         if !self.is_locked() {
@@ -61,7 +61,7 @@ impl<T> ActorSignal<T> {
 }
 
 impl<T: 'static> Signal<T> for ActorSignal<T> {
-    fn get(&self) -> Ref<T> {
+    fn get(&self) -> Ref<'_, T> {
         if !self.is_locked() {
             self.run();
         }

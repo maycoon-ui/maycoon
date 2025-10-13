@@ -17,7 +17,7 @@ impl<T> FixedSignal<T> {
 }
 
 impl<T: 'static> Signal<T> for FixedSignal<T> {
-    fn get(&self) -> Ref<T> {
+    fn get(&self) -> Ref<'_, T> {
         Ref::Borrow(&self.value)
     }
 

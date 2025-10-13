@@ -19,7 +19,7 @@ impl<T> EvalSignal<T> {
 }
 
 impl<T: 'static> Signal<T> for EvalSignal<T> {
-    fn get(&self) -> Ref<T> {
+    fn get(&self) -> Ref<'_, T> {
         Ref::Owned((self.eval)())
     }
 

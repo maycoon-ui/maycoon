@@ -19,7 +19,7 @@ impl<T> StateSignal<T> {
 }
 
 impl<T: 'static> Signal<T> for StateSignal<T> {
-    fn get(&self) -> Ref<T> {
+    fn get(&self) -> Ref<'_, T> {
         Ref::Arc(self.value.load().clone())
     }
 

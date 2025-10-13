@@ -23,7 +23,7 @@ impl<T> RwSignal<T> {
     /// Get a mutable reference to the value.
     ///
     /// **NOTE:** Multiple mutable reference cannot co-exist and will lead to deadlocks.
-    pub fn get_mut(&self) -> MutRef<T> {
+    pub fn get_mut(&self) -> MutRef<'_, T> {
         MutRef::ParkingLotWriteGuard(self.lock.write())
     }
 
@@ -34,7 +34,7 @@ impl<T> RwSignal<T> {
 }
 
 impl<T: 'static> Signal<T> for RwSignal<T> {
-    fn get(&self) -> Ref<T> {
+    fn get(&self) -> Ref<'_, T> {
         Ref::ParkingLotReadGuard(self.lock.read())
     }
 

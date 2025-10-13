@@ -27,13 +27,13 @@ impl<T: 'static, U> MapSignal<T, U> {
     }
 
     /// Get the inner signal's value, without applying the mapping function.
-    pub fn get_unmapped(&self) -> Ref<T> {
+    pub fn get_unmapped(&self) -> Ref<'_, T> {
         self.signal.get()
     }
 }
 
 impl<T: 'static, U: 'static> Signal<U> for MapSignal<T, U> {
-    fn get(&self) -> Ref<U> {
+    fn get(&self) -> Ref<'_, U> {
         (self.map)(self.get_unmapped())
     }
 

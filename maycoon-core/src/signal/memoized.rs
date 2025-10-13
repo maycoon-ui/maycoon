@@ -23,7 +23,7 @@ impl<T> MemoizedSignal<T> {
 }
 
 impl<T: 'static> Signal<T> for MemoizedSignal<T> {
-    fn get(&self) -> Ref<T> {
+    fn get(&self) -> Ref<'_, T> {
         Ref::Borrow(self.inner.get_or_init(&self.factory))
     }
 

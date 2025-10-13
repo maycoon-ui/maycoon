@@ -40,7 +40,7 @@ pub type ArcSignal<T> = Arc<dyn Signal<T>>;
 /// [use_signal]: AppContext::use_signal
 pub trait Signal<T: 'static>: 'static {
     /// Get a reference to the current value of the signal.
-    fn get(&self) -> Ref<T>;
+    fn get(&self) -> Ref<'_, T>;
 
     /// Set the value of the signal.
     ///
@@ -113,7 +113,7 @@ impl<T: 'static> MaybeSignal<T> {
     ///
     /// If the value is a signal, the signal's current value is returned,
     /// otherwise a [Ref::Arc] of the value is returned.
-    pub fn get(&self) -> Ref<T> {
+    pub fn get(&self) -> Ref<'_, T> {
         match self {
             MaybeSignal::Signal(signal) => signal.get(),
             MaybeSignal::Value(value) => Ref::Arc(value.clone()),
