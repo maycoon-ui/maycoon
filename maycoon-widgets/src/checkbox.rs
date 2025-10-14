@@ -4,9 +4,9 @@ use maycoon_core::app::update::Update;
 use maycoon_core::layout;
 use maycoon_core::layout::{Dimension, LayoutNode, LayoutStyle, LengthPercentageAuto, StyleNode};
 use maycoon_core::signal::MaybeSignal;
+use maycoon_core::vg::Scene;
 use maycoon_core::vg::kurbo::{Affine, Rect, RoundedRect, RoundedRectRadii, Stroke};
 use maycoon_core::vg::peniko::{Brush, Fill};
-use maycoon_core::vg::Scene;
 use maycoon_core::widget::{Widget, WidgetLayoutExt};
 use maycoon_core::window::{ElementState, MouseButton};
 use maycoon_theme::id::WidgetId;
@@ -138,20 +138,19 @@ impl Widget for Checkbox {
     fn update(&mut self, layout: &LayoutNode, _: AppContext, info: &AppInfo) -> Update {
         let mut update = Update::empty();
 
-        if let Some(cursor) = &info.cursor_pos {
-            if cursor.x as f32 >= layout.layout.location.x
+        if let Some(cursor) = &info.cursor_pos
+            && (cursor.x as f32 >= layout.layout.location.x
                 && cursor.x as f32 <= layout.layout.location.x + layout.layout.size.width
                 && cursor.y as f32 >= layout.layout.location.y
-                && cursor.y as f32 <= layout.layout.location.y + layout.layout.size.height
-            {
-                for (_, btn, el) in &info.buttons {
-                    if btn == &MouseButton::Left && *el == ElementState::Released {
-                        update |= *self.on_change.get();
-                        update |= Update::DRAW;
+                && cursor.y as f32 <= layout.layout.location.y + layout.layout.size.height)
+        {
+            for (_, btn, el) in &info.buttons {
+                if btn == &MouseButton::Left && *el == ElementState::Released {
+                    update |= *self.on_change.get();
+                    update |= Update::DRAW;
 
-                        if let Some(sig) = self.value.as_signal() {
-                            sig.set(!*sig.get());
-                        }
+                    if let Some(sig) = self.value.as_signal() {
+                        sig.set(!*sig.get());
                     }
                 }
             }

@@ -1,8 +1,8 @@
 use nalgebra::{Point2, Vector2};
 use std::num::NonZeroUsize;
-use vello::util::DeviceHandle;
 pub use vello::AaConfig;
-pub use wgpu_types::PresentMode;
+use vello::util::DeviceHandle;
+use wgpu_types::PresentMode;
 pub use winit::window::{
     BadIcon, Cursor, CursorIcon, CustomCursor, Icon as WindowIcon, WindowButtons, WindowLevel,
 };
@@ -119,7 +119,9 @@ pub struct RenderConfig {
     /// The number of threads to use for initialization in [vello].
     pub init_threads: Option<NonZeroUsize>,
     /// The selector function to determine which device to use for rendering. Defaults to using the first device found.
-    pub device_selector: fn(&Vec<DeviceHandle>) -> &DeviceHandle,
+    pub device_selector: fn(&Vec<DeviceHandle>) -> usize,
+    /// The maximum frame latency for the surface. Defaults to 2.
+    pub max_frame_latency: u32,
 }
 
 impl Default for RenderConfig {
@@ -129,7 +131,14 @@ impl Default for RenderConfig {
             cpu: false,
             present_mode: PresentMode::AutoNoVsync,
             init_threads: None,
-            device_selector: |devices| devices.first().expect("No devices found"),
+            device_selector: |devices| {
+                if devices.is_empty() {
+                    0
+                } else {
+                    panic!("No devices found");
+                }
+            },
+            max_frame_latency: 2,
         }
     }
 }

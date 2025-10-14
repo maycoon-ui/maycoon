@@ -1,5 +1,5 @@
 use indexmap::IndexMap;
-use peniko::{Blob, Font};
+use peniko::{Blob, FontData};
 use std::sync::Arc;
 
 /// A font manager for maycoon applications.
@@ -10,7 +10,7 @@ use std::sync::Arc;
 #[derive(Clone, Debug)]
 pub struct FontContext {
     default: String,
-    fonts: IndexMap<String, Font>,
+    fonts: IndexMap<String, FontData>,
 }
 
 impl FontContext {
@@ -28,7 +28,7 @@ impl FontContext {
     /// Loads a font with a custom name into the font context.
     ///
     /// If the font with the same name already exists, it will be overwritten and the old font will be returned.
-    pub fn load(&mut self, name: impl ToString, font: Font) -> Option<Font> {
+    pub fn load(&mut self, name: impl ToString, font: FontData) -> Option<FontData> {
         self.fonts.insert(name.to_string(), font)
     }
 
@@ -55,7 +55,7 @@ impl FontContext {
             .ok()?
             .copy_font_data()?;
 
-        self.load(name, Font::new(Blob::new(font), 0));
+        self.load(name, FontData::new(Blob::new(font), 0));
 
         Some(())
     }
@@ -68,17 +68,17 @@ impl FontContext {
     }
 
     /// Get a font by a specified name. Returns [None] if the font could not be found.
-    pub fn get(&self, name: impl ToString) -> Option<Font> {
+    pub fn get(&self, name: impl ToString) -> Option<FontData> {
         self.fonts.get(&name.to_string()).cloned()
     }
 
     /// Removes a font by the given name and returns it or [None] if the font could not be found.
-    pub fn remove(&mut self, name: impl ToString) -> Option<Font> {
+    pub fn remove(&mut self, name: impl ToString) -> Option<FontData> {
         self.fonts.swap_remove(&name.to_string())
     }
 
     /// Returns the default font. [Roboto](https://fonts.google.com/specimen/Roboto) by default.
-    pub fn default_font(&self) -> &Font {
+    pub fn default_font(&self) -> &FontData {
         self.fonts
             .get(&self.default)
             .expect("Default font not found. Please load one via `FontContext::load`.")
@@ -92,7 +92,7 @@ impl Default for FontContext {
 
         ctx.load(
             "Noto Sans",
-            Font::new(Blob::new(Arc::new(crate::DEFAULT_FONT)), 0),
+            FontData::new(Blob::new(Arc::new(crate::DEFAULT_FONT)), 0),
         );
 
         ctx

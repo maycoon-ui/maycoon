@@ -1,12 +1,12 @@
 use crate::app::diagnostics::Diagnostics;
 use crate::app::update::{Update, UpdateManager};
+use crate::signal::Signal;
 use crate::signal::actor::ActorSignal;
 use crate::signal::eval::EvalSignal;
 use crate::signal::fixed::FixedSignal;
 use crate::signal::memoized::MemoizedSignal;
 use crate::signal::rw::RwSignal;
 use crate::signal::state::StateSignal;
-use crate::signal::Signal;
 use std::sync::Arc;
 use vello::util::RenderContext;
 
@@ -34,7 +34,7 @@ impl AppContext {
 
     /// Get the [Diagnostics] of the application.
     pub fn diagnostics(&self) -> Diagnostics {
-        self.diagnostics.clone()
+        self.diagnostics
     }
 
     /// Get the [RenderContext] of the application.

@@ -6,7 +6,7 @@ use crate::config::MayConfig;
 use crate::plugin::PluginManager;
 use crate::widget::Widget;
 use maycoon_theme::theme::Theme;
-use peniko::Font;
+use peniko::FontData;
 use winit::dpi::{LogicalPosition, LogicalSize, Position, Size};
 use winit::event_loop::EventLoopBuilder;
 use winit::window::WindowAttributes;
@@ -39,7 +39,7 @@ impl<T: Theme> MayRunner<T> {
     /// Loads a new font into the font context.
     ///
     /// See [FontContext::load] for more.
-    pub fn with_font(mut self, name: impl ToString, font: Font) -> Self {
+    pub fn with_font(mut self, name: impl ToString, font: FontData) -> Self {
         self.font_ctx.load(name, font);
         self
     }

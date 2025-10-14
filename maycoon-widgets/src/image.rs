@@ -3,15 +3,15 @@ use maycoon_core::app::info::AppInfo;
 use maycoon_core::app::update::Update;
 use maycoon_core::layout::{LayoutNode, LayoutStyle, StyleNode};
 use maycoon_core::signal::MaybeSignal;
-use maycoon_core::vg::kurbo::{Affine, Vec2};
 use maycoon_core::vg::Scene;
+use maycoon_core::vg::kurbo::{Affine, Vec2};
+use maycoon_core::vg::peniko::ImageBrush;
 use maycoon_core::widget::{Widget, WidgetLayoutExt};
 use maycoon_theme::id::WidgetId;
 use maycoon_theme::theme::Theme;
+use std::ops::Deref;
+pub use vello::peniko::ImageData;
 use vello_svg::vello;
-
-/// Owned shareable image data.
-pub type ImageData = vello::peniko::Image;
 
 /// An image widget. Pretty self-explanatory.
 ///
@@ -20,13 +20,13 @@ pub type ImageData = vello::peniko::Image;
 /// ### Theming
 /// The widget itself only draws the underlying image, so theming is useless.
 pub struct Image {
-    image: MaybeSignal<ImageData>,
+    image: MaybeSignal<ImageBrush>,
     style: MaybeSignal<LayoutStyle>,
 }
 
 impl Image {
     /// Create an image widget from the given [ImageData].
-    pub fn new(image: impl Into<MaybeSignal<ImageData>>) -> Self {
+    pub fn new(image: impl Into<MaybeSignal<ImageBrush>>) -> Self {
         Self {
             image: image.into(),
             style: LayoutStyle::default().into(),
@@ -34,7 +34,7 @@ impl Image {
     }
 
     /// Set the image.
-    pub fn with_image(mut self, image: impl Into<MaybeSignal<ImageData>>) -> Self {
+    pub fn with_image(mut self, image: impl Into<MaybeSignal<ImageBrush>>) -> Self {
         self.image = image.into();
         self
     }
@@ -58,7 +58,7 @@ impl Widget for Image {
         let image = self.image.get();
 
         scene.draw_image(
-            &image,
+            image.deref(),
             Affine::translate(Vec2::new(
                 layout_node.layout.location.x as f64,
                 layout_node.layout.location.y as f64,

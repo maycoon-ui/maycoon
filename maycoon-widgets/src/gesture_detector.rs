@@ -97,26 +97,25 @@ impl Widget for GestureDetector {
     fn update(&mut self, layout: &LayoutNode, context: AppContext, info: &AppInfo) -> Update {
         let mut update = Update::empty();
 
-        if let Some(cursor) = info.cursor_pos {
-            if cursor.x as f32 >= layout.layout.location.x
+        if let Some(cursor) = info.cursor_pos
+            && (cursor.x as f32 >= layout.layout.location.x
                 && cursor.x as f32 <= layout.layout.location.x + layout.layout.size.width
                 && cursor.y as f32 >= layout.layout.location.y
-                && cursor.y as f32 <= layout.layout.location.y + layout.layout.size.height
-            {
-                update |= self.on_hover();
+                && cursor.y as f32 <= layout.layout.location.y + layout.layout.size.height)
+        {
+            update |= self.on_hover();
 
-                // check for click
-                for (_, btn, el) in &info.buttons {
-                    if *btn == MouseButton::Left {
-                        match el {
-                            ElementState::Pressed => {
-                                update |= self.on_press();
-                            },
+            // check for click
+            for (_, btn, el) in &info.buttons {
+                if *btn == MouseButton::Left {
+                    match el {
+                        ElementState::Pressed => {
+                            update |= self.on_press();
+                        },
 
-                            ElementState::Released => {
-                                update |= self.on_release();
-                            },
-                        }
+                        ElementState::Released => {
+                            update |= self.on_release();
+                        },
                     }
                 }
             }

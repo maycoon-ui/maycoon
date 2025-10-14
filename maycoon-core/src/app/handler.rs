@@ -1,13 +1,13 @@
+use nalgebra::Vector2;
 use std::sync::Arc;
 use std::time::{Duration, Instant};
-
-use nalgebra::Vector2;
 use taffy::{
     AvailableSpace, Dimension, NodeId, PrintTree, Size, Style, TaffyResult, TaffyTree,
     TraversePartialTree,
 };
 use vello::util::{RenderContext, RenderSurface};
 use vello::{AaConfig, AaSupport, RenderParams, Renderer, RendererOptions, Scene};
+use wgpu_types::{CommandEncoderDescriptor, TextureViewDescriptor};
 use winit::application::ApplicationHandler;
 use winit::event::WindowEvent;
 use winit::event_loop::ActiveEventLoop;
@@ -46,6 +46,7 @@ where
     update: UpdateManager,
     last_update: Instant,
     plugins: PluginManager<T>,
+    selected_device: usize,
 }
 
 impl<T, W, S, F> AppHandler<'_, T, W, S, F>
@@ -94,6 +95,7 @@ where
             update,
             last_update: Instant::now(),
             plugins,
+            selected_device: 0,
         }
     }
 
@@ -150,7 +152,7 @@ where
         }
 
         Ok(LayoutNode {
-            layout: self.taffy.get_final_layout(node).clone(),
+            layout: self.taffy.get_final_layout(node),
             children,
         })
     }
@@ -162,6 +164,58 @@ where
         if let Some(window) = self.window.as_ref() {
             window.request_redraw();
         }
+    }
+
+    fn render(&mut self, window: Arc<Window>) {
+        let renderer = self.renderer.as_mut().expect("Renderer not initialized");
+        let render_ctx = self
+            .render_ctx
+            .as_ref()
+            .expect("Render context not initialized");
+        let surface = self.surface.as_ref().expect("Surface not initialized");
+        let device_handle = &render_ctx.devices[self.selected_device];
+
+        renderer
+            .render_to_texture(
+                &device_handle.device,
+                &device_handle.queue,
+                &self.scene,
+                &surface.target_view,
+                &RenderParams {
+                    base_color: self.config.theme.window_background(),
+                    width: window.inner_size().width,
+                    height: window.inner_size().height,
+                    antialiasing_method: self.config.render.antialiasing,
+                },
+            )
+            .expect("Failed to render to surface");
+
+        let surface_texture = surface
+            .surface
+            .get_current_texture()
+            .expect("Failed to get current surface texture");
+
+        let mut encoder = device_handle
+            .device
+            .create_command_encoder(&CommandEncoderDescriptor {
+                label: Some("Surface Blit Encoder"),
+            });
+
+        surface.blitter.copy(
+            &device_handle.device,
+            &mut encoder,
+            &surface.target_view,
+            &surface_texture
+                .texture
+                .create_view(&TextureViewDescriptor::default()),
+        );
+
+        device_handle.queue.submit([encoder.finish()]);
+
+        // make sure winit knows that the surface texture is ready to be presented
+        window.pre_present_notify();
+
+        surface_texture.present();
     }
 
     /// Update the app and process events.
@@ -261,43 +315,11 @@ where
                 context,
             );
 
-            let renderer = self.renderer.as_mut().expect("Renderer not initialized");
-            let render_ctx = self
-                .render_ctx
-                .as_ref()
-                .expect("Render context not initialized");
-            let surface = self.surface.as_ref().expect("Surface not initialized");
-            let window = self.window.as_ref().expect("Window not initialized");
-
-            let device_handle = render_ctx.devices.first().expect("No devices available");
+            let window = self.window.clone().expect("Window not initialized");
 
             // check surface validity
             if window.inner_size().width != 0 && window.inner_size().height != 0 {
-                let surface_texture = surface
-                    .surface
-                    .get_current_texture()
-                    .expect("Failed to get surface texture");
-
-                // make sure winit knows that the surface texture is ready to be presented
-                window.pre_present_notify();
-
-                // TODO: this panics if canvas didn't change (no operation was done) in debug mode
-                renderer
-                    .render_to_surface(
-                        &device_handle.device,
-                        &device_handle.queue,
-                        &self.scene,
-                        &surface_texture,
-                        &RenderParams {
-                            base_color: self.config.theme.window_background(),
-                            width: window.inner_size().width,
-                            height: window.inner_size().height,
-                            antialiasing_method: self.config.render.antialiasing,
-                        },
-                    )
-                    .expect("Failed to render to surface");
-
-                surface_texture.present();
+                self.render(window);
             } else {
                 log::debug!("Surface invalid. Skipping render.");
             }
@@ -360,54 +382,48 @@ where
         let mut render_ctx = RenderContext::new();
 
         log::debug!("Creating window...");
-        self.window = Some(Arc::new(
+        let window = Arc::new(
             event_loop
                 .create_window(self.attrs.clone())
                 .expect("Failed to create window"),
-        ));
+        );
+
+        let size = window.inner_size();
 
         self.taffy
             .set_style(
                 self.window_node,
                 Style {
                     size: Size::<Dimension> {
-                        width: Dimension::length(
-                            self.window.as_ref().unwrap().inner_size().width as f32,
-                        ),
-                        height: Dimension::length(
-                            self.window.as_ref().unwrap().inner_size().height as f32,
-                        ),
+                        width: Dimension::length(size.width as f32),
+                        height: Dimension::length(size.height as f32),
                     },
                     ..Default::default()
                 },
             )
             .expect("Failed to set window node style");
 
-        self.surface = Some(
-            crate::tasks::block_on(async {
-                log::debug!("Creating surface...");
-
-                render_ctx
-                    .create_surface(
-                        self.window.clone().unwrap(),
-                        self.window.as_ref().unwrap().inner_size().width,
-                        self.window.as_ref().unwrap().inner_size().height,
-                        self.config.render.present_mode,
-                    )
-                    .await
-            })
-            .expect("Failed to create surface"),
-        );
+        log::debug!("Creating surface...");
+        let surface = crate::tasks::block_on(async {
+            render_ctx
+                .create_surface(
+                    window.clone(),
+                    size.width,
+                    size.height,
+                    self.config.render.present_mode,
+                )
+                .await
+                .expect("Failed to create surface")
+        });
 
         log::debug!("Requesting device handle via selector...");
-        let device_handle = (self.config.render.device_selector)(&render_ctx.devices);
+        let selected_device = (self.config.render.device_selector)(&render_ctx.devices);
 
         log::debug!("Creating renderer...");
         self.renderer = Some(
             Renderer::new(
-                &device_handle.device,
+                &render_ctx.devices[selected_device].device,
                 RendererOptions {
-                    surface_format: Some(self.surface.as_ref().unwrap().format),
                     use_cpu: self.config.render.cpu,
                     antialiasing_support: match self.config.render.antialiasing {
                         AaConfig::Area => AaSupport::area_only(),
@@ -425,22 +441,28 @@ where
                         },
                     },
                     num_init_threads: self.config.render.init_threads,
+                    pipeline_cache: None,
                 },
             )
             .expect("Failed to create renderer"),
         );
 
-        self.render_ctx = Some(Arc::new(render_ctx));
-        self.update.set(Update::FORCE);
+        let render_ctx = Arc::new(render_ctx);
 
         self.widget = Some((self.builder)(
             AppContext::new(
                 self.update.clone(),
                 self.info.diagnostics,
-                self.render_ctx.clone().unwrap(),
+                render_ctx.clone(),
             ),
             self.state.take().unwrap(),
         ));
+
+        self.selected_device = selected_device;
+        self.render_ctx = Some(render_ctx);
+        self.surface = Some(surface);
+        self.window = Some(window);
+        self.update.set(Update::FORCE);
     }
 
     fn window_event(
@@ -467,101 +489,101 @@ where
             )
         });
 
-        if let Some(window) = &self.window {
-            if window.id() == window_id {
-                match event {
-                    WindowEvent::Resized(new_size) => {
-                        if new_size.width != 0 && new_size.height != 0 {
-                            log::info!("Window resized to {}x{}", new_size.width, new_size.height);
+        if let Some(window) = &self.window
+            && window.id() == window_id
+        {
+            match event {
+                WindowEvent::Resized(new_size) => {
+                    if new_size.width != 0 && new_size.height != 0 {
+                        log::info!("Window resized to {}x{}", new_size.width, new_size.height);
 
-                            if let Some(ctx) = &self.render_ctx {
-                                if let Some(surface) = &mut self.surface {
-                                    ctx.resize_surface(surface, new_size.width, new_size.height);
-                                }
-                            }
+                        if let Some(ctx) = &self.render_ctx
+                            && let Some(surface) = &mut self.surface
+                        {
+                            ctx.resize_surface(surface, new_size.width, new_size.height);
+                        }
 
-                            self.taffy
-                                .set_style(
-                                    self.window_node,
-                                    Style {
-                                        size: Size::<Dimension> {
-                                            width: Dimension::length(new_size.width as f32),
-                                            height: Dimension::length(new_size.height as f32),
-                                        },
-                                        ..Default::default()
+                        self.taffy
+                            .set_style(
+                                self.window_node,
+                                Style {
+                                    size: Size::<Dimension> {
+                                        width: Dimension::length(new_size.width as f32),
+                                        height: Dimension::length(new_size.height as f32),
                                     },
-                                )
-                                .expect("Failed to set window node style");
+                                    ..Default::default()
+                                },
+                            )
+                            .expect("Failed to set window node style");
 
-                            self.info.size =
-                                Vector2::new(new_size.width as f64, new_size.height as f64);
+                        self.info.size =
+                            Vector2::new(new_size.width as f64, new_size.height as f64);
 
-                            self.request_redraw();
-
-                            self.update.insert(Update::DRAW | Update::LAYOUT);
-                        } else {
-                            log::debug!("Window size is 0x0, ignoring resize event.");
-                        }
-                    },
-
-                    WindowEvent::CloseRequested => {
-                        log::info!("Window Close requested...");
-
-                        log::debug!("Destroying device handles...");
-                        if let Some(render_ctx) = self.render_ctx.as_mut() {
-                            for handle in &render_ctx.devices {
-                                handle.device.destroy();
-                            }
-                        }
-
-                        if self.config.window.close_on_request {
-                            event_loop.exit();
-                        }
-                    },
-
-                    WindowEvent::RedrawRequested => {
-                        self.update(event_loop);
-                    },
-
-                    WindowEvent::CursorLeft { .. } => {
-                        self.info.cursor_pos = None;
                         self.request_redraw();
-                    },
 
-                    WindowEvent::CursorMoved { position, .. } => {
-                        self.info.cursor_pos = Some(Vector2::new(position.x, position.y));
-                        self.request_redraw();
-                    },
+                        self.update.insert(Update::DRAW | Update::LAYOUT);
+                    } else {
+                        log::debug!("Window size is 0x0, ignoring resize event.");
+                    }
+                },
 
-                    WindowEvent::KeyboardInput {
-                        event,
-                        device_id,
-                        is_synthetic,
-                    } => {
-                        if !is_synthetic {
-                            self.info.keys.push((device_id, event));
-                            self.request_redraw();
+                WindowEvent::CloseRequested => {
+                    log::info!("Window Close requested...");
+
+                    log::debug!("Destroying device handles...");
+                    if let Some(render_ctx) = self.render_ctx.as_mut() {
+                        for handle in &render_ctx.devices {
+                            handle.device.destroy();
                         }
-                    },
+                    }
 
-                    WindowEvent::MouseInput {
-                        device_id,
-                        button,
-                        state,
-                    } => {
-                        self.info.buttons.push((device_id, button, state));
+                    if self.config.window.close_on_request {
+                        event_loop.exit();
+                    }
+                },
+
+                WindowEvent::RedrawRequested => {
+                    self.update(event_loop);
+                },
+
+                WindowEvent::CursorLeft { .. } => {
+                    self.info.cursor_pos = None;
+                    self.request_redraw();
+                },
+
+                WindowEvent::CursorMoved { position, .. } => {
+                    self.info.cursor_pos = Some(Vector2::new(position.x, position.y));
+                    self.request_redraw();
+                },
+
+                WindowEvent::KeyboardInput {
+                    event,
+                    device_id,
+                    is_synthetic,
+                } => {
+                    if !is_synthetic {
+                        self.info.keys.push((device_id, event));
                         self.request_redraw();
-                    },
+                    }
+                },
 
-                    WindowEvent::MouseWheel { delta, .. } => {
-                        self.info.mouse_scroll_delta = Some(delta);
-                        self.request_redraw();
-                    },
+                WindowEvent::MouseInput {
+                    device_id,
+                    button,
+                    state,
+                } => {
+                    self.info.buttons.push((device_id, button, state));
+                    self.request_redraw();
+                },
 
-                    WindowEvent::Destroyed => log::info!("Window destroyed! Exiting..."),
+                WindowEvent::MouseWheel { delta, .. } => {
+                    self.info.mouse_scroll_delta = Some(delta);
+                    self.request_redraw();
+                },
 
-                    _ => (),
-                }
+                WindowEvent::Destroyed => log::info!("Window destroyed! Exiting..."),
+
+                _ => (),
             }
         }
     }
