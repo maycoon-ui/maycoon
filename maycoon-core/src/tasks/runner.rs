@@ -1,4 +1,4 @@
-use crate::tasks::{TaskHandle, RUNNER};
+use crate::tasks::{RUNNER, TaskHandle};
 use futures::executor::{ThreadPool, ThreadPoolBuilder};
 use futures::task::SpawnExt;
 use std::future::Future;

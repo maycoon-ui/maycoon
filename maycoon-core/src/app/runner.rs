@@ -22,7 +22,7 @@ impl<T: Theme> MayRunner<T> {
     pub fn new(config: MayConfig<T>) -> Self {
         // init task runner
         if let Some(config) = &config.tasks {
-            log::info!("Initializing task runner.");
+            tracing::info!("initializing task runner");
 
             crate::tasks::runner::TaskRunner::new(config.stack_size, config.workers)
                 .expect("Failed to create task runner")
@@ -64,6 +64,7 @@ impl<T: Theme> MayRunner<T> {
         W: Widget,
         F: Fn(AppContext, S) -> W,
     {
+        tracing::trace!("building event loop");
         let mut event_loop = EventLoopBuilder::default()
             .build()
             .expect("Failed to create event loop");
@@ -115,12 +116,13 @@ impl<T: Theme> MayRunner<T> {
             .resize_increments
             .map(|v| Size::Logical(LogicalSize::new(v.x, v.y)));
 
-        log::info!("Launching Application...");
-
+        tracing::trace!("creating update manager");
         let update = UpdateManager::new();
 
+        tracing::trace!("initializing plugins");
         plugins.run(|pl| pl.init(&mut event_loop, &update, &mut attrs, &mut self.config));
 
+        tracing::info!("running application handler");
         event_loop
             .run_app(&mut AppHandler::new(
                 attrs,

@@ -55,6 +55,10 @@ pub trait Application: Sized {
     ///
     /// Override this method if you want to use a custom event loop.
     fn run(self, state: Self::State) {
-        MayRunner::<Self::Theme>::new(self.config()).run(state, Self::build, self.plugins());
+        let config = self.config();
+
+        tracing::info!("launching application runner with {config:?}");
+
+        MayRunner::<Self::Theme>::new(config).run(state, Self::build, self.plugins());
     }
 }

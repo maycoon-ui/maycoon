@@ -25,7 +25,7 @@ maycoon-theme = { workspace = true }
 nalgebra = { workspace = true }
 indexmap = { workspace = true }
 peniko = { workspace = true }
-log = { workspace = true }
+tracing = { workspace = true }
 
 [features]
 default = []

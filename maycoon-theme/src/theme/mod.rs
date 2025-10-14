@@ -1,4 +1,5 @@
 use peniko::Color;
+use std::fmt::Debug;
 
 use crate::globals::Globals;
 use crate::id::WidgetId;
@@ -8,7 +9,7 @@ use crate::style::{DefaultStyles, Style};
 pub mod celeste;
 
 /// Base trait for all themes.
-pub trait Theme {
+pub trait Theme: Debug {
     /// Return the [Style] of the given widget using its ID.
     /// Returns [None] if the theme does not have styles for the given widget.
     /// In that case, you should use [Theme::defaults] to get widget style defaults.

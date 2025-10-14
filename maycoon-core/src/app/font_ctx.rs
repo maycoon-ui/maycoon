@@ -45,11 +45,14 @@ impl FontContext {
         name: impl ToString,
         postscript_name: impl ToString,
     ) -> Option<()> {
-        log::debug!("Loading system font: {}", postscript_name.to_string());
+        let name = name.to_string();
+        let postscript_name = postscript_name.to_string();
+
+        tracing::info!("loading system font named {name} by postscript {postscript_name}");
 
         // TODO: find a more lightweight solution to finding system source fonts
         let font = font_kit::source::SystemSource::new()
-            .select_by_postscript_name(postscript_name.to_string().as_str())
+            .select_by_postscript_name(postscript_name.as_str())
             .ok()?
             .load()
             .ok()?
@@ -90,6 +93,7 @@ impl Default for FontContext {
     fn default() -> Self {
         let mut ctx = FontContext::new("Noto Sans".to_string());
 
+        tracing::debug!("loading noto sans system font");
         ctx.load(
             "Noto Sans",
             FontData::new(Blob::new(Arc::new(crate::DEFAULT_FONT)), 0),

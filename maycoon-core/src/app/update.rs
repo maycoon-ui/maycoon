@@ -1,6 +1,6 @@
 use bitflags::bitflags;
-use std::sync::atomic::{AtomicU8, Ordering};
 use std::sync::Arc;
+use std::sync::atomic::{AtomicU8, Ordering};
 
 bitflags! {
     /// Update bitflags to define which part of the App should Update.
@@ -41,11 +41,13 @@ impl UpdateManager {
 
     /// Inserts the given `Update` into the `UpdateManager` using bitwise OR.
     pub fn insert(&self, update: Update) {
+        tracing::debug!("inserting update {update:?}");
         self.update.fetch_or(update.bits(), Ordering::AcqRel);
     }
 
     /// Removes the given `Update` from the `UpdateManager` using bitwise AND.
     pub fn remove(&self, update: Update) {
+        tracing::debug!("removing update {update:?}");
         self.update.fetch_and(!update.bits(), Ordering::AcqRel);
     }
 
@@ -57,11 +59,13 @@ impl UpdateManager {
 
     /// Sets the current `Update` of the `UpdateManager`.
     pub fn set(&self, update: Update) {
+        tracing::debug!("setting update {update:?}");
         self.update.store(update.bits(), Ordering::Release);
     }
 
     /// Clears the current `Update` flags of the `UpdateManager`.
     pub fn clear(&self) {
+        tracing::debug!("clearing update");
         self.update.store(0, Ordering::Release);
     }
 }

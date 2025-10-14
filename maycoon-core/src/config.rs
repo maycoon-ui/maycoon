@@ -10,7 +10,7 @@ pub use winit::window::{
 use maycoon_theme::theme::Theme;
 
 /// Maycoon Application Configuration Structure.
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct MayConfig<T: Theme> {
     /// Window Configuration
     pub window: WindowConfig,
@@ -34,7 +34,7 @@ impl<T: Default + Theme> Default for MayConfig<T> {
 }
 
 /// Window configuration.
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct WindowConfig {
     /// The title of the window.
     pub title: String,
@@ -106,7 +106,7 @@ impl Default for WindowConfig {
 }
 
 /// Renderer configuration.
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct RenderConfig {
     /// The antialiasing config
     pub antialiasing: AaConfig,
@@ -132,7 +132,7 @@ impl Default for RenderConfig {
             present_mode: PresentMode::AutoNoVsync,
             init_threads: None,
             device_selector: |devices| {
-                if devices.is_empty() {
+                if !devices.is_empty() {
                     0
                 } else {
                     panic!("No devices found");
