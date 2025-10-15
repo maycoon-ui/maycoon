@@ -158,7 +158,7 @@ pub enum WindowMode {
 /// Configuration structure for the integrated [TaskRunner](crate::tasks::TaskRunner).
 ///
 /// The task runner isn't used by maycoon internally, but can be used to spawn asynchronous tasks and integrate them with the UI.
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Copy, Clone, Debug, Eq, PartialEq)]
 pub struct TasksConfig {
     /// The stack size of each thread of the task runner thread pool. Defaults to 1 MB.
     pub stack_size: usize,

@@ -57,6 +57,9 @@ canvas = ["maycoon-widgets/canvas"]
 # Include the `Noto Sans` font as a default font. If disabled, you must specify a default font using the `FontContext`.
 include-noto-sans = ["maycoon-core/include-noto-sans"]
 
+# Use the `tokio` runtime for running tasks inside a task runner.
+tokio-runner = ["maycoon-core/tokio-runner"]
+
 [lib]
 name = "maycoon"
 path = "src/lib.rs"

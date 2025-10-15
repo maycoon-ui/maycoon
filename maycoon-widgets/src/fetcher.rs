@@ -44,11 +44,10 @@ impl<T: Send + 'static, W: Widget, F: Fn(Option<T>) -> W> WidgetFetcher<T, W, F>
         let result = Arc::new(Mutex::new(None));
 
         let result_clone = result.clone();
-        tasks::spawn(async move {
+        let _ = tasks::spawn(async move {
             let out = future.await;
             *result_clone.lock().expect("failed to lock result") = Some(out);
-        })
-        .forget();
+        });
 
         Self {
             result,

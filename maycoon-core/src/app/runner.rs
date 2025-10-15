@@ -24,10 +24,7 @@ impl<T: Theme> MayRunner<T> {
         if let Some(config) = &config.tasks {
             tracing::info!("initializing task runner");
 
-            crate::tasks::runner::TaskRunner::new(config.stack_size, config.workers)
-                .expect("Failed to create task runner")
-                .init()
-                .expect("Failed to init task runner");
+            crate::tasks::init(*config);
         }
 
         Self {

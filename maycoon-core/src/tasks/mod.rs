@@ -1,42 +1,57 @@
+use crate::config::TasksConfig;
 use crate::tasks::runner::TaskRunner;
-use std::future::Future;
 use std::sync::OnceLock;
-
-pub use futures::future;
 
 /// Contains the [TaskRunner] struct.
 pub mod runner;
 
-/// A handle to a running task which can be awaited in order to get its result.
-pub type TaskHandle<T> = future::RemoteHandle<T>;
-
 static RUNNER: OnceLock<TaskRunner> = OnceLock::new();
 
-/// Returns the global [TaskRunner] or panics if it hasn't been initialized yet.
-pub fn runner<'a>() -> &'a TaskRunner {
-    try_runner().expect("Task runner not initialized yet")
+/// Initializes the task runner with the given config. Panics if the task runner is already initialized.
+pub fn init(config: TasksConfig) {
+    RUNNER
+        .set(TaskRunner::new(config))
+        .expect("Task runner already initialized")
 }
 
-/// Returns the global [TaskRunner] or [None] if it hasn't been initialized yet.
+/// Try to get the global task runner. Returns [None] if the task runner is not initialized yet.
 pub fn try_runner<'a>() -> Option<&'a TaskRunner> {
     RUNNER.get()
 }
 
-/// Spawns the given [Future] on the task runner thread pool and returns a [TaskHandle] to await for the result.
-///
-/// Panics if the task runner hasn't been initialized yet.
-pub fn spawn<Fut>(fut: Fut) -> TaskHandle<Fut::Output>
-where
-    Fut: Future + Send + 'static,
-    Fut::Output: Send,
-{
-    runner().run(fut)
+/// Get the global task runner. Panics if the task runner is not initialized yet.
+pub fn runner<'a>() -> &'a TaskRunner {
+    try_runner().expect("Task runner not initialized")
 }
 
-/// Blocks the current thread until the given [Future] completes.
-pub fn block_on<Fut>(fut: Fut) -> Fut::Output
+/// Block on the given future on the task runner. Panics if the task runner is not initialized yet.
+///
+/// If the task runner is not initialized (e.g. if no task runner config is specified), [pollster] will be used.
+pub fn block_on<F>(fut: F) -> F::Output
 where
-    Fut: Future,
+    F: Future,
 {
-    futures::executor::block_on(fut)
+    if let Some(runner) = try_runner() {
+        runner.block_on(fut)
+    } else {
+        pollster::block_on(fut)
+    }
+}
+
+/// Spawn the given future on the task runner. Panics if the task runner is not initialized yet.
+pub async fn spawn<F>(fut: F) -> F::Output
+where
+    F: Future + Send + 'static,
+    F::Output: Send + 'static,
+{
+    runner().spawn(fut).await
+}
+
+/// Spawn the given blocking function on the task runner. Panics if the task runner is not initialized yet.
+pub async fn spawn_blocking<F, R>(fut: F) -> R
+where
+    F: FnOnce() -> R + Send + 'static,
+    R: Send + 'static,
+{
+    runner().spawn_blocking(fut).await
 }
