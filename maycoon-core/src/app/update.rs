@@ -20,6 +20,8 @@ bitflags! {
         const LAYOUT = 0b00000100;
         /// Force the App to re-evaluate, re-draw and re-layout the widget tree.
         const FORCE  = 0b00001000;
+        /// Makes the App exit.
+        const EXIT   = 0b00010000;
     }
 }
 

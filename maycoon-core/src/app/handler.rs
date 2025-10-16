@@ -349,6 +349,12 @@ where
                 });
             }
 
+            // update the app if requested
+            if self.update.get().intersects(Update::EXIT) {
+                event_loop.exit();
+                return;
+            }
+
             // reset AppInfo and update states
             tracing::trace!("resetting info and update state");
             self.info.reset();
