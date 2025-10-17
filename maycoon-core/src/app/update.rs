@@ -1,6 +1,7 @@
 use bitflags::bitflags;
 use std::sync::Arc;
 use std::sync::atomic::{AtomicU8, Ordering};
+use tracing::instrument;
 
 bitflags! {
     /// Update bitflags to define which part of the App should Update.
@@ -66,6 +67,7 @@ impl UpdateManager {
     }
 
     /// Clears the current `Update` flags of the `UpdateManager`.
+    #[instrument(level = "trace", skip_all)]
     pub fn clear(&self) {
         tracing::debug!("clearing update");
         self.update.store(0, Ordering::Release);

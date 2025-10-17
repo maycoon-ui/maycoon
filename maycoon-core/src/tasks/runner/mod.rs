@@ -23,10 +23,16 @@ impl TaskRunner {
     /// Initializes the task runner with the given config.
     pub fn new(_config: TasksConfig) -> Self {
         #[cfg(feature = "tokio-runner")]
-        return Self::Tokio(tokio_runner::TokioRunner::new(_config));
+        {
+            tracing::info!("creating tokio task runner");
+            return Self::Tokio(tokio_runner::TokioRunner::new(_config));
+        }
 
         #[cfg(any(not(feature = "tokio-runner")))]
-        Self::None
+        {
+            tracing::warn!("no task runner feature selected, but task runner config specified");
+            Self::None
+        }
     }
 
     /// Blocks on the given future.

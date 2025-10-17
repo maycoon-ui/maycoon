@@ -1,16 +1,17 @@
 use maycoon::core::app::Application;
 use maycoon::core::app::context::AppContext;
-use maycoon::core::config::{MayConfig, TasksConfig};
+use maycoon::core::config::MayConfig;
 use maycoon::core::widget::Widget;
 use maycoon::theme::theme::celeste::CelesteTheme;
 use maycoon::widgets::text::Text;
 use tracing_flame::FlameLayer;
 use tracing_subscriber::filter::FilterFn;
+use tracing_subscriber::fmt::writer::MakeWriterExt;
 use tracing_subscriber::layer::SubscriberExt;
 use tracing_subscriber::util::SubscriberInitExt;
 use tracing_subscriber::{Layer, fmt};
 
-const FILTER_TARGETS: [&str; 2] = ["wgpu", "naga"];
+const FILTER_TARGETS: [&str; 3] = ["wgpu", "naga", "winit"];
 
 fn main() {
     let filter = FilterFn::new(|md| {
@@ -27,15 +28,12 @@ fn main() {
 
     tracing_subscriber::registry()
         .with(fmt::layer().compact().with_filter(filter.clone()))
-        .with(
-            flame
-                .with_file_and_line(false)
-                .with_module_path(false)
-                .with_filter(filter),
-        )
+        .with(flame.with_file_and_line(false).with_filter(filter))
         .init();
 
-    MyApp.run(())
+    MyApp.run(());
+
+    guard.flush().unwrap();
 }
 
 struct MyApp;

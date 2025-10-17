@@ -7,6 +7,7 @@ use crate::plugin::PluginManager;
 use crate::widget::Widget;
 use maycoon_theme::theme::Theme;
 use peniko::FontData;
+use tracing::instrument;
 use winit::dpi::{LogicalPosition, LogicalSize, Position, Size};
 use winit::event_loop::EventLoopBuilder;
 use winit::window::WindowAttributes;
@@ -56,6 +57,7 @@ impl<T: Theme> MayRunner<T> {
     }
 
     /// Run the application with given widget and state.
+    #[instrument(level = "info", skip_all)]
     pub fn run<S, W, F>(mut self, state: S, builder: F, mut plugins: PluginManager<T>)
     where
         W: Widget,

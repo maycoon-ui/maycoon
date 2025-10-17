@@ -8,6 +8,7 @@ use crate::signal::memoized::MemoizedSignal;
 use crate::signal::rw::RwSignal;
 use crate::signal::state::StateSignal;
 use std::sync::Arc;
+use tracing::instrument;
 use vello::util::RenderContext;
 
 /// The application context for managing the application lifecycle.
@@ -55,6 +56,7 @@ impl AppContext {
     /// Hook the given [Signal] to the [UpdateManager] of this application.
     ///
     /// This makes the signal reactive, so it will notify the renderer when the inner value changes.
+    #[instrument(level = "trace", skip_all, fields(signal = std::any::type_name::<T>()))]
     pub fn hook_signal<T: 'static, S: Signal<T>>(&self, signal: &mut S) {
         let update = self.update();
 

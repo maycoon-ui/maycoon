@@ -1,4 +1,5 @@
 use nalgebra::Vector2;
+use tracing::instrument;
 use winit::event::{DeviceId, ElementState, KeyEvent, MouseButton, MouseScrollDelta};
 
 use crate::app::diagnostics::Diagnostics;
@@ -24,6 +25,7 @@ pub struct AppInfo {
 
 impl AppInfo {
     /// Reset the application information for a new frame.
+    #[instrument(level = "trace", skip_all)]
     pub fn reset(&mut self) {
         self.buttons.clear();
         self.keys.clear();

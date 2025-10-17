@@ -1,6 +1,7 @@
 use indexmap::IndexMap;
 use peniko::{Blob, FontData};
 use std::sync::Arc;
+use tracing::instrument;
 
 /// A font manager for maycoon applications.
 ///
@@ -28,7 +29,9 @@ impl FontContext {
     /// Loads a font with a custom name into the font context.
     ///
     /// If the font with the same name already exists, it will be overwritten and the old font will be returned.
+    #[instrument(level = "trace", skip_all, fields(name = name.to_string()))]
     pub fn load(&mut self, name: impl ToString, font: FontData) -> Option<FontData> {
+        tracing::trace!("loading font named {}", name.to_string());
         self.fonts.insert(name.to_string(), font)
     }
 
@@ -40,6 +43,7 @@ impl FontContext {
     /// Returns `None` if the font could not be loaded.
     ///
     /// **NOTE:** Not every postscript font is available on every system.
+    #[instrument(level = "info", skip_all, fields(name = name.to_string(), postscript = postscript_name.to_string()))]
     pub fn load_system(
         &mut self,
         name: impl ToString,
@@ -47,8 +51,6 @@ impl FontContext {
     ) -> Option<()> {
         let name = name.to_string();
         let postscript_name = postscript_name.to_string();
-
-        tracing::info!("loading system font named {name} by postscript {postscript_name}");
 
         // TODO: find a more lightweight solution to finding system source fonts
         let font = font_kit::source::SystemSource::new()
