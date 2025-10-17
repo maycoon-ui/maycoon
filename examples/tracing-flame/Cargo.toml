@@ -1,0 +1,10 @@
+[package]
+name = "tracing-flame"
+version = "0.1.0"
+edition = "2024"
+publish = false
+
+[dependencies]
+maycoon = { path = "../..", features = ["tokio-runner"] }
+tracing-subscriber = "0.3.20"
+tracing-flame = "0.2.0"
