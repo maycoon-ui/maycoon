@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.0](https://github.com/maycoon-ui/maycoon/compare/maycoon-widgets-v0.4.0...maycoon-widgets-v0.5.0) - 2025-10-17
+
+### Added
+
+- Reworked task runner architecture
+
+### Other
+
+- Update render dependencies
+- Re-organize features
+
 ## [0.4.0](https://github.com/maycoon-ui/maycoon/compare/maycoon-widgets-v0.3.2...maycoon-widgets-v0.4.0) - 2025-04-29
 
 ### Other
