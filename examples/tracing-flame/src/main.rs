@@ -6,7 +6,6 @@ use maycoon::theme::theme::celeste::CelesteTheme;
 use maycoon::widgets::text::Text;
 use tracing_flame::FlameLayer;
 use tracing_subscriber::filter::FilterFn;
-use tracing_subscriber::fmt::writer::MakeWriterExt;
 use tracing_subscriber::layer::SubscriberExt;
 use tracing_subscriber::util::SubscriberInitExt;
 use tracing_subscriber::{Layer, fmt};
