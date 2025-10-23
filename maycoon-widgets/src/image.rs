@@ -3,15 +3,11 @@ use maycoon_core::app::info::AppInfo;
 use maycoon_core::app::update::Update;
 use maycoon_core::layout::{LayoutNode, LayoutStyle, StyleNode};
 use maycoon_core::signal::MaybeSignal;
-use maycoon_core::vg::Scene;
-use maycoon_core::vg::kurbo::{Affine, Vec2};
-use maycoon_core::vg::peniko::ImageBrush;
+use maycoon_core::vgi::{ImageBrush, ImageData, Scene};
 use maycoon_core::widget::{Widget, WidgetLayoutExt};
 use maycoon_theme::id::WidgetId;
 use maycoon_theme::theme::Theme;
-use std::ops::Deref;
-pub use vello::peniko::ImageData;
-use vello_svg::vello;
+use nalgebra::Vector2;
 
 /// An image widget. Pretty self-explanatory.
 ///
@@ -20,13 +16,13 @@ use vello_svg::vello;
 /// ### Theming
 /// The widget itself only draws the underlying image, so theming is useless.
 pub struct Image {
-    image: MaybeSignal<ImageBrush>,
+    image: MaybeSignal<ImageData>,
     style: MaybeSignal<LayoutStyle>,
 }
 
 impl Image {
     /// Create an image widget from the given [ImageData].
-    pub fn new(image: impl Into<MaybeSignal<ImageBrush>>) -> Self {
+    pub fn new(image: impl Into<MaybeSignal<ImageData>>) -> Self {
         Self {
             image: image.into(),
             style: LayoutStyle::default().into(),
@@ -34,7 +30,7 @@ impl Image {
     }
 
     /// Set the image.
-    pub fn with_image(mut self, image: impl Into<MaybeSignal<ImageBrush>>) -> Self {
+    pub fn with_image(mut self, image: impl Into<MaybeSignal<ImageData>>) -> Self {
         self.image = image.into();
         self
     }
@@ -49,20 +45,19 @@ impl WidgetLayoutExt for Image {
 impl Widget for Image {
     fn render(
         &mut self,
-        scene: &mut Scene,
+        scene: &mut dyn Scene,
         _: &mut dyn Theme,
         layout_node: &LayoutNode,
         _: &AppInfo,
         _: AppContext,
     ) {
         let image = self.image.get();
+        let brush = ImageBrush::new(image.clone());
 
         scene.draw_image(
-            image.deref(),
-            Affine::translate(Vec2::new(
-                layout_node.layout.location.x as f64,
-                layout_node.layout.location.y as f64,
-            )),
+            &brush,
+            None,
+            Vector2::new(layout_node.layout.location.x, layout_node.layout.location.y),
         );
     }
 

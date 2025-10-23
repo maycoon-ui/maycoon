@@ -1,10 +1,9 @@
-use vello::Scene;
-
 use crate::app::context::AppContext;
 use crate::app::info::AppInfo;
 use crate::app::update::Update;
 use crate::layout::{LayoutNode, LayoutStyle, StyleNode};
 use crate::signal::MaybeSignal;
+use crate::vgi::Scene;
 use maycoon_theme::id::WidgetId;
 use maycoon_theme::theme::Theme;
 
@@ -16,7 +15,7 @@ pub trait Widget {
     /// Render the widget to the canvas.
     fn render(
         &mut self,
-        scene: &mut Scene,
+        scene: &mut dyn Scene,
         theme: &mut dyn Theme,
         layout_node: &LayoutNode,
         info: &AppInfo,

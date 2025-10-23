@@ -2,6 +2,7 @@ use crate::app::context::AppContext;
 use crate::app::runner::MayRunner;
 use crate::config::MayConfig;
 use crate::plugin::PluginManager;
+use crate::vgi::VectorGraphicsInterface;
 use crate::widget::Widget;
 use maycoon_theme::theme::Theme;
 
@@ -29,11 +30,17 @@ pub mod runner;
 /// The main application interface.
 ///
 /// Contains basic functions for the [MayRunner] to create and run an application.
-pub trait Application: Sized {
+pub trait Application<'a>: Sized {
     /// The theme of the application and its widgets.
     ///
     /// See [maycoon_theme::theme] for built-in themes.
     type Theme: Theme;
+
+    // TODO: Change to default type, once (associated type defaults)[https://github.com/rust-lang/rust/issues/29661] is stabilized.
+    /// The vector graphics interface to use for rendering.
+    ///
+    /// See [VectorGraphicsInterface] for more.
+    type Graphics: VectorGraphicsInterface<'a>;
 
     /// The global state of the application.
     type State;
@@ -44,10 +51,10 @@ pub trait Application: Sized {
     fn build(context: AppContext, state: Self::State) -> impl Widget;
 
     /// Returns the [MayConfig] for the application.
-    fn config(&self) -> MayConfig<Self::Theme>;
+    fn config(&self) -> MayConfig<'a, Self::Theme, Self::Graphics>;
 
     /// Builds and returns the [PluginManager] for the application.
-    fn plugins(&self) -> PluginManager<Self::Theme> {
+    fn plugins(&self) -> PluginManager<'a, Self::Theme, Self::Graphics> {
         PluginManager::new()
     }
 
@@ -59,6 +66,10 @@ pub trait Application: Sized {
 
         tracing::info!("launching application runner with {config:?}");
 
-        MayRunner::<Self::Theme>::new(config).run(state, Self::build, self.plugins());
+        MayRunner::<'a, Self::Theme, Self::Graphics>::new(config).run(
+            state,
+            Self::build,
+            self.plugins(),
+        );
     }
 }

@@ -1,7 +1,8 @@
+use maycoon::core::app::Application;
 use maycoon::core::app::context::AppContext;
 use maycoon::core::app::update::Update;
-use maycoon::core::app::Application;
 use maycoon::core::config::{MayConfig, TasksConfig};
+use maycoon::core::vgi::DefaultGraphics;
 use maycoon::core::widget::Widget;
 use maycoon::theme::theme::celeste::CelesteTheme;
 use maycoon::widgets::fetcher::WidgetFetcher;
@@ -10,8 +11,9 @@ use serde::Deserialize;
 
 struct MyApp;
 
-impl Application for MyApp {
+impl<'a> Application<'a> for MyApp {
     type Theme = CelesteTheme;
+    type Graphics = DefaultGraphics<'a>;
     type State = ();
 
     fn build(_: AppContext, _: Self::State) -> impl Widget {
@@ -24,7 +26,7 @@ impl Application for MyApp {
         })
     }
 
-    fn config(&self) -> MayConfig<Self::Theme> {
+    fn config(&self) -> MayConfig<'a, Self::Theme, Self::Graphics> {
         MayConfig {
             tasks: Some(TasksConfig::default()),
             ..Default::default()

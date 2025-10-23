@@ -1,16 +1,18 @@
-use maycoon::core::app::context::AppContext;
 use maycoon::core::app::Application;
+use maycoon::core::app::context::AppContext;
 use maycoon::core::config::MayConfig;
+use maycoon::core::vgi::DefaultGraphics;
 use maycoon::core::widget::Widget;
 use maycoon::macros::svg_icon;
 use maycoon::theme::theme::celeste::CelesteTheme;
-use maycoon::widgets::icon::svg::SvgIcon;
 use maycoon::widgets::icon::Icon;
+use maycoon::widgets::icon::svg::SvgIcon;
 
 struct MyApp;
 
-impl Application for MyApp {
+impl<'a> Application<'a> for MyApp {
     type Theme = CelesteTheme;
+    type Graphics = DefaultGraphics<'a>;
     type State = ();
 
     fn build(_: AppContext, _: Self::State) -> impl Widget {
@@ -19,7 +21,7 @@ impl Application for MyApp {
         Icon::new(icon)
     }
 
-    fn config(&self) -> MayConfig<Self::Theme> {
+    fn config(&self) -> MayConfig<'a, Self::Theme, Self::Graphics> {
         MayConfig::default()
     }
 }

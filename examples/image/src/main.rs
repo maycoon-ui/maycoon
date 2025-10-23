@@ -1,23 +1,25 @@
-use maycoon::color::{Blob, ImageAlphaType, ImageBrush, ImageFormat};
+use maycoon::color::{Blob, ImageAlphaType, ImageData, ImageFormat};
 use maycoon::core::app::Application;
 use maycoon::core::app::context::AppContext;
 use maycoon::core::config::MayConfig;
 use maycoon::core::signal::Signal;
 use maycoon::core::signal::fixed::FixedSignal;
+use maycoon::core::vgi::DefaultGraphics;
 use maycoon::core::widget::Widget;
 use maycoon::theme::theme::celeste::CelesteTheme;
-use maycoon::widgets::image::{Image, ImageData};
+use maycoon::widgets::image::Image;
 
 const IMAGE_DATA: &[u8] = include_bytes!("../pelican.jpg");
 
 struct MyApp;
 
-impl Application for MyApp {
+impl<'a> Application<'a> for MyApp {
     type Theme = CelesteTheme;
+    type Graphics = DefaultGraphics<'a>;
     type State = ();
 
     fn build(context: AppContext, _: Self::State) -> impl Widget {
-        let image = FixedSignal::new(ImageBrush::new(ImageData {
+        let image = FixedSignal::new(ImageData {
             data: Blob::from(
                 image::load_from_memory(IMAGE_DATA)
                     .unwrap()
@@ -28,13 +30,13 @@ impl Application for MyApp {
             alpha_type: ImageAlphaType::Alpha,
             width: 427,
             height: 640,
-        }))
+        })
         .hook(&context);
 
         Image::new(image.maybe())
     }
 
-    fn config(&self) -> MayConfig<Self::Theme> {
+    fn config(&self) -> MayConfig<'a, Self::Theme, Self::Graphics> {
         MayConfig::default()
     }
 }

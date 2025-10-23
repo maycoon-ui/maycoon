@@ -1,13 +1,12 @@
 use crate::app::info::AppInfo;
 use crate::app::update::UpdateManager;
 use crate::config::MayConfig;
+use crate::vgi::VectorGraphicsInterface;
 use indexmap::IndexMap;
 use maycoon_theme::theme::Theme;
 use std::sync::Arc;
 use std::time::Instant;
 use taffy::{NodeId, TaffyTree};
-use vello::util::{RenderContext, RenderSurface};
-use vello::{Renderer, Scene};
 use winit::event::WindowEvent;
 use winit::event_loop::{ActiveEventLoop, EventLoop};
 use winit::window::{Window, WindowAttributes};
@@ -18,17 +17,17 @@ use winit::window::{Window, WindowAttributes};
 /// Beware that tampering with the application state may cause crashes or other issues if not done correctly.
 ///
 /// All functions defined in this trait get called before the app handler logic and therefore can control the application flow.
-pub trait Plugin<T: Theme> {
+pub trait Plugin<'a, T: Theme, V: VectorGraphicsInterface<'a>> {
     /// The plugin name.
     ///
     /// Should be unique among the ecosystem.
     fn name(&self) -> &'static str;
 
     /// Called when the plugin is registered using [PluginManager::register].
-    fn on_register(&mut self, _manager: &mut PluginManager<T>) {}
+    fn on_register(&mut self, _manager: &mut PluginManager<'a, T, V>) {}
 
     /// Called when the plugin is unregistered using [PluginManager::unregister].
-    fn on_unregister(&mut self, _manager: &mut PluginManager<T>) {}
+    fn on_unregister(&mut self, _manager: &mut PluginManager<'a, T, V>) {}
 
     /// Called right before initializing the [AppHandler](crate::app::handler::AppHandler) and running the event loop.
     fn init(
@@ -36,7 +35,7 @@ pub trait Plugin<T: Theme> {
         _event_loop: &mut EventLoop<()>,
         _update: &UpdateManager,
         _window: &mut WindowAttributes,
-        _config: &mut MayConfig<T>,
+        _config: &mut MayConfig<'a, T, V>,
     ) {
     }
 
@@ -46,8 +45,8 @@ pub trait Plugin<T: Theme> {
     /// while mobile apps can be suspended and resumed.
     fn on_resume(
         &mut self,
-        _config: &mut MayConfig<T>,
-        _scene: &mut Scene,
+        _config: &mut MayConfig<'a, T, V>,
+        _scene: &mut V::Scene,
         _taffy: &mut TaffyTree,
         _window_node: NodeId,
         _info: &mut AppInfo,
@@ -61,15 +60,12 @@ pub trait Plugin<T: Theme> {
     /// and figure out what updates to apply.
     fn on_update(
         &mut self,
-        _config: &mut MayConfig<T>,
+        _config: &mut MayConfig<'a, T, V>,
         _window: &Arc<Window>,
-        _renderer: &mut Renderer,
-        _scene: &mut Scene,
-        _surface: &mut RenderSurface<'_>,
+        _scene: &mut V::Scene,
         _taffy: &mut TaffyTree,
         _window_node: NodeId,
         _info: &mut AppInfo,
-        _render_ctx: &Arc<RenderContext>,
         _update: &UpdateManager,
         _last_update: &mut Instant,
         _event_loop: &ActiveEventLoop,
@@ -80,15 +76,12 @@ pub trait Plugin<T: Theme> {
     fn on_window_event(
         &mut self,
         _event: &mut WindowEvent,
-        _config: &mut MayConfig<T>,
+        _config: &mut MayConfig<'a, T, V>,
         _window: &Arc<Window>,
-        _renderer: &mut Renderer,
-        _scene: &mut Scene,
-        _surface: &mut RenderSurface<'_>,
+        _scene: &mut V::Scene,
         _taffy: &mut TaffyTree,
         _window_node: NodeId,
         _info: &mut AppInfo,
-        _render_ctx: &Arc<RenderContext>,
         _update: &UpdateManager,
         _last_update: &mut Instant,
         _event_loop: &ActiveEventLoop,
@@ -98,8 +91,8 @@ pub trait Plugin<T: Theme> {
     /// Called when the application is suspended.
     fn on_suspended(
         &mut self,
-        _config: &mut MayConfig<T>,
-        _scene: &mut Scene,
+        _config: &mut MayConfig<'a, T, V>,
+        _scene: &mut V::Scene,
         _taffy: &mut TaffyTree,
         _window_node: NodeId,
         _info: &mut AppInfo,
@@ -111,11 +104,11 @@ pub trait Plugin<T: Theme> {
 }
 
 /// A plugin manager for maycoon applications.
-pub struct PluginManager<T: Theme> {
-    plugins: IndexMap<&'static str, Box<dyn Plugin<T>>>,
+pub struct PluginManager<'a, T: Theme, V: VectorGraphicsInterface<'a>> {
+    plugins: IndexMap<&'static str, Box<dyn Plugin<'a, T, V>>>,
 }
 
-impl<T: Theme> PluginManager<T> {
+impl<'a, T: Theme, V: VectorGraphicsInterface<'a>> PluginManager<'a, T, V> {
     /// Creates a new empty plugin manager.
     pub fn new() -> Self {
         Self {
@@ -124,7 +117,7 @@ impl<T: Theme> PluginManager<T> {
     }
 
     /// Registers a new plugin.
-    pub fn register(&mut self, mut plugin: impl Plugin<T> + 'static) {
+    pub fn register(&mut self, mut plugin: impl Plugin<'a, T, V> + 'static) {
         plugin.on_register(self);
 
         self.plugins.insert(plugin.name(), Box::new(plugin));
@@ -149,7 +142,7 @@ impl<T: Theme> PluginManager<T> {
     /// Runs a closure on all plugins.
     pub fn run<F>(&mut self, mut op: F)
     where
-        F: FnMut(&mut Box<dyn Plugin<T>>),
+        F: FnMut(&mut Box<dyn Plugin<'a, T, V>>),
     {
         for pl in self.plugins.values_mut() {
             op(pl);
@@ -157,7 +150,7 @@ impl<T: Theme> PluginManager<T> {
     }
 }
 
-impl<T: Theme> Default for PluginManager<T> {
+impl<'a, T: Theme, V: VectorGraphicsInterface<'a>> Default for PluginManager<'a, T, V> {
     fn default() -> Self {
         Self::new()
     }

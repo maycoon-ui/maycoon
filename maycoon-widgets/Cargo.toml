@@ -11,12 +11,11 @@ repository.workspace = true
 homepage.workspace = true
 
 [dependencies]
-vello_svg = { version = "0.8.0", default-features = false }
 maycoon-theme = { workspace = true }
-maycoon-core = { workspace = true, features = ["vg"] }
-bytemuck = { workspace = true }
+maycoon-core = { workspace = true }
 nalgebra = { workspace = true }
 
 [features]
 default = []
 canvas = []
+svg = ["maycoon-core/svg"]

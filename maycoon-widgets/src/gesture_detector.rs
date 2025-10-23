@@ -3,7 +3,7 @@ use maycoon_core::app::info::AppInfo;
 use maycoon_core::app::update::Update;
 use maycoon_core::layout::{LayoutNode, StyleNode};
 use maycoon_core::signal::MaybeSignal;
-use maycoon_core::vg::Scene;
+use maycoon_core::vgi::Scene;
 use maycoon_core::widget::{BoxedWidget, Widget};
 use maycoon_core::window::{ElementState, MouseButton};
 use maycoon_theme::id::WidgetId;
@@ -81,7 +81,7 @@ impl GestureDetector {
 impl Widget for GestureDetector {
     fn render(
         &mut self,
-        scene: &mut Scene,
+        scene: &mut dyn Scene,
         theme: &mut dyn Theme,
         layout_node: &LayoutNode,
         info: &AppInfo,

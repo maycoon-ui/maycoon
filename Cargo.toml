@@ -43,13 +43,10 @@ peniko = { workspace = true }
 nalgebra = { workspace = true }
 
 [features]
-default = ["macros", "include-noto-sans"]
+default = ["macros", "include-noto-sans", "vello-vg"]
 
 # Exports useful macros for working with maycoon.
 macros = ["maycoon-macros"]
-
-# Exports `vello` and `skrifa` for drawing vector graphics. Useful if you want to create custom widgets.
-vg = ["maycoon-core/vg"]
 
 # Enables the `Canvas` widget for drawing to the screen.
 canvas = ["maycoon-widgets/canvas"]
@@ -59,6 +56,12 @@ include-noto-sans = ["maycoon-core/include-noto-sans"]
 
 # Use the `tokio` runtime for running tasks inside a task runner.
 tokio-runner = ["maycoon-core/tokio-runner"]
+
+# Enables structures and widgets for working with SVGs.
+svg = ["maycoon-core/svg", "maycoon-widgets/svg"]
+
+# Enables the `vello` vector graphics backend.
+vello-vg = ["maycoon-core/vello-vg"]
 
 [lib]
 name = "maycoon"

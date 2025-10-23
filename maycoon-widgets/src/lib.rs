@@ -33,6 +33,7 @@ pub mod canvas;
 pub mod gesture_detector;
 
 /// Contains the [icon::Icon] widget.
+#[cfg(feature = "svg")]
 pub mod icon;
 
 /// Contains the [animator::Animator] widget and associated structures.

@@ -4,9 +4,8 @@ use maycoon_core::app::update::Update;
 use maycoon_core::layout;
 use maycoon_core::layout::{Dimension, LayoutNode, LayoutStyle, LengthPercentageAuto, StyleNode};
 use maycoon_core::signal::MaybeSignal;
-use maycoon_core::vg::kurbo::{Affine, Circle, Point, Rect, RoundedRect, RoundedRectRadii};
-use maycoon_core::vg::peniko::{Brush, Fill};
-use maycoon_core::vg::Scene;
+use maycoon_core::vgi::kurbo::{Circle, Point, Rect, RoundedRect, RoundedRectRadii};
+use maycoon_core::vgi::{Brush, Scene};
 use maycoon_core::widget::{Widget, WidgetLayoutExt};
 use maycoon_core::window::MouseButton;
 use maycoon_theme::id::WidgetId;
@@ -69,7 +68,7 @@ impl WidgetLayoutExt for Slider {
 impl Widget for Slider {
     fn render(
         &mut self,
-        scene: &mut Scene,
+        scene: &mut dyn Scene,
         theme: &mut dyn Theme,
         layout_node: &LayoutNode,
         _: &AppInfo,
@@ -91,10 +90,9 @@ impl Widget for Slider {
 
         let circle_radius = layout_node.layout.size.height as f64 / 1.15;
 
-        scene.fill(
-            Fill::NonZero,
-            Affine::default(),
+        scene.draw_rounded_rect(
             &brush,
+            None,
             None,
             &RoundedRect::from_rect(
                 Rect::new(
@@ -107,10 +105,9 @@ impl Widget for Slider {
             ),
         );
 
-        scene.fill(
-            Fill::NonZero,
-            Affine::default(),
+        scene.draw_circle(
             &ball_brush,
+            None,
             None,
             &Circle::new(
                 Point::new(

@@ -1,9 +1,10 @@
 use crate::counter::Counter;
-use maycoon::core::app::context::AppContext;
 use maycoon::core::app::Application;
+use maycoon::core::app::context::AppContext;
 use maycoon::core::config::MayConfig;
 use maycoon::core::layout::{AlignItems, Dimension, FlexDirection, LayoutStyle};
 use maycoon::core::signal::state::StateSignal;
+use maycoon::core::vgi::DefaultGraphics;
 use maycoon::core::widget::{Widget, WidgetLayoutExt};
 use maycoon::math::Vector2;
 use maycoon::theme::theme::celeste::CelesteTheme;
@@ -12,8 +13,9 @@ mod counter;
 
 struct MyApp;
 
-impl Application for MyApp {
+impl<'a> Application<'a> for MyApp {
     type Theme = CelesteTheme;
+    type Graphics = DefaultGraphics<'a>;
     type State = ();
 
     fn build(context: AppContext, _: Self::State) -> impl Widget {
@@ -27,7 +29,7 @@ impl Application for MyApp {
         })
     }
 
-    fn config(&self) -> MayConfig<Self::Theme> {
+    fn config(&self) -> MayConfig<'a, Self::Theme, Self::Graphics> {
         MayConfig::default()
     }
 }

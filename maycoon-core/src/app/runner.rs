@@ -4,6 +4,7 @@ use crate::app::handler::AppHandler;
 use crate::app::update::UpdateManager;
 use crate::config::MayConfig;
 use crate::plugin::PluginManager;
+use crate::vgi::VectorGraphicsInterface;
 use crate::widget::Widget;
 use maycoon_theme::theme::Theme;
 use peniko::FontData;
@@ -13,14 +14,14 @@ use winit::event_loop::EventLoopBuilder;
 use winit::window::WindowAttributes;
 
 /// The core Application structure.
-pub struct MayRunner<T: Theme> {
-    config: MayConfig<T>,
+pub struct MayRunner<'a, T: Theme, V: VectorGraphicsInterface<'a>> {
+    config: MayConfig<'a, T, V>,
     font_ctx: FontContext,
 }
 
-impl<T: Theme> MayRunner<T> {
+impl<'a, T: Theme, V: VectorGraphicsInterface<'a>> MayRunner<'a, T, V> {
     /// Create a new App with the given [MayConfig].
-    pub fn new(config: MayConfig<T>) -> Self {
+    pub fn new(config: MayConfig<'a, T, V>) -> Self {
         // init task runner
         if let Some(config) = &config.tasks {
             tracing::info!("initializing task runner");
@@ -58,7 +59,7 @@ impl<T: Theme> MayRunner<T> {
 
     /// Run the application with given widget and state.
     #[instrument(level = "info", skip_all)]
-    pub fn run<S, W, F>(mut self, state: S, builder: F, mut plugins: PluginManager<T>)
+    pub fn run<S, W, F>(mut self, state: S, builder: F, mut plugins: PluginManager<'a, T, V>)
     where
         W: Widget,
         F: Fn(AppContext, S) -> W,

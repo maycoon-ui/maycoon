@@ -2,7 +2,7 @@ use maycoon_core::app::context::AppContext;
 use maycoon_core::app::info::AppInfo;
 use maycoon_core::app::update::Update;
 use maycoon_core::layout::{LayoutNode, StyleNode};
-use maycoon_core::vg::Scene;
+use maycoon_core::vgi::Scene;
 use maycoon_core::widget::Widget;
 use maycoon_theme::id::WidgetId;
 use maycoon_theme::theme::Theme;
@@ -34,7 +34,7 @@ impl<W: Widget, A: Fn(&mut W, f32) -> Update> Animator<W, A> {
 impl<W: Widget, A: Fn(&mut W, f32) -> Update> Widget for Animator<W, A> {
     fn render(
         &mut self,
-        scene: &mut Scene,
+        scene: &mut dyn Scene,
         theme: &mut dyn Theme,
         layout_node: &LayoutNode,
         info: &AppInfo,

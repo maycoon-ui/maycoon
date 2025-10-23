@@ -3,12 +3,7 @@ use maycoon_core::app::info::AppInfo;
 use maycoon_core::app::update::Update;
 use maycoon_core::layout::{Dimension, LayoutNode, LayoutStyle, StyleNode};
 use maycoon_core::signal::MaybeSignal;
-use maycoon_core::skrifa::instance::Size;
-use maycoon_core::skrifa::raw::FileRef;
-use maycoon_core::skrifa::setting::VariationSetting;
-use maycoon_core::skrifa::MetadataProvider;
-use maycoon_core::vg::peniko::{Brush, Fill};
-use maycoon_core::vg::{peniko, Glyph, Scene};
+use maycoon_core::vgi::{Brush, Scene};
 use maycoon_core::widget::{Widget, WidgetLayoutExt};
 use maycoon_theme::id::WidgetId;
 use maycoon_theme::theme::Theme;
@@ -86,7 +81,7 @@ impl WidgetLayoutExt for Text {
 impl Widget for Text {
     fn render(
         &mut self,
-        scene: &mut Scene,
+        scene: &mut dyn Scene,
         theme: &mut dyn Theme,
         layout_node: &LayoutNode,
         info: &AppInfo,
@@ -105,15 +100,6 @@ impl Widget for Text {
             info.font_context.default_font().clone()
         };
 
-        let font_ref = {
-            let file_ref = FileRef::new(font.data.as_ref()).expect("Failed to load font data");
-            match file_ref {
-                FileRef::Font(font) => Some(font),
-                FileRef::Collection(collection) => collection.get(font.index).ok(),
-            }
-        }
-        .expect("Failed to load font reference");
-
         let color = if let Some(style) = theme.of(Self::widget_id(self)) {
             if theme.globals().invert_text_color {
                 style.get_color("color_invert").unwrap()
@@ -124,52 +110,20 @@ impl Widget for Text {
             theme.defaults().text().foreground()
         };
 
-        let location = font_ref.axes().location::<&[VariationSetting; 0]>(&[]);
-
-        let metrics = font_ref.metrics(Size::new(font_size), &location);
-
-        let glyph_metrics = font_ref.glyph_metrics(Size::new(font_size), &location);
-
-        let line_height = metrics.ascent + metrics.descent + metrics.leading;
-
         let line_gap = *self.line_gap.get();
-
-        let charmap = font_ref.charmap();
-
-        let mut pen_x = layout_node.layout.location.x;
-
-        let mut pen_y = layout_node.layout.location.y + font_size;
 
         let text = self.text.get();
 
-        scene
-            .draw_glyphs(&font)
-            .font_size(font_size)
-            .brush(&Brush::Solid(color))
-            .normalized_coords(bytemuck::cast_slice(location.coords()))
-            .hint(hinting)
-            .draw(
-                &peniko::Style::Fill(Fill::NonZero),
-                text.chars().filter_map(|c| {
-                    if c == '\n' {
-                        pen_y += line_height + line_gap;
-                        pen_x = layout_node.layout.location.x;
-                        return None;
-                    }
-
-                    let gid = charmap.map(c).unwrap_or_default();
-                    let advance = glyph_metrics.advance_width(gid).unwrap_or_default();
-                    let x = pen_x;
-
-                    pen_x += advance;
-
-                    Some(Glyph {
-                        id: gid.to_u32(),
-                        x,
-                        y: pen_y,
-                    })
-                }),
-            );
+        scene.draw_text(
+            &Brush::Solid(color),
+            None,
+            Vector2::new(layout_node.layout.location.x, layout_node.layout.location.y),
+            text.as_str(),
+            hinting,
+            &font,
+            font_size,
+            line_gap,
+        );
     }
 
     fn layout_style(&self) -> StyleNode {

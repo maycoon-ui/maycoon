@@ -6,9 +6,6 @@ use taffy::{
     TraversePartialTree,
 };
 use tracing::instrument;
-use vello::util::{RenderContext, RenderSurface};
-use vello::{AaConfig, AaSupport, RenderParams, Renderer, RendererOptions, Scene};
-use wgpu_types::{CommandEncoderDescriptor, TextureViewDescriptor};
 use winit::application::ApplicationHandler;
 use winit::event::WindowEvent;
 use winit::event_loop::ActiveEventLoop;
@@ -21,50 +18,50 @@ use crate::app::update::{Update, UpdateManager};
 use crate::config::MayConfig;
 use crate::layout::{LayoutNode, StyleNode};
 use crate::plugin::PluginManager;
+use crate::vgi::{Scene, VectorGraphicsInterface};
 use crate::widget::Widget;
 use maycoon_theme::theme::Theme;
 
 /// The core application handler. You should use [MayApp](crate::app::MayApp) instead for running applications.
-pub struct AppHandler<'a, T, W, S, F>
+pub struct AppHandler<'a, T, W, S, F, V>
 where
     T: Theme,
     W: Widget,
     F: Fn(AppContext, S) -> W,
+    V: VectorGraphicsInterface<'a>,
 {
-    config: MayConfig<T>,
+    config: MayConfig<'a, T, V>,
     attrs: WindowAttributes,
     window: Option<Arc<Window>>,
-    renderer: Option<Renderer>,
-    scene: Scene,
-    surface: Option<RenderSurface<'a>>,
+    scene: V::Scene,
     taffy: TaffyTree,
     window_node: NodeId,
     builder: F,
     state: Option<S>,
     widget: Option<W>,
     info: AppInfo,
-    render_ctx: Option<Arc<RenderContext>>,
     update: UpdateManager,
     last_update: Instant,
-    plugins: PluginManager<T>,
-    selected_device: usize,
+    plugins: PluginManager<'a, T, V>,
+    graphics: V,
 }
 
-impl<T, W, S, F> AppHandler<'_, T, W, S, F>
+impl<'a, T, W, S, F, V> AppHandler<'a, T, W, S, F, V>
 where
     T: Theme,
     W: Widget,
     F: Fn(AppContext, S) -> W,
+    V: VectorGraphicsInterface<'a>,
 {
     /// Create a new handler with given window attributes, config, widget and state.
     pub fn new(
         attrs: WindowAttributes,
-        config: MayConfig<T>,
+        config: MayConfig<'a, T, V>,
         builder: F,
         state: S,
         font_context: FontContext,
         update: UpdateManager,
-        plugins: PluginManager<T>,
+        plugins: PluginManager<'a, T, V>,
     ) -> Self {
         tracing::trace!("creating taffy tree");
         let mut taffy = TaffyTree::with_capacity(16);
@@ -76,13 +73,13 @@ where
 
         let size = config.window.size;
 
+        let graphics = config.graphics.clone();
+
         Self {
             attrs,
             window: None,
-            renderer: None,
             config,
             scene: Scene::new(),
-            surface: None,
             taffy,
             widget: None,
             info: AppInfo {
@@ -93,22 +90,17 @@ where
             window_node,
             builder,
             state: Some(state),
-            render_ctx: None,
             update,
             last_update: Instant::now(),
             plugins,
-            selected_device: 0,
+            graphics: V::new(graphics).expect("Failed to create vector graphics interface"),
         }
     }
 
     /// Get the application context.
     #[instrument(level = "trace", skip_all)]
     pub fn context(&self) -> AppContext {
-        AppContext::new(
-            self.update.clone(),
-            self.info.diagnostics,
-            self.render_ctx.clone().unwrap(),
-        )
+        AppContext::new(self.update.clone(), self.info.diagnostics)
     }
 
     /// Add the parent node and its children to the layout tree.
@@ -166,69 +158,25 @@ where
     /// Request a window redraw.
     #[instrument(level = "trace", skip(self))]
     fn request_redraw(&self) {
-        if let Some(window) = self.window.as_ref() {
-            window.request_redraw();
-        }
+        tracing::trace!("requesting redraw");
+        self.window.as_ref().unwrap().request_redraw();
     }
 
     #[instrument(level = "trace", skip(self))]
-    fn render(&mut self, window: Arc<Window>) {
-        tracing::trace!("acquiring render resources");
-        let renderer = self.renderer.as_mut().expect("Renderer not initialized");
-        let render_ctx = self
-            .render_ctx
-            .as_ref()
-            .expect("Render context not initialized");
-        let surface = self.surface.as_ref().expect("Surface not initialized");
-        let device_handle = &render_ctx.devices[self.selected_device];
+    fn render(
+        &mut self,
+        window: Arc<Window>,
+        event_loop: &ActiveEventLoop,
+    ) -> Result<(), V::Error> {
+        tracing::trace!("rendering via vector graphics interface");
+        self.graphics.render(
+            window.clone(),
+            event_loop,
+            &self.scene,
+            self.config.theme.window_background(),
+        )?;
 
-        tracing::trace!("rendering to target texture");
-        renderer
-            .render_to_texture(
-                &device_handle.device,
-                &device_handle.queue,
-                &self.scene,
-                &surface.target_view,
-                &RenderParams {
-                    base_color: self.config.theme.window_background(),
-                    width: window.inner_size().width,
-                    height: window.inner_size().height,
-                    antialiasing_method: self.config.render.antialiasing,
-                },
-            )
-            .expect("Failed to render to surface");
-
-        tracing::trace!("acquiring surface texture");
-        let surface_texture = surface
-            .surface
-            .get_current_texture()
-            .expect("Failed to get current surface texture");
-
-        tracing::trace!("creating blitting command encoder");
-        let mut encoder = device_handle
-            .device
-            .create_command_encoder(&CommandEncoderDescriptor {
-                label: Some("Surface Blit Encoder"),
-            });
-
-        tracing::trace!("blitting target texture to surface");
-        surface.blitter.copy(
-            &device_handle.device,
-            &mut encoder,
-            &surface.target_view,
-            &surface_texture
-                .texture
-                .create_view(&TextureViewDescriptor::default()),
-        );
-
-        tracing::trace!("submitting command encoder");
-        device_handle.queue.submit([encoder.finish()]);
-
-        // make sure winit knows that the surface texture is ready to be presented
-        window.pre_present_notify();
-
-        tracing::trace!("presenting surface texture");
-        surface_texture.present();
+        Ok(())
     }
 
     /// Update the app and process events.
@@ -240,15 +188,10 @@ where
             pl.on_update(
                 &mut self.config,
                 self.window.as_ref().expect("Window not initialized"),
-                self.renderer.as_mut().expect("Renderer not initialized"),
                 &mut self.scene,
-                self.surface.as_mut().expect("Surface not initialized"),
                 &mut self.taffy,
                 self.window_node,
                 &mut self.info,
-                self.render_ctx
-                    .as_mut()
-                    .expect("Render context not initialized"),
                 &self.update,
                 &mut self.last_update,
                 event_loop,
@@ -257,7 +200,7 @@ where
 
         // completely layout widgets if taffy is not set up yet (e.g. during first update)
         if self.taffy.child_count(self.window_node) == 0 {
-            tracing::trace!("completely laying out widget");
+            tracing::trace!("completely laying out widgets");
 
             let style = self.widget.as_ref().unwrap().layout_style();
 
@@ -314,6 +257,7 @@ where
         // check if app should redraw
         if self.update.get().intersects(Update::FORCE | Update::DRAW) {
             // clear scene
+            tracing::trace!("resetting vector graphics interface scene");
             self.scene.reset();
 
             let context = self.context();
@@ -331,7 +275,8 @@ where
 
             // check surface validity
             if window.inner_size().width != 0 && window.inner_size().height != 0 {
-                self.render(window);
+                self.render(window, event_loop)
+                    .expect("Failed rendering process");
             } else {
                 tracing::debug!("skipping render due to invalid surface");
             }
@@ -339,18 +284,19 @@ where
 
         // check if app should re-evaluate
         if self.update.get().intersects(Update::EVAL | Update::FORCE) {
-            if let Some(window) = self.window.as_ref() {
-                window.request_redraw();
-            }
+            tracing::trace!("re-evaluating application state");
+            self.request_redraw();
         }
 
         // update the app if requested
         if self.update.get().intersects(Update::EXIT) {
+            tracing::trace!("exiting event loop");
             event_loop.exit();
             return;
         }
 
         // reset AppInfo and update states
+        tracing::trace!("resetting app info and update states");
         self.info.reset();
         self.update.clear();
 
@@ -374,11 +320,12 @@ where
     }
 }
 
-impl<T, W, S, F> ApplicationHandler for AppHandler<'_, T, W, S, F>
+impl<'a, T, W, S, F, V> ApplicationHandler for AppHandler<'a, T, W, S, F, V>
 where
     T: Theme,
     W: Widget,
     F: Fn(AppContext, S) -> W,
+    V: VectorGraphicsInterface<'a>,
 {
     #[instrument(level = "trace", skip_all)]
     fn resumed(&mut self, event_loop: &ActiveEventLoop) {
@@ -396,8 +343,6 @@ where
             )
         });
 
-        let mut render_ctx = RenderContext::new();
-
         tracing::info!("creating window");
         let window = Arc::new(
             event_loop
@@ -405,6 +350,7 @@ where
                 .expect("Failed to create window"),
         );
 
+        tracing::info!("initializing layout");
         let size = window.inner_size();
 
         self.taffy
@@ -420,66 +366,17 @@ where
             )
             .expect("Failed to set window node style");
 
-        tracing::info!("creating surface");
-        let surface = crate::tasks::block_on(async {
-            render_ctx
-                .create_surface(
-                    window.clone(),
-                    size.width,
-                    size.height,
-                    self.config.render.present_mode,
-                )
-                .await
-                .expect("Failed to create surface")
-        });
-
-        tracing::info!("selecting render device");
-        let selected_device = (self.config.render.device_selector)(&render_ctx.devices);
-        tracing::info!("selected render device with index {selected_device}");
-
-        tracing::info!("creating renderer");
-        self.renderer = Some(
-            Renderer::new(
-                &render_ctx.devices[selected_device].device,
-                RendererOptions {
-                    use_cpu: self.config.render.cpu,
-                    antialiasing_support: match self.config.render.antialiasing {
-                        AaConfig::Area => AaSupport::area_only(),
-
-                        AaConfig::Msaa8 => AaSupport {
-                            area: false,
-                            msaa8: true,
-                            msaa16: false,
-                        },
-
-                        AaConfig::Msaa16 => AaSupport {
-                            area: false,
-                            msaa8: false,
-                            msaa16: true,
-                        },
-                    },
-                    num_init_threads: self.config.render.init_threads,
-                    pipeline_cache: None,
-                },
-            )
-            .expect("Failed to create renderer"),
-        );
-
-        let render_ctx = Arc::new(render_ctx);
+        tracing::info!("initializing vector graphics interface");
+        self.graphics
+            .init(window.clone(), event_loop)
+            .expect("Failed to initialize vector graphics interface");
 
         tracing::info!("building root widget");
         self.widget = Some((self.builder)(
-            AppContext::new(
-                self.update.clone(),
-                self.info.diagnostics,
-                render_ctx.clone(),
-            ),
+            AppContext::new(self.update.clone(), self.info.diagnostics),
             self.state.take().unwrap(),
         ));
 
-        self.selected_device = selected_device;
-        self.render_ctx = Some(render_ctx);
-        self.surface = Some(surface);
         self.window = Some(window);
         self.update.set(Update::FORCE);
     }
@@ -498,13 +395,10 @@ where
                 &mut event,
                 &mut self.config,
                 self.window.as_ref().unwrap(),
-                self.renderer.as_mut().unwrap(),
                 &mut self.scene,
-                self.surface.as_mut().unwrap(),
                 &mut self.taffy,
                 self.window_node,
                 &mut self.info,
-                self.render_ctx.as_ref().unwrap(),
                 &self.update,
                 &mut self.last_update,
                 event_loop,
@@ -519,12 +413,14 @@ where
                     tracing::debug!("resizing window to {new_size:?}");
 
                     if new_size.width != 0 && new_size.height != 0 {
-                        if let Some(ctx) = &self.render_ctx
-                            && let Some(surface) = &mut self.surface
-                        {
-                            tracing::trace!("resizing surface");
-                            ctx.resize_surface(surface, new_size.width, new_size.height);
-                        }
+                        tracing::trace!("resizing vector graphics interface");
+                        self.graphics
+                            .resize(
+                                window.clone(),
+                                event_loop,
+                                Vector2::new(new_size.width, new_size.height),
+                            )
+                            .expect("Failed to resize vector graphics interface");
 
                         tracing::trace!("resizing root layout node");
                         self.taffy
@@ -554,12 +450,9 @@ where
                 WindowEvent::CloseRequested => {
                     tracing::trace!("close requested");
 
-                    if let Some(render_ctx) = self.render_ctx.as_mut() {
-                        tracing::info!("destroying render devices");
-                        for handle in &render_ctx.devices {
-                            handle.device.destroy();
-                        }
-                    }
+                    self.graphics
+                        .destroy(window.clone(), event_loop)
+                        .expect("Failed to destroy vector graphics interface");
 
                     if self.config.window.close_on_request {
                         tracing::info!("exiting event loop");
@@ -606,6 +499,7 @@ where
                 },
 
                 WindowEvent::MouseWheel { delta, .. } => {
+                    tracing::trace!("mouse wheel {delta:?}");
                     self.info.mouse_scroll_delta = Some(delta);
                     self.request_redraw();
                 },
@@ -619,11 +513,14 @@ where
 
     #[instrument(level = "trace", skip_all)]
     fn suspended(&mut self, event_loop: &ActiveEventLoop) {
-        tracing::trace!("destroying resources");
+        tracing::trace!("destroying vector graphics interface");
+        let window = self.window.clone().unwrap();
+        self.graphics
+            .uninit(window, event_loop)
+            .expect("Failed to destroy vector graphics interface");
+
+        tracing::trace!("destroying window");
         self.window = None;
-        self.surface = None;
-        self.render_ctx = None;
-        self.renderer = None;
 
         tracing::trace!("running plugin suspensions");
         self.plugins.run(|pl| {

@@ -25,10 +25,10 @@ impl TaskRunner {
         #[cfg(feature = "tokio-runner")]
         {
             tracing::info!("creating tokio task runner");
-            return Self::Tokio(tokio_runner::TokioRunner::new(_config));
+            Self::Tokio(tokio_runner::TokioRunner::new(_config))
         }
 
-        #[cfg(any(not(feature = "tokio-runner")))]
+        #[cfg(not(feature = "tokio-runner"))]
         {
             tracing::warn!("no task runner feature selected, but task runner config specified");
             Self::None

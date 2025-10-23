@@ -4,9 +4,8 @@ use maycoon_core::app::update::Update;
 use maycoon_core::layout;
 use maycoon_core::layout::{LayoutNode, LayoutStyle, LengthPercentage, StyleNode};
 use maycoon_core::signal::MaybeSignal;
-use maycoon_core::vg::kurbo::{Affine, Rect, RoundedRect, RoundedRectRadii, Vec2};
-use maycoon_core::vg::peniko::{Brush, Fill};
-use maycoon_core::vg::Scene;
+use maycoon_core::vgi::kurbo::{Affine, Rect, RoundedRect, RoundedRectRadii, Vec2};
+use maycoon_core::vgi::{Brush, Scene};
 use maycoon_core::widget::{BoxedWidget, Widget, WidgetChildExt, WidgetLayoutExt};
 use maycoon_core::window::{ElementState, MouseButton};
 use maycoon_theme::id::WidgetId;
@@ -70,7 +69,7 @@ impl WidgetLayoutExt for Button {
 impl Widget for Button {
     fn render(
         &mut self,
-        scene: &mut Scene,
+        scene: &mut dyn Scene,
         theme: &mut dyn Theme,
         layout_node: &LayoutNode,
         info: &AppInfo,
@@ -92,10 +91,9 @@ impl Widget for Button {
             })
         };
 
-        scene.fill(
-            Fill::NonZero,
-            Affine::default(),
+        scene.draw_rounded_rect(
             &brush,
+            None,
             None,
             &RoundedRect::from_rect(
                 Rect::new(
@@ -111,10 +109,11 @@ impl Widget for Button {
         {
             theme.globals_mut().invert_text_color = true;
 
-            let mut child_scene = Scene::new();
+            let mut child_scene = scene.dyn_clone();
+            child_scene.reset();
 
             self.child.render(
-                &mut child_scene,
+                child_scene.as_mut(),
                 theme,
                 &layout_node.children[0],
                 info,
@@ -122,7 +121,7 @@ impl Widget for Button {
             );
 
             scene.append(
-                &child_scene,
+                child_scene.as_ref(),
                 Some(Affine::translate(Vec2::new(
                     layout_node.layout.location.x as f64,
                     layout_node.layout.location.y as f64,

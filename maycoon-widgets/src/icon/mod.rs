@@ -1,26 +1,19 @@
 use maycoon_core::app::info::AppInfo;
 use maycoon_core::app::update::Update;
 use maycoon_core::layout::{Dimension, LayoutNode, LayoutStyle, StyleNode};
-use maycoon_core::vg::kurbo::{Affine, Vec2};
-use maycoon_core::vg::Scene;
 use maycoon_core::widget::{Widget, WidgetLayoutExt};
 use maycoon_theme::id::WidgetId;
 use maycoon_theme::theme::Theme;
 use nalgebra::Vector2;
-use vello_svg::usvg;
 
 use crate::icon::svg::SvgIcon;
 use maycoon_core::app::context::AppContext;
 use maycoon_core::signal::MaybeSignal;
-pub use usvg::ImageRendering;
-pub use usvg::ShapeRendering;
-pub use usvg::TextRendering;
+use maycoon_core::vgi::Scene;
+use maycoon_core::vgi::kurbo::{Affine, Vec2};
 
 /// Contains the [SvgIcon] struct for representing a rendered SVG Icon.
 pub mod svg;
-
-/// Error type for parsing SVGs with [usvg].
-pub type SvgError = usvg::Error;
 
 /// A simple icon widget to display SVG icons using [vello_svg] and [usvg].
 ///
@@ -48,7 +41,7 @@ impl Icon {
 impl Widget for Icon {
     fn render(
         &mut self,
-        scene: &mut Scene,
+        scene: &mut dyn Scene,
         _: &mut dyn Theme,
         layout_node: &LayoutNode,
         _: &AppInfo,
@@ -66,7 +59,7 @@ impl Widget for Icon {
             layout_node.layout.location.y as f64,
         ));
 
-        scene.append(icon.scene(), Some(affine));
+        scene.draw_svg(icon.tree(), Some(affine));
     }
 
     fn layout_style(&self) -> StyleNode {

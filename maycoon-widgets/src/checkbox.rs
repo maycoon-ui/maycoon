@@ -4,9 +4,8 @@ use maycoon_core::app::update::Update;
 use maycoon_core::layout;
 use maycoon_core::layout::{Dimension, LayoutNode, LayoutStyle, LengthPercentageAuto, StyleNode};
 use maycoon_core::signal::MaybeSignal;
-use maycoon_core::vg::Scene;
-use maycoon_core::vg::kurbo::{Affine, Rect, RoundedRect, RoundedRectRadii, Stroke};
-use maycoon_core::vg::peniko::{Brush, Fill};
+use maycoon_core::vgi::kurbo::{Rect, RoundedRect, RoundedRectRadii, Stroke};
+use maycoon_core::vgi::{Brush, Scene};
 use maycoon_core::widget::{Widget, WidgetLayoutExt};
 use maycoon_core::window::{ElementState, MouseButton};
 use maycoon_theme::id::WidgetId;
@@ -71,7 +70,7 @@ impl WidgetLayoutExt for Checkbox {
 impl Widget for Checkbox {
     fn render(
         &mut self,
-        scene: &mut Scene,
+        scene: &mut dyn Scene,
         theme: &mut dyn Theme,
         layout_node: &LayoutNode,
         _: &AppInfo,
@@ -91,11 +90,10 @@ impl Widget for Checkbox {
             theme.defaults().interactive().inactive()
         };
 
-        scene.stroke(
-            &Stroke::new(3.0),
-            Affine::default(),
+        scene.draw_rounded_rect(
             &Brush::Solid(color),
             None,
+            Some(&Stroke::new(3.0)),
             &RoundedRect::from_rect(
                 Rect::new(
                     layout_node.layout.location.x as f64,
@@ -108,10 +106,9 @@ impl Widget for Checkbox {
         );
 
         if checked {
-            scene.fill(
-                Fill::NonZero,
-                Affine::default(),
+            scene.draw_rounded_rect(
                 &Brush::Solid(color),
+                None,
                 None,
                 &RoundedRect::from_rect(
                     Rect::new(

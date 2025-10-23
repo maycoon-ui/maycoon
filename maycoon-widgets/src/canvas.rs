@@ -2,7 +2,7 @@ use maycoon_core::app::context::AppContext;
 use maycoon_core::app::info::AppInfo;
 use maycoon_core::app::update::Update;
 use maycoon_core::layout::{LayoutNode, LayoutStyle, StyleNode};
-use maycoon_core::vg::Scene;
+use maycoon_core::vgi::Scene;
 use maycoon_core::widget::Widget;
 use maycoon_theme::id::WidgetId;
 use maycoon_theme::theme::Theme;
@@ -14,19 +14,19 @@ use maycoon_theme::theme::Theme;
 /// ### Theming
 /// The canvas cannot be themed, since it does not draw something on itself.
 pub struct Canvas {
-    painter: Box<dyn FnMut(&mut Scene, &AppInfo)>,
+    painter: Box<dyn FnMut(&mut dyn Scene, &AppInfo)>,
 }
 
 impl Canvas {
     /// Create a new Canvas widget from a painter function.
-    pub fn new(painter: impl FnMut(&mut Scene, &AppInfo) + 'static) -> Self {
+    pub fn new(painter: impl FnMut(&mut dyn Scene, &AppInfo) + 'static) -> Self {
         Self {
             painter: Box::new(painter),
         }
     }
 
     /// Set a painter function and return itself.
-    pub fn with_painter(mut self, painter: impl FnMut(&mut Scene, &AppInfo) + 'static) -> Self {
+    pub fn with_painter(mut self, painter: impl FnMut(&mut dyn Scene, &AppInfo) + 'static) -> Self {
         self.painter = Box::new(painter);
         self
     }
@@ -35,17 +35,18 @@ impl Canvas {
 impl Widget for Canvas {
     fn render(
         &mut self,
-        scene: &mut Scene,
+        scene: &mut dyn Scene,
         _: &mut dyn Theme,
         _: &LayoutNode,
         info: &AppInfo,
         _: AppContext,
     ) {
-        let mut canvas = Scene::new();
+        let mut canvas = scene.dyn_clone();
+        canvas.reset();
 
-        (self.painter)(&mut canvas, info);
+        (self.painter)(canvas.as_mut(), info);
 
-        scene.append(&canvas, None);
+        scene.append(canvas.as_ref(), None);
     }
 
     fn layout_style(&self) -> StyleNode {

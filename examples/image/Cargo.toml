@@ -5,5 +5,5 @@ edition = "2024"
 publish = false
 
 [dependencies]
-image = "0.25"
+image = "0.25.8"
 maycoon = { path = "../.." }

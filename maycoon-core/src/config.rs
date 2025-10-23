@@ -1,34 +1,33 @@
 use nalgebra::{Point2, Vector2};
 use std::num::NonZeroUsize;
 pub use vello::AaConfig;
-use vello::util::DeviceHandle;
-use wgpu_types::PresentMode;
 pub use winit::window::{
     BadIcon, Cursor, CursorIcon, CustomCursor, Icon as WindowIcon, WindowButtons, WindowLevel,
 };
 
+use crate::vgi::VectorGraphicsInterface;
 use maycoon_theme::theme::Theme;
 
 /// Maycoon Application Configuration Structure.
 #[derive(Clone, Debug)]
-pub struct MayConfig<T: Theme> {
+pub struct MayConfig<'a, T: Theme, V: VectorGraphicsInterface<'a>> {
     /// Window Configuration
     pub window: WindowConfig,
-    /// Renderer Configuration.
-    pub render: RenderConfig,
     /// Task Runner Configuration. If [None] (default), the task runner won't be enabled.
     pub tasks: Option<TasksConfig>,
     /// Theme of the Application.
     pub theme: T,
+    /// The configuration of the vector graphics interface.
+    pub graphics: V::Config,
 }
 
-impl<T: Default + Theme> Default for MayConfig<T> {
+impl<'a, T: Default + Theme, V: VectorGraphicsInterface<'a>> Default for MayConfig<'a, T, V> {
     fn default() -> Self {
         Self {
             window: WindowConfig::default(),
-            render: RenderConfig::default(),
             tasks: None,
             theme: T::default(),
+            graphics: V::Config::default(),
         }
     }
 }
@@ -101,44 +100,6 @@ impl Default for WindowConfig {
             icon: None,
             cursor: Cursor::default(),
             close_on_request: true,
-        }
-    }
-}
-
-/// Renderer configuration.
-#[derive(Clone, Debug)]
-pub struct RenderConfig {
-    /// The antialiasing config
-    pub antialiasing: AaConfig,
-    /// If the backend should use the CPU for most drawing operations.
-    ///
-    /// **NOTE:** The GPU is still used during rasterization.
-    pub cpu: bool,
-    /// The presentation mode of the window/surface.
-    pub present_mode: PresentMode,
-    /// The number of threads to use for initialization in [vello].
-    pub init_threads: Option<NonZeroUsize>,
-    /// The selector function to determine which device to use for rendering. Defaults to using the first device found.
-    pub device_selector: fn(&Vec<DeviceHandle>) -> usize,
-    /// The maximum frame latency for the surface. Defaults to 2.
-    pub max_frame_latency: u32,
-}
-
-impl Default for RenderConfig {
-    fn default() -> Self {
-        Self {
-            antialiasing: AaConfig::Area,
-            cpu: false,
-            present_mode: PresentMode::AutoNoVsync,
-            init_threads: None,
-            device_selector: |devices| {
-                if !devices.is_empty() {
-                    0
-                } else {
-                    panic!("No devices found");
-                }
-            },
-            max_frame_latency: 2,
         }
     }
 }

@@ -3,7 +3,7 @@ use maycoon_core::app::info::AppInfo;
 use maycoon_core::app::update::Update;
 use maycoon_core::layout::{LayoutNode, LayoutStyle, StyleNode};
 use maycoon_core::tasks;
-use maycoon_core::vg::Scene;
+use maycoon_core::vgi::Scene;
 use maycoon_core::widget::Widget;
 use maycoon_theme::id::WidgetId;
 use maycoon_theme::theme::Theme;
@@ -61,7 +61,7 @@ impl<T: Send + 'static, W: Widget, F: Fn(Option<T>) -> W> WidgetFetcher<T, W, F>
 impl<T: Send + 'static, W: Widget, F: Fn(Option<T>) -> W> Widget for WidgetFetcher<T, W, F> {
     fn render(
         &mut self,
-        scene: &mut Scene,
+        scene: &mut dyn Scene,
         theme: &mut dyn Theme,
         layout_node: &LayoutNode,
         info: &AppInfo,
