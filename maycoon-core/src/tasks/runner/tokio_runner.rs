@@ -44,13 +44,13 @@ impl TokioRunner {
     }
 
     /// Spawns the given blocking function.
-    pub(crate) async fn spawn_blocking<F, R>(&self, fut: F) -> R
+    pub(crate) async fn spawn_blocking<F, R>(&self, f: F) -> R
     where
         F: FnOnce() -> R + Send + 'static,
         R: Send + 'static,
     {
         self.rt
-            .spawn_blocking(fut)
+            .spawn_blocking(f)
             .await
             .expect("Failed to spawn task")
     }

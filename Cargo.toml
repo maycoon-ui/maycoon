@@ -57,6 +57,9 @@ include-noto-sans = ["maycoon-core/include-noto-sans"]
 # Use the `tokio` runtime for running tasks inside a task runner.
 tokio-runner = ["maycoon-core/tokio-runner"]
 
+# Use the `futures` crate's runtime for running tasks inside a task runner.
+futures-runner = ["maycoon-core/futures-runner"]
+
 # Enables structures and widgets for working with SVGs.
 svg = ["maycoon-core/svg", "maycoon-widgets/svg"]
 

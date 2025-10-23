@@ -4,14 +4,21 @@ use crate::config::TasksConfig;
 #[cfg(feature = "tokio-runner")]
 pub mod tokio_runner;
 
+#[cfg(feature = "futures-runner")]
+pub mod futures_runner;
+
 /// The task runner enum.
 ///
 /// Contains the [TokioRunner](tokio_runner::TokioRunner) if the 'tokio-runner' feature is enabled.
 #[derive(Debug)]
 pub enum TaskRunner {
-    /// The tokio task runner.
+    /// The [tokio] task runner.
     #[cfg(feature = "tokio-runner")]
     Tokio(tokio_runner::TokioRunner),
+
+    /// The [futures] task runner.
+    #[cfg(feature = "futures-runner")]
+    Futures(futures_runner::FuturesRunner),
 
     /// No task runner selected. Panics on any method call, but blocks on futures.
     ///
@@ -26,6 +33,12 @@ impl TaskRunner {
         {
             tracing::info!("creating tokio task runner");
             Self::Tokio(tokio_runner::TokioRunner::new(_config))
+        }
+
+        #[cfg(feature = "futures-runner")]
+        {
+            tracing::info!("creating futures task runner");
+            Self::Futures(futures_runner::FuturesRunner::new(_config))
         }
 
         #[cfg(not(feature = "tokio-runner"))]
@@ -43,6 +56,10 @@ impl TaskRunner {
         match self {
             #[cfg(feature = "tokio-runner")]
             TaskRunner::Tokio(runner) => runner.block_on(_fut),
+
+            #[cfg(feature = "futures-runner")]
+            TaskRunner::Futures(runner) => runner.block_on(_fut),
+
             TaskRunner::None => {
                 panic!("No task runner feature selected! Please select one (e.g. 'tokio-runner').")
             },
@@ -58,6 +75,10 @@ impl TaskRunner {
         match self {
             #[cfg(feature = "tokio-runner")]
             TaskRunner::Tokio(runner) => runner.spawn(_fut).await,
+
+            #[cfg(feature = "futures-runner")]
+            TaskRunner::Futures(runner) => runner.spawn(_fut).await,
+
             TaskRunner::None => {
                 panic!("No task runner feature selected! Please select one (e.g. 'tokio-runner').")
             },
@@ -73,6 +94,10 @@ impl TaskRunner {
         match self {
             #[cfg(feature = "tokio-runner")]
             TaskRunner::Tokio(runner) => runner.spawn_blocking(_fut).await,
+
+            #[cfg(feature = "futures-runner")]
+            TaskRunner::Futures(runner) => runner.spawn_blocking(_fut).await,
+
             TaskRunner::None => {
                 panic!("No task runner feature selected! Please select one (e.g. 'tokio-runner').")
             },
