@@ -5,6 +5,6 @@ edition = "2024"
 publish = false
 
 [dependencies]
-maycoon = { path = "../.." }
+maycoon = { path = "../..", features = ["tokio-runner"] }
 surf = "2.3.2"
 serde = { version = "1", features = ["derive"] }
