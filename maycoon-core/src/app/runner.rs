@@ -43,14 +43,6 @@ impl<'a, T: Theme, V: VectorGraphicsInterface<'a>> MayRunner<'a, T, V> {
         self
     }
 
-    /// Loads a new system font into the font context.
-    ///
-    /// See [FontContext::load_system] for more.
-    pub fn with_system_font(mut self, name: impl ToString, postscript_name: impl ToString) -> Self {
-        self.font_ctx.load_system(name, postscript_name);
-        self
-    }
-
     /// Set the font context. Can be used to configure fonts.
     pub fn with_font_context(mut self, font_ctx: FontContext) -> Self {
         self.font_ctx = font_ctx;

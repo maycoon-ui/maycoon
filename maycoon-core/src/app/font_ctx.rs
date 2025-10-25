@@ -19,9 +19,9 @@ impl FontContext {
     ///
     /// Make sure to load the default font via [FontContext::load],
     /// before passing this context to the application runner.
-    pub fn new(default: String) -> Self {
+    pub fn new(default: impl ToString) -> Self {
         Self {
-            default,
+            default: default.to_string(),
             fonts: IndexMap::new(),
         }
     }
@@ -33,36 +33,6 @@ impl FontContext {
     pub fn load(&mut self, name: impl ToString, font: FontData) -> Option<FontData> {
         tracing::trace!("loading font named {}", name.to_string());
         self.fonts.insert(name.to_string(), font)
-    }
-
-    /// Loads a system font into the font context.
-    /// The provided name must match the postscript name of the font.
-    ///
-    /// If a font with the same name is already loaded, it will be overwritten and the old font will be returned.
-    ///
-    /// Returns `None` if the font could not be loaded.
-    ///
-    /// **NOTE:** Not every postscript font is available on every system.
-    #[instrument(level = "info", skip_all, fields(name = name.to_string(), postscript = postscript_name.to_string()))]
-    pub fn load_system(
-        &mut self,
-        name: impl ToString,
-        postscript_name: impl ToString,
-    ) -> Option<()> {
-        let name = name.to_string();
-        let postscript_name = postscript_name.to_string();
-
-        // TODO: find a more lightweight solution to finding system source fonts
-        let font = font_kit::source::SystemSource::new()
-            .select_by_postscript_name(postscript_name.as_str())
-            .ok()?
-            .load()
-            .ok()?
-            .copy_font_data()?;
-
-        self.load(name, FontData::new(Blob::new(font), 0));
-
-        Some(())
     }
 
     /// Set the default font.

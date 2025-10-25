@@ -14,7 +14,6 @@ homepage.workspace = true
 winit = "0.30.12"
 taffy = "0.9.1"
 bitflags = "2.9.4"
-font-kit = "0.14.3"
 arc-swap = "1.7.1"
 parking_lot = "0.12.5"
 pollster = "0.4.0"
