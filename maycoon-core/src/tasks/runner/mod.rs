@@ -114,13 +114,15 @@ impl<T: Unpin> Task<T> {
 impl<T: Unpin> Future for Task<T> {
     type Output = T;
 
-    fn poll(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Self::Output> {
+    fn poll(self: Pin<&mut Self>, _cx: &mut Context<'_>) -> Poll<Self::Output> {
         match self.get_mut() {
             #[cfg(feature = "tokio-runner")]
             Task::Tokio(task) => {
                 let pinned = Pin::new(task);
 
-                pinned.poll(cx).map(|res| res.expect("Failed to poll task"))
+                pinned
+                    .poll(_cx)
+                    .map(|res| res.expect("Failed to poll task"))
             },
 
             Task::None(_) => {
