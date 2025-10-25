@@ -1,5 +1,5 @@
 use crate::config::TasksConfig;
-use crate::tasks::runner::TaskRunner;
+use crate::tasks::runner::{Task, TaskRunner};
 use std::sync::OnceLock;
 
 /// Contains the [TaskRunner] struct.
@@ -39,19 +39,19 @@ where
 }
 
 /// Spawn the given future on the task runner. Panics if the task runner is not initialized yet.
-pub async fn spawn<F>(fut: F) -> F::Output
+pub fn spawn<F>(fut: F) -> Task<F::Output>
 where
     F: Future + Send + 'static,
     F::Output: Send + 'static,
 {
-    runner().spawn(fut).await
+    runner().spawn(fut)
 }
 
 /// Spawn the given blocking function on the task runner. Panics if the task runner is not initialized yet.
-pub async fn spawn_blocking<F, R>(fut: F) -> R
+pub fn spawn_blocking<F, R>(fut: F) -> Task<R>
 where
     F: FnOnce() -> R + Send + 'static,
     R: Send + 'static,
 {
-    runner().spawn_blocking(fut).await
+    runner().spawn_blocking(fut)
 }

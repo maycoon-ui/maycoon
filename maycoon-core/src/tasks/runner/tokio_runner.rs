@@ -1,5 +1,6 @@
 use crate::config::TasksConfig;
 use tokio::runtime::{Builder, Runtime};
+use tokio::task::JoinHandle;
 
 /// A task runner using [tokio] as runtime.
 #[derive(Debug)]
@@ -10,11 +11,7 @@ pub struct TokioRunner {
 impl TokioRunner {
     /// Initializes the tokio task runner with the given config.
     pub(crate) fn new(config: TasksConfig) -> Self {
-        let mut builder = if config.workers.get() == 1 {
-            Builder::new_current_thread()
-        } else {
-            Builder::new_multi_thread()
-        };
+        let mut builder = Builder::new_multi_thread();
 
         Self {
             rt: builder
@@ -35,23 +32,20 @@ impl TokioRunner {
     }
 
     /// Spawns the given future.
-    pub(crate) async fn spawn<F>(&self, fut: F) -> F::Output
+    pub(crate) fn spawn<F>(&self, fut: F) -> JoinHandle<F::Output>
     where
         F: Future + Send + 'static,
         F::Output: Send + 'static,
     {
-        self.rt.spawn(fut).await.expect("Failed to spawn task")
+        self.rt.spawn(fut)
     }
 
     /// Spawns the given blocking function.
-    pub(crate) async fn spawn_blocking<F, R>(&self, f: F) -> R
+    pub(crate) fn spawn_blocking<F, R>(&self, f: F) -> JoinHandle<R>
     where
         F: FnOnce() -> R + Send + 'static,
         R: Send + 'static,
     {
-        self.rt
-            .spawn_blocking(f)
-            .await
-            .expect("Failed to spawn task")
+        self.rt.spawn_blocking(f)
     }
 }
