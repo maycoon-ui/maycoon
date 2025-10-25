@@ -1,4 +1,5 @@
 use crate::config::TasksConfig;
+use std::marker::PhantomData;
 use std::pin::Pin;
 use std::task::{Context, Poll};
 
@@ -93,24 +94,24 @@ pub enum Task<T> {
     #[cfg(feature = "tokio-runner")]
     Tokio(tokio::task::JoinHandle<T>),
     /// Not a real task. Will panic on poll.
-    None,
+    None(PhantomData<T>),
 }
 
-impl<T> Task<T> {
+impl<T: Unpin> Task<T> {
     /// Returns true if the task is ready (completed).
     pub fn is_ready(&self) -> bool {
         match self {
             #[cfg(feature = "tokio-runner")]
             Task::Tokio(task) => task.is_finished(),
 
-            Task::None => {
+            Task::None(_) => {
                 panic!("No task runner feature selected! Please select one (e.g. 'tokio-runner').")
             },
         }
     }
 }
 
-impl<T> Future for Task<T> {
+impl<T: Unpin> Future for Task<T> {
     type Output = T;
 
     fn poll(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Self::Output> {
@@ -122,7 +123,7 @@ impl<T> Future for Task<T> {
                 pinned.poll(cx).map(|res| res.expect("Failed to poll task"))
             },
 
-            Task::None => {
+            Task::None(_) => {
                 panic!("No task runner feature selected! Please select one (e.g. 'tokio-runner').")
             },
         }

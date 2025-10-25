@@ -25,14 +25,14 @@ use std::future::Future;
 ///
 /// ### Theming
 /// The widget itself only draws the underlying widget, so theming is useless.
-pub struct WidgetFetcher<T: Send + 'static, W: Widget, F: Fn(Option<T>) -> W> {
+pub struct WidgetFetcher<T: Send + Unpin + 'static, W: Widget, F: Fn(Option<T>) -> W> {
     task: Option<Task<T>>,
     render: F,
     widget: Option<W>,
     update: Update,
 }
 
-impl<T: Send + 'static, W: Widget, F: Fn(Option<T>) -> W> WidgetFetcher<T, W, F> {
+impl<T: Send + Unpin + 'static, W: Widget, F: Fn(Option<T>) -> W> WidgetFetcher<T, W, F> {
     /// Creates a new [WidgetFetcher] with parameters:
     /// - `future`: The future to execute.
     /// - `update`: The update to trigger when the data is updated (from loading to done).
@@ -66,7 +66,9 @@ impl<T: Send + 'static, W: Widget, F: Fn(Option<T>) -> W> WidgetFetcher<T, W, F>
     }
 }
 
-impl<T: Send + 'static, W: Widget, F: Fn(Option<T>) -> W> Widget for WidgetFetcher<T, W, F> {
+impl<T: Send + Unpin + 'static, W: Widget, F: Fn(Option<T>) -> W> Widget
+    for WidgetFetcher<T, W, F>
+{
     fn render(
         &mut self,
         scene: &mut dyn Scene,
