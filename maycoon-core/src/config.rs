@@ -10,7 +10,7 @@ use maycoon_theme::theme::Theme;
 
 /// Maycoon Application Configuration Structure.
 #[derive(Clone, Debug)]
-pub struct MayConfig<'a, T: Theme, V: VectorGraphicsInterface<'a>> {
+pub struct MayConfig<T: Theme, V: VectorGraphicsInterface> {
     /// Window Configuration
     pub window: WindowConfig,
     /// Task Runner Configuration. If [None] (default), the task runner won't be enabled.
@@ -21,7 +21,7 @@ pub struct MayConfig<'a, T: Theme, V: VectorGraphicsInterface<'a>> {
     pub graphics: V::Config,
 }
 
-impl<'a, T: Default + Theme, V: VectorGraphicsInterface<'a>> Default for MayConfig<'a, T, V> {
+impl<T: Default + Theme, V: VectorGraphicsInterface> Default for MayConfig<T, V> {
     fn default() -> Self {
         Self {
             window: WindowConfig::default(),

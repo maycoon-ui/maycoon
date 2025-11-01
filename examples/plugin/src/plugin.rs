@@ -11,23 +11,23 @@ use std::time::Instant;
 
 pub struct MyPlugin;
 
-impl<'a, T: Theme, V: VectorGraphicsInterface<'a>> Plugin<'a, T, V> for MyPlugin {
+impl<T: Theme, V: VectorGraphicsInterface> Plugin<T, V> for MyPlugin {
     fn name(&self) -> &'static str {
         "my_plugin"
     }
 
-    fn on_register(&mut self, _manager: &mut PluginManager<'a, T, V>) {
+    fn on_register(&mut self, _manager: &mut PluginManager<T, V>) {
         println!("Hello World!");
     }
 
-    fn on_unregister(&mut self, _manager: &mut PluginManager<'a, T, V>) {
+    fn on_unregister(&mut self, _manager: &mut PluginManager<T, V>) {
         println!("Bye World!");
     }
 
     fn on_window_event(
         &mut self,
         event: &mut WindowEvent,
-        _config: &mut MayConfig<'a, T, V>,
+        _config: &mut MayConfig<T, V>,
         _window: &Arc<Window>,
         _scene: &mut V::Scene,
         _taffy: &mut TaffyTree,

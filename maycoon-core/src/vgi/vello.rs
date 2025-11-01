@@ -29,15 +29,15 @@ use winit::window::Window;
 /// Requires the `vello-vg` feature (enabled by default).
 ///
 /// Uses [vello] and [wgpu](https://crates.io/crates/wgpu) to render vector graphics.
-pub struct VectorGraphicsInterface<'a> {
+pub struct VectorGraphicsInterface {
     config: VectorGraphicsConfig,
     context: RenderContext,
     renderer: Option<Renderer>,
-    surface: Option<RenderSurface<'a>>,
+    surface: Option<RenderSurface<'static>>,
     device: usize,
 }
 
-impl<'a> vgi::VectorGraphicsInterface<'a> for VectorGraphicsInterface<'a> {
+impl vgi::VectorGraphicsInterface for VectorGraphicsInterface {
     type Error = Error;
     type Scene = Scene;
     type Config = VectorGraphicsConfig;
@@ -185,7 +185,7 @@ impl<'a> vgi::VectorGraphicsInterface<'a> for VectorGraphicsInterface<'a> {
     }
 }
 
-impl Debug for VectorGraphicsInterface<'_> {
+impl Debug for VectorGraphicsInterface {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("VectorGraphicsInterface")
             .field("config", &self.config)

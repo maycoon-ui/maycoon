@@ -15,9 +15,9 @@ use maycoon::widgets::text::Text;
 
 struct MyApp;
 
-impl<'a> Application<'a> for MyApp {
+impl Application for MyApp {
     type Theme = CelesteTheme;
-    type Graphics = DefaultGraphics<'a>;
+    type Graphics = DefaultGraphics;
     type State = ();
 
     fn build(context: AppContext, _: Self::State) -> impl Widget {
@@ -35,7 +35,7 @@ impl<'a> Application<'a> for MyApp {
         })
     }
 
-    fn config(&self) -> MayConfig<'a, Self::Theme, Self::Graphics> {
+    fn config(&self) -> MayConfig<Self::Theme, Self::Graphics> {
         MayConfig::default()
     }
 }

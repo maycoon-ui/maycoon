@@ -16,20 +16,20 @@ fn main() {
 
 struct MyApp;
 
-impl<'a> Application<'a> for MyApp {
+impl Application for MyApp {
     type Theme = CelesteTheme;
-    type Graphics = DefaultGraphics<'a>;
+    type Graphics = DefaultGraphics;
     type State = ();
 
     fn build(_: AppContext, _: Self::State) -> impl Widget {
         Text::new("Drop a file!".to_string())
     }
 
-    fn config(&self) -> MayConfig<'a, Self::Theme, Self::Graphics> {
+    fn config(&self) -> MayConfig<Self::Theme, Self::Graphics> {
         MayConfig::default()
     }
 
-    fn plugins(&self) -> PluginManager<'a, Self::Theme, Self::Graphics> {
+    fn plugins(&self) -> PluginManager<Self::Theme, Self::Graphics> {
         let mut plugins = PluginManager::new();
 
         plugins.register(MyPlugin);

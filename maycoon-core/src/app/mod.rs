@@ -30,7 +30,7 @@ pub mod runner;
 /// The main application interface.
 ///
 /// Contains basic functions for the [MayRunner] to create and run an application.
-pub trait Application<'a>: Sized {
+pub trait Application: Sized {
     /// The theme of the application and its widgets.
     ///
     /// See [maycoon_theme::theme] for built-in themes.
@@ -40,7 +40,7 @@ pub trait Application<'a>: Sized {
     /// The vector graphics interface to use for rendering.
     ///
     /// See [VectorGraphicsInterface] for more.
-    type Graphics: VectorGraphicsInterface<'a>;
+    type Graphics: VectorGraphicsInterface;
 
     /// The global state of the application.
     type State;
@@ -51,10 +51,10 @@ pub trait Application<'a>: Sized {
     fn build(context: AppContext, state: Self::State) -> impl Widget;
 
     /// Returns the [MayConfig] for the application.
-    fn config(&self) -> MayConfig<'a, Self::Theme, Self::Graphics>;
+    fn config(&self) -> MayConfig<Self::Theme, Self::Graphics>;
 
     /// Builds and returns the [PluginManager] for the application.
-    fn plugins(&self) -> PluginManager<'a, Self::Theme, Self::Graphics> {
+    fn plugins(&self) -> PluginManager<Self::Theme, Self::Graphics> {
         PluginManager::new()
     }
 
@@ -66,7 +66,7 @@ pub trait Application<'a>: Sized {
 
         tracing::info!("launching application runner with {config:?}");
 
-        MayRunner::<'a, Self::Theme, Self::Graphics>::new(config).run(
+        MayRunner::<Self::Theme, Self::Graphics>::new(config).run(
             state,
             Self::build,
             self.plugins(),

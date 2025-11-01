@@ -9,7 +9,7 @@ use crate::style::{DefaultStyles, Style};
 pub mod celeste;
 
 /// Base trait for all themes.
-pub trait Theme: Debug {
+pub trait Theme: Debug + 'static {
     /// Return the [Style] of the given widget using its ID.
     /// Returns [None] if the theme does not have styles for the given widget.
     /// In that case, you should use [Theme::defaults] to get widget style defaults.

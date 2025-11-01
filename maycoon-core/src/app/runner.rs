@@ -14,14 +14,14 @@ use winit::event_loop::EventLoopBuilder;
 use winit::window::WindowAttributes;
 
 /// The core Application structure.
-pub struct MayRunner<'a, T: Theme, V: VectorGraphicsInterface<'a>> {
-    config: MayConfig<'a, T, V>,
+pub struct MayRunner<T: Theme, V: VectorGraphicsInterface> {
+    config: MayConfig<T, V>,
     font_ctx: FontContext,
 }
 
-impl<'a, T: Theme, V: VectorGraphicsInterface<'a>> MayRunner<'a, T, V> {
+impl<T: Theme, V: VectorGraphicsInterface> MayRunner<T, V> {
     /// Create a new App with the given [MayConfig].
-    pub fn new(config: MayConfig<'a, T, V>) -> Self {
+    pub fn new(config: MayConfig<T, V>) -> Self {
         // init task runner
         if let Some(config) = &config.tasks {
             tracing::info!("initializing task runner");
@@ -51,7 +51,7 @@ impl<'a, T: Theme, V: VectorGraphicsInterface<'a>> MayRunner<'a, T, V> {
 
     /// Run the application with given widget and state.
     #[instrument(level = "info", skip_all)]
-    pub fn run<S, W, F>(mut self, state: S, builder: F, mut plugins: PluginManager<'a, T, V>)
+    pub fn run<S, W, F>(mut self, state: S, builder: F, mut plugins: PluginManager<T, V>)
     where
         W: Widget,
         F: Fn(AppContext, S) -> W,

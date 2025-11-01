@@ -28,12 +28,12 @@ pub mod vello;
 ///
 /// Requires the `vello-vg` feature (enabled by default).
 #[cfg(feature = "vello-vg")]
-pub type DefaultGraphics<'a> = vello::VectorGraphicsInterface<'a>;
+pub type DefaultGraphics = vello::VectorGraphicsInterface;
 
 /// A trait describing ways to render vector graphics.
 ///
 /// This is a universal interface for 2D vector graphics rendering.
-pub trait VectorGraphicsInterface<'a>: Debug {
+pub trait VectorGraphicsInterface: Debug + 'static {
     /// The error used by most graphics operations.
     type Error: Error;
     /// A direct interface for drawing vector graphics using this interface.

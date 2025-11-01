@@ -23,14 +23,14 @@ use crate::widget::Widget;
 use maycoon_theme::theme::Theme;
 
 /// The core application handler. You should use [MayApp](crate::app::MayApp) instead for running applications.
-pub struct AppHandler<'a, T, W, S, F, V>
+pub struct AppHandler<T, W, S, F, V>
 where
     T: Theme,
     W: Widget,
     F: Fn(AppContext, S) -> W,
-    V: VectorGraphicsInterface<'a>,
+    V: VectorGraphicsInterface,
 {
-    config: MayConfig<'a, T, V>,
+    config: MayConfig<T, V>,
     attrs: WindowAttributes,
     window: Option<Arc<Window>>,
     scene: V::Scene,
@@ -42,26 +42,26 @@ where
     info: AppInfo,
     update: UpdateManager,
     last_update: Instant,
-    plugins: PluginManager<'a, T, V>,
+    plugins: PluginManager<T, V>,
     graphics: V,
 }
 
-impl<'a, T, W, S, F, V> AppHandler<'a, T, W, S, F, V>
+impl<T, W, S, F, V> AppHandler<T, W, S, F, V>
 where
     T: Theme,
     W: Widget,
     F: Fn(AppContext, S) -> W,
-    V: VectorGraphicsInterface<'a>,
+    V: VectorGraphicsInterface,
 {
     /// Create a new handler with given window attributes, config, widget and state.
     pub fn new(
         attrs: WindowAttributes,
-        config: MayConfig<'a, T, V>,
+        config: MayConfig<T, V>,
         builder: F,
         state: S,
         font_context: FontContext,
         update: UpdateManager,
-        plugins: PluginManager<'a, T, V>,
+        plugins: PluginManager<T, V>,
     ) -> Self {
         tracing::trace!("creating taffy tree");
         let mut taffy = TaffyTree::with_capacity(16);
@@ -320,12 +320,12 @@ where
     }
 }
 
-impl<'a, T, W, S, F, V> ApplicationHandler for AppHandler<'a, T, W, S, F, V>
+impl<T, W, S, F, V> ApplicationHandler for AppHandler<T, W, S, F, V>
 where
     T: Theme,
     W: Widget,
     F: Fn(AppContext, S) -> W,
-    V: VectorGraphicsInterface<'a>,
+    V: VectorGraphicsInterface,
 {
     #[instrument(level = "trace", skip_all)]
     fn resumed(&mut self, event_loop: &ActiveEventLoop) {
