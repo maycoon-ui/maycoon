@@ -42,5 +42,8 @@ pub mod plugin;
 /// Contains the universal vector graphics interface.
 pub mod vgi;
 
+/// Contains conditional types to provide generic platform specific structures.
+pub mod platform;
+
 #[cfg(feature = "include-noto-sans")]
 pub(crate) const DEFAULT_FONT: &[u8] = include_bytes!("NotoSans.ttf");
