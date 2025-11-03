@@ -15,8 +15,6 @@ pub enum Ref<'a, T> {
     Arc(Arc<T>),
     /// A [RwLockReadGuard] reference.
     ReadGuard(RwLockReadGuard<'a, T>),
-    /// A [parking_lot::RwLockReadGuard] reference.
-    ParkingLotReadGuard(parking_lot::RwLockReadGuard<'a, T>),
 }
 
 impl<'a, T> Deref for Ref<'a, T> {
@@ -28,7 +26,6 @@ impl<'a, T> Deref for Ref<'a, T> {
             Ref::Borrow(value) => value,
             Ref::Arc(value) => value,
             Ref::ReadGuard(value) => value,
-            Ref::ParkingLotReadGuard(value) => value,
         }
     }
 }
@@ -57,12 +54,6 @@ impl<'a, T> From<RwLockReadGuard<'a, T>> for Ref<'a, T> {
     }
 }
 
-impl<'a, T> From<parking_lot::RwLockReadGuard<'a, T>> for Ref<'a, T> {
-    fn from(value: parking_lot::RwLockReadGuard<'a, T>) -> Self {
-        Ref::ParkingLotReadGuard(value)
-    }
-}
-
 /// Represents a mutable reference to a value of type `T`.
 ///
 /// Due to Rust's temporal borrowing rules,
@@ -73,8 +64,6 @@ pub enum MutRef<'a, T> {
     Borrow(&'a mut T),
     /// A [RwLockWriteGuard] mutable reference.
     WriteGuard(RwLockWriteGuard<'a, T>),
-    /// A [parking_lot::RwLockWriteGuard] mutable reference.
-    ParkingLotWriteGuard(parking_lot::RwLockWriteGuard<'a, T>),
 }
 
 impl<'a, T> Deref for MutRef<'a, T> {
@@ -84,7 +73,6 @@ impl<'a, T> Deref for MutRef<'a, T> {
         match self {
             MutRef::Borrow(value) => value,
             MutRef::WriteGuard(value) => value,
-            MutRef::ParkingLotWriteGuard(value) => value,
         }
     }
 }
@@ -94,7 +82,6 @@ impl<'a, T> DerefMut for MutRef<'a, T> {
         match self {
             MutRef::Borrow(value) => value,
             MutRef::WriteGuard(value) => value,
-            MutRef::ParkingLotWriteGuard(value) => value,
         }
     }
 }
@@ -108,11 +95,5 @@ impl<'a, T> From<&'a mut T> for MutRef<'a, T> {
 impl<'a, T> From<RwLockWriteGuard<'a, T>> for MutRef<'a, T> {
     fn from(value: RwLockWriteGuard<'a, T>) -> Self {
         MutRef::WriteGuard(value)
-    }
-}
-
-impl<'a, T> From<parking_lot::RwLockWriteGuard<'a, T>> for MutRef<'a, T> {
-    fn from(value: parking_lot::RwLockWriteGuard<'a, T>) -> Self {
-        MutRef::ParkingLotWriteGuard(value)
     }
 }

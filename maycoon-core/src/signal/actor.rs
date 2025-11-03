@@ -1,7 +1,7 @@
 use crate::reference::{MutRef, Ref};
 use crate::signal::rw::RwSignal;
 use crate::signal::{Listener, Signal};
-use parking_lot::Mutex;
+use std::sync::Mutex;
 
 /// An action to run on the inner value.
 pub type Action<T> = Box<dyn Fn(MutRef<T>)>;
@@ -47,14 +47,22 @@ impl<T> ActorSignal<T> {
     ///
     /// The action will be run as soon as the inner value is unlocked and requires an update.
     pub fn act(&self, action: Action<T>) {
-        self.actions.lock().push(action);
+        self.actions
+            .lock()
+            .expect("Failed to lock on actions")
+            .push(action);
     }
 
     /// Run all pushed actions.
     ///
     /// This can cause deadlocks if [Self::is_locked] returns true.
     pub fn run(&self) {
-        for action in self.actions.lock().drain(..) {
+        for action in self
+            .actions
+            .lock()
+            .expect("Failed to lock on actions")
+            .drain(..)
+        {
             action(self.get_mut());
         }
     }
