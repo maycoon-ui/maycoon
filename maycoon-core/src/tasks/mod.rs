@@ -1,57 +1,73 @@
-use crate::config::TasksConfig;
-use crate::tasks::runner::{Task, TaskRunner};
+use crate::tasks::runner::TaskRunner;
+use crate::tasks::task::Task;
 use std::sync::OnceLock;
 
-/// Contains the [TaskRunner] struct.
+/// Contains the [TaskRunner] and related structures.
 pub mod runner;
 
+/// Contains the [Task] and [task::LocalTask] traits.
+pub mod task;
+
+/// Contains a dummy implementation of a waker. Used in [Task::take].
+pub mod waker;
+
+/// The global task runner.
 static RUNNER: OnceLock<TaskRunner> = OnceLock::new();
 
-/// Initializes the task runner with the given config. Panics if the task runner is already initialized.
-pub fn init(config: TasksConfig) {
-    RUNNER
-        .set(TaskRunner::new(config))
-        .expect("Task runner already initialized")
+/// Initializes the global task runner.
+///
+/// Panics if the task runner is already initialized.
+pub fn init(runner: TaskRunner) {
+    RUNNER.set(runner).expect("Task runner already initialized");
 }
 
-/// Try to get the global task runner. Returns [None] if the task runner is not initialized yet.
+/// Try to get the global task runner.
+/// Returns [None] if the task runner is not initialized.
 pub fn try_runner<'a>() -> Option<&'a TaskRunner> {
     RUNNER.get()
 }
 
-/// Get the global task runner. Panics if the task runner is not initialized yet.
-pub fn runner<'a>() -> &'a TaskRunner {
-    try_runner().expect("Task runner not initialized")
-}
-
-/// Block on the given future on the task runner. Panics if the task runner is not initialized yet.
+/// Get the global task runner.
 ///
-/// If the task runner is not initialized (e.g. if no task runner config is specified), [pollster] will be used.
-pub fn block_on<F>(fut: F) -> F::Output
-where
-    F: Future,
-{
-    if let Some(runner) = try_runner() {
-        runner.block_on(fut)
-    } else {
-        pollster::block_on(fut)
-    }
+/// Panics if the task runner is not initialized.
+pub fn runner<'a>() -> &'a TaskRunner {
+    RUNNER.get().expect("Task runner not initialized")
 }
 
-/// Spawn the given future on the task runner. Panics if the task runner is not initialized yet.
-pub fn spawn<F>(fut: F) -> Task<F::Output>
+/// Spawns a task on the global task runner.
+///
+/// If this actually spawns a task on a background task or just spawns a local task,
+/// depends on the [TaskRunner] type that is in use.
+pub fn spawn<Fut>(future: Fut) -> impl Task<Fut::Output>
 where
-    F: Future + Send + 'static,
-    F::Output: Send + 'static,
+    Fut: Future + Send + 'static,
+    Fut::Output: Send + 'static,
 {
-    runner().spawn(fut)
+    runner().spawn(future)
 }
 
-/// Spawn the given blocking function on the task runner. Panics if the task runner is not initialized yet.
-pub fn spawn_blocking<F, R>(fut: F) -> Task<R>
+/// Spawns a blocking task on the global task runner.
+///
+/// This will always spawn a task in a background thread,
+/// as local spawning would block the thread.
+///
+/// Only available on native platforms.
+#[cfg(native)]
+pub fn spawn_blocking<R, F>(func: F) -> impl Task<R>
 where
-    F: FnOnce() -> R + Send + 'static,
     R: Send + 'static,
+    F: FnOnce() -> R + Send + 'static,
 {
-    runner().spawn_blocking(fut)
+    runner().spawn_blocking(func)
+}
+
+/// Blocks the current thread on the global task runner until the future is ready.
+///
+/// Only available on native platforms.
+#[cfg(native)]
+pub fn block_on<Fut>(future: Fut) -> Fut::Output
+where
+    Fut: Future,
+{
+    runner().block_on(future)
 }

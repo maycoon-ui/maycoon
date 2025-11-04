@@ -22,13 +22,6 @@ pub struct MayRunner<T: Theme, V: VectorGraphicsInterface> {
 impl<T: Theme, V: VectorGraphicsInterface> MayRunner<T, V> {
     /// Create a new App with the given [MayConfig].
     pub fn new(config: MayConfig<T, V>) -> Self {
-        // init task runner
-        if let Some(config) = &config.tasks {
-            tracing::info!("initializing task runner");
-
-            crate::tasks::init(*config);
-        }
-
         Self {
             config,
             font_ctx: FontContext::default(),

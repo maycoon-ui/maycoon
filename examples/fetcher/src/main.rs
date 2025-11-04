@@ -1,7 +1,7 @@
 use maycoon::core::app::Application;
 use maycoon::core::app::context::AppContext;
 use maycoon::core::app::update::Update;
-use maycoon::core::config::{MayConfig, TasksConfig};
+use maycoon::core::config::MayConfig;
 use maycoon::core::vgi::DefaultGraphics;
 use maycoon::core::widget::Widget;
 use maycoon::theme::theme::celeste::CelesteTheme;
@@ -27,10 +27,7 @@ impl Application for MyApp {
     }
 
     fn config(&self) -> MayConfig<Self::Theme, Self::Graphics> {
-        MayConfig {
-            tasks: Some(TasksConfig::default()),
-            ..Default::default()
-        }
+        MayConfig::default()
     }
 }
 

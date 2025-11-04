@@ -1,5 +1,4 @@
 use nalgebra::{Point2, Vector2};
-use std::num::NonZeroUsize;
 pub use vello::AaConfig;
 pub use winit::window::{
     BadIcon, Cursor, CursorIcon, CustomCursor, Icon as WindowIcon, WindowButtons, WindowLevel,
@@ -13,8 +12,6 @@ use maycoon_theme::theme::Theme;
 pub struct MayConfig<T: Theme, V: VectorGraphicsInterface> {
     /// Window Configuration
     pub window: WindowConfig,
-    /// Task Runner Configuration. If [None] (default), the task runner won't be enabled.
-    pub tasks: Option<TasksConfig>,
     /// Theme of the Application.
     pub theme: T,
     /// The configuration of the vector graphics interface.
@@ -25,7 +22,6 @@ impl<T: Default + Theme, V: VectorGraphicsInterface> Default for MayConfig<T, V>
     fn default() -> Self {
         Self {
             window: WindowConfig::default(),
-            tasks: None,
             theme: T::default(),
             graphics: V::Config::default(),
         }
@@ -114,30 +110,4 @@ pub enum WindowMode {
     Borderless,
     /// Legacy Fullscreen mode.
     Fullscreen,
-}
-
-/// Configuration structure for the integrated [TaskRunner](crate::tasks::TaskRunner).
-///
-/// The task runner isn't used by maycoon internally, but can be used to spawn asynchronous tasks and integrate them with the UI.
-#[derive(Copy, Clone, Debug, Eq, PartialEq)]
-pub struct TasksConfig {
-    /// The stack size of each thread of the task runner thread pool. Defaults to 1 MB.
-    pub stack_size: usize,
-    /// The amount of worker threads of the task runner thread pool. Defaults to half of the available threads.
-    pub workers: NonZeroUsize,
-}
-
-impl Default for TasksConfig {
-    fn default() -> Self {
-        Self {
-            stack_size: 1024 * 1024, // 1 MB
-            workers: NonZeroUsize::new(
-                std::thread::available_parallelism()
-                    .expect("Failed to get available threads")
-                    .get()
-                    / 2,
-            )
-            .unwrap(),
-        }
-    }
 }

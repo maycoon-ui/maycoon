@@ -2,6 +2,7 @@ use crate::app::context::AppContext;
 use crate::app::runner::MayRunner;
 use crate::config::MayConfig;
 use crate::plugin::PluginManager;
+use crate::tasks;
 use crate::vgi::VectorGraphicsInterface;
 use crate::widget::Widget;
 use maycoon_theme::theme::Theme;
@@ -58,14 +59,32 @@ pub trait Application: Sized {
         PluginManager::new()
     }
 
+    /// Initializes the backend application data.
+    ///
+    /// This function is called before the actual launch of the app.
+    ///
+    /// The default implementation just initializes the task runner.
+    fn init(&self) {
+        #[cfg(feature = "tokio-runner")]
+        {
+            tracing::info!("initializing tokio task runner");
+            tasks::init(tasks::runner::TaskRunner::Tokio(
+                tasks::runner::tokio::TaskRunner::new(
+                    true, None, None, None, None, None, None, None,
+                ),
+            ));
+        }
+    }
+
     /// Runs the application using the [MayRunner].
     ///
     /// Override this method if you want to use a custom event loop.
     fn run(self, state: Self::State) {
         let config = self.config();
 
-        tracing::info!("launching application runner with {config:?}");
+        tracing::info_span!("init").in_scope(|| self.init());
 
+        tracing::info!("launching application runner with config {config:?}");
         MayRunner::<Self::Theme, Self::Graphics>::new(config).run(
             state,
             Self::build,

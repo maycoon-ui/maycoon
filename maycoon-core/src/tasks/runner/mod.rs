@@ -1,133 +1,106 @@
-use crate::config::TasksConfig;
-use std::marker::PhantomData;
-use std::pin::Pin;
-use std::task::{Context, Poll};
+use crate::tasks::task::{LocalTask, Task};
+use std::fmt::Debug;
 
-/// Contains the [tokio_runner::TokioRunner] struct.
-#[cfg(feature = "tokio-runner")]
-pub mod tokio_runner;
+/// Contains implementations of [Task], [LocalTask] and [TaskRunnerImpl] using [tokio].
+#[cfg(all(native, feature = "tokio-runner"))]
+pub mod tokio;
 
-/// The task runner enum.
+/// A task runner that can be used to spawn tasks.
 ///
-/// Contains the [TokioRunner](tokio_runner::TokioRunner) if the 'tokio-runner' feature is enabled.
+/// The fields will only be available, if the corresponding feature is enabled.
 #[derive(Debug)]
 pub enum TaskRunner {
-    /// The [tokio] task runner.
+    /// A task runner that uses the [tokio] runtime.
     #[cfg(feature = "tokio-runner")]
-    Tokio(tokio_runner::TokioRunner),
-
-    /// No task runner selected. Panics on any method call, but blocks on futures.
-    ///
-    /// Panics on any method call.
+    Tokio(tokio::TaskRunner),
+    /// Not a real task runner. Panics on any method call.
     None,
 }
 
 impl TaskRunner {
-    /// Initializes the task runner with the given config.
-    pub fn new(_config: TasksConfig) -> Self {
-        #[cfg(feature = "tokio-runner")]
-        {
-            tracing::info!("creating tokio task runner");
-            Self::Tokio(tokio_runner::TokioRunner::new(_config))
-        }
-
-        #[cfg(not(feature = "tokio-runner"))]
-        {
-            tracing::warn!("no task runner feature selected, but task runner config specified");
-            Self::None
-        }
-    }
-
-    /// Blocks on the given future.
-    pub fn block_on<F>(&self, _fut: F) -> F::Output
+    /// Spawns a task, possibly in the background.
+    ///
+    /// Returns a task handle to the future.
+    ///
+    /// Panics, when no task runner feature is enabled.
+    pub fn spawn<Fut>(&self, future: Fut) -> impl Task<Fut::Output>
     where
-        F: Future,
+        Fut: Future + Send + 'static,
+        Fut::Output: Send + 'static,
     {
         match self {
             #[cfg(feature = "tokio-runner")]
-            TaskRunner::Tokio(runner) => runner.block_on(_fut),
-
-            TaskRunner::None => {
-                panic!("No task runner feature selected! Please select one (e.g. 'tokio-runner').")
-            },
+            TaskRunner::Tokio(rt) => rt.spawn(future),
+            _ => panic!(
+                "No valid task runner feature selected. Please select a `-runner` feature (e.g. `tokio-runner`)."
+            ),
         }
     }
 
-    /// Spawns the given future.
-    pub fn spawn<F>(&self, _fut: F) -> Task<F::Output>
+    /// Spawns a blocking task in the background.
+    ///
+    /// Returns a task handle to the operation.
+    ///
+    /// Panics, when no task runner feature is enabled.
+    #[cfg(native)]
+    pub fn spawn_blocking<R, F>(&self, func: F) -> impl Task<R>
     where
-        F: Future + Send + 'static,
-        F::Output: Send + 'static,
-    {
-        match self {
-            #[cfg(feature = "tokio-runner")]
-            TaskRunner::Tokio(runner) => Task::Tokio(runner.spawn(_fut)),
-
-            TaskRunner::None => {
-                panic!("No task runner feature selected! Please select one (e.g. 'tokio-runner').")
-            },
-        }
-    }
-
-    /// Spawns the given blocking function.
-    pub fn spawn_blocking<F, R>(&self, _fut: F) -> Task<R>
-    where
-        F: FnOnce() -> R + Send + 'static,
         R: Send + 'static,
+        F: FnOnce() -> R + Send + 'static,
     {
         match self {
             #[cfg(feature = "tokio-runner")]
-            TaskRunner::Tokio(runner) => Task::Tokio(runner.spawn_blocking(_fut)),
-
-            TaskRunner::None => {
-                panic!("No task runner feature selected! Please select one (e.g. 'tokio-runner').")
-            },
+            TaskRunner::Tokio(rt) => rt.spawn_blocking(func),
+            _ => panic!(
+                "No valid task runner feature selected. Please select a `-runner` feature (e.g. `tokio-runner`)."
+            ),
         }
     }
-}
 
-/// A task representing a future that can be polled.
-///
-/// This struct mainly exist to have a universal interface for the different task types of the different task runners.
-pub enum Task<T> {
-    /// A tokio task. Only available if the 'tokio-runner' feature is enabled.
-    #[cfg(feature = "tokio-runner")]
-    Tokio(tokio::task::JoinHandle<T>),
-    /// Not a real task. Will panic on poll.
-    None(PhantomData<T>),
-}
-
-impl<T: Unpin> Task<T> {
-    /// Returns true if the task is ready (completed).
-    pub fn is_ready(&self) -> bool {
+    /// Blocks on the given future, until it's completed.
+    ///
+    /// Panics, when no task runner feature is enabled.
+    #[cfg(native)]
+    pub fn block_on<Fut>(&self, future: Fut) -> Fut::Output
+    where
+        Fut: Future,
+    {
         match self {
             #[cfg(feature = "tokio-runner")]
-            Task::Tokio(task) => task.is_finished(),
-
-            Task::None(_) => {
-                panic!("No task runner feature selected! Please select one (e.g. 'tokio-runner').")
-            },
+            TaskRunner::Tokio(rt) => rt.block_on(future),
+            _ => panic!(
+                "No valid task runner feature selected. Please select a `-runner` feature (e.g. `tokio-runner`)."
+            ),
         }
     }
 }
 
-impl<T: Unpin> Future for Task<T> {
-    type Output = T;
+/// A trait that provides a task runner implementation.
+pub trait TaskRunnerImpl: Debug + 'static {
+    /// The task type, that this task runner implementation uses.
+    type Task<T: Send + 'static>: Task<T>;
 
-    fn poll(self: Pin<&mut Self>, _cx: &mut Context<'_>) -> Poll<Self::Output> {
-        match self.get_mut() {
-            #[cfg(feature = "tokio-runner")]
-            Task::Tokio(task) => {
-                let pinned = Pin::new(task);
+    /// The local task type, that this task runner implementation uses.
+    type LocalTask<T>: LocalTask<T>;
 
-                pinned
-                    .poll(_cx)
-                    .map(|res| res.expect("Failed to poll task"))
-            },
+    /// Spawns a task, possibly in the background.
+    ///
+    /// Returns a task handle to the future.
+    fn spawn<Fut>(&self, future: Fut) -> Self::Task<Fut::Output>
+    where
+        Fut: Future + Send + 'static,
+        Fut::Output: Send + 'static;
 
-            Task::None(_) => {
-                panic!("No task runner feature selected! Please select one (e.g. 'tokio-runner').")
-            },
-        }
-    }
+    /// Spawns a blocking task in the background.
+    ///
+    /// Returns a task handle to the operation.
+    fn spawn_blocking<R, F>(&self, func: F) -> Self::Task<R>
+    where
+        R: Send + 'static,
+        F: FnOnce() -> R + Send + 'static;
+
+    /// Blocks on the given future, until it's completed.
+    fn block_on<Fut>(&self, future: Fut) -> Fut::Output
+    where
+        Fut: Future;
 }
