@@ -3,8 +3,8 @@ use maycoon::core::app::context::AppContext;
 use maycoon::core::config::MayConfig;
 use maycoon::core::layout::{AlignItems, Dimension, FlexDirection, LayoutStyle};
 use maycoon::core::reference::Ref;
+use maycoon::core::signal::Signal;
 use maycoon::core::signal::state::StateSignal;
-use maycoon::core::signal::{MaybeSignal, Signal};
 use maycoon::core::vgi::DefaultGraphics;
 use maycoon::core::widget::{Widget, WidgetLayoutExt};
 use maycoon::math::Vector2;
@@ -27,7 +27,7 @@ impl Application for MyApp {
             {
                 let checked = checked.clone();
 
-                Box::new(Checkbox::new(MaybeSignal::signal(checked)))
+                Box::new(Checkbox::new(checked.maybe()))
             },
             {
                 let checked = checked.clone();

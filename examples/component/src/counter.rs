@@ -4,7 +4,8 @@ use maycoon::core::component::{Component, Composed};
 use maycoon::core::layout::LayoutStyle;
 use maycoon::core::reference::Ref;
 use maycoon::core::signal::eval::EvalSignal;
-use maycoon::core::signal::{ArcSignal, MaybeSignal, Signal};
+use maycoon::core::signal::state::StateSignal;
+use maycoon::core::signal::{MaybeSignal, Signal};
 use maycoon::core::widget::{Widget, WidgetLayoutExt};
 use maycoon::theme::id::WidgetId;
 use maycoon::widgets::button::Button;
@@ -12,12 +13,12 @@ use maycoon::widgets::container::Container;
 use maycoon::widgets::text::Text;
 
 pub struct Counter {
-    counter: ArcSignal<i32>,
+    counter: StateSignal<i32>,
     layout: MaybeSignal<LayoutStyle>,
 }
 
 impl Counter {
-    pub fn new(counter: ArcSignal<i32>) -> Composed<Self> {
+    pub fn new(counter: StateSignal<i32>) -> Composed<Self> {
         Counter {
             counter,
             layout: LayoutStyle::default().into(),
@@ -37,7 +38,7 @@ impl Component for Counter {
                 Box::new(
                     Button::new(Text::new("Increase".to_string())).with_on_pressed(
                         EvalSignal::new(move || {
-                            counter.set(*counter.get() + 1);
+                            counter.mutate(|i| *i += 1);
                             Update::DRAW
                         })
                         .hook(&context)
@@ -51,7 +52,7 @@ impl Component for Counter {
                 Box::new(
                     Button::new(Text::new("Decrease".to_string())).with_on_pressed(
                         EvalSignal::new(move || {
-                            counter.set(*counter.get() - 1);
+                            counter.mutate(|i| *i -= 1);
                             Update::DRAW
                         })
                         .hook(&context)
@@ -59,9 +60,7 @@ impl Component for Counter {
                     ),
                 )
             },
-            Box::new(Text::new(
-                MaybeSignal::signal(counter).map(|i| Ref::Owned(i.to_string())),
-            )),
+            Box::new(Text::new(counter.map(|i| Ref::Owned(i.to_string())))),
         ])
         .with_layout_style(self.layout.get().clone())
     }

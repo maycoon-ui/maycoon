@@ -147,7 +147,8 @@ impl Widget for Checkbox {
                     update |= Update::DRAW;
 
                     if let Some(sig) = self.value.as_signal() {
-                        sig.set(!*sig.get());
+                        let checked = *sig.get();
+                        sig.set(!checked);
                     }
                 }
             }

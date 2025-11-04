@@ -32,7 +32,7 @@ impl Application for MyApp {
                 Box::new(
                     Button::new(Text::new("Increase".to_string())).with_on_pressed(
                         EvalSignal::new(move || {
-                            counter.set(*counter.get() + 1);
+                            counter.mutate(|c| *c += 1);
 
                             Update::DRAW
                         })
@@ -47,7 +47,7 @@ impl Application for MyApp {
                 Box::new(
                     Button::new(Text::new("Decrease".to_string())).with_on_pressed(
                         EvalSignal::new(move || {
-                            counter.set(*counter.get() - 1);
+                            counter.mutate(|c| *c -= 1);
 
                             Update::DRAW
                         })

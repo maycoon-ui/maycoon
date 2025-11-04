@@ -1,5 +1,6 @@
-use std::ops::{Deref, DerefMut};
-use std::sync::{Arc, RwLockReadGuard, RwLockWriteGuard};
+use std::ops::Deref;
+use std::rc::Rc;
+use std::sync::{Arc, RwLockReadGuard};
 
 /// Represents a reference to a value of type `T`.
 ///
@@ -11,6 +12,10 @@ pub enum Ref<'a, T> {
     Owned(T),
     /// A borrowed reference.
     Borrow(&'a T),
+    /// A reference counted reference.
+    Rc(Rc<T>),
+    /// A reference of a [std::cell::Ref].
+    Ref(std::cell::Ref<'a, T>),
     /// An [Arc] reference.
     Arc(Arc<T>),
     /// A [RwLockReadGuard] reference.
@@ -24,6 +29,8 @@ impl<'a, T> Deref for Ref<'a, T> {
         match self {
             Ref::Owned(value) => value,
             Ref::Borrow(value) => value,
+            Ref::Rc(value) => value,
+            Ref::Ref(value) => value,
             Ref::Arc(value) => value,
             Ref::ReadGuard(value) => value,
         }
@@ -42,6 +49,18 @@ impl<'a, T> From<&'a T> for Ref<'a, T> {
     }
 }
 
+impl<'a, T> From<Rc<T>> for Ref<'a, T> {
+    fn from(value: Rc<T>) -> Self {
+        Ref::Rc(value)
+    }
+}
+
+impl<'a, T> From<std::cell::Ref<'a, T>> for Ref<'a, T> {
+    fn from(value: std::cell::Ref<'a, T>) -> Self {
+        Ref::Ref(value)
+    }
+}
+
 impl<'a, T> From<Arc<T>> for Ref<'a, T> {
     fn from(value: Arc<T>) -> Self {
         Ref::Arc(value)
@@ -51,49 +70,5 @@ impl<'a, T> From<Arc<T>> for Ref<'a, T> {
 impl<'a, T> From<RwLockReadGuard<'a, T>> for Ref<'a, T> {
     fn from(value: RwLockReadGuard<'a, T>) -> Self {
         Ref::ReadGuard(value)
-    }
-}
-
-/// Represents a mutable reference to a value of type `T`.
-///
-/// Due to Rust's temporal borrowing rules,
-/// returning a reference to a value may not be always possible,
-/// so this enum is used to represent one by having multiple variants for multiple types of mutable references.
-pub enum MutRef<'a, T> {
-    /// A borrowed mutable reference.
-    Borrow(&'a mut T),
-    /// A [RwLockWriteGuard] mutable reference.
-    WriteGuard(RwLockWriteGuard<'a, T>),
-}
-
-impl<'a, T> Deref for MutRef<'a, T> {
-    type Target = T;
-
-    fn deref(&self) -> &Self::Target {
-        match self {
-            MutRef::Borrow(value) => value,
-            MutRef::WriteGuard(value) => value,
-        }
-    }
-}
-
-impl<'a, T> DerefMut for MutRef<'a, T> {
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        match self {
-            MutRef::Borrow(value) => value,
-            MutRef::WriteGuard(value) => value,
-        }
-    }
-}
-
-impl<'a, T> From<&'a mut T> for MutRef<'a, T> {
-    fn from(value: &'a mut T) -> Self {
-        MutRef::Borrow(value)
-    }
-}
-
-impl<'a, T> From<RwLockWriteGuard<'a, T>> for MutRef<'a, T> {
-    fn from(value: RwLockWriteGuard<'a, T>) -> Self {
-        MutRef::WriteGuard(value)
     }
 }

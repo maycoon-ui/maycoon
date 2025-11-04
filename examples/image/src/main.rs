@@ -2,8 +2,6 @@ use maycoon::color::{Blob, ImageAlphaType, ImageData, ImageFormat};
 use maycoon::core::app::Application;
 use maycoon::core::app::context::AppContext;
 use maycoon::core::config::MayConfig;
-use maycoon::core::signal::Signal;
-use maycoon::core::signal::fixed::FixedSignal;
 use maycoon::core::vgi::DefaultGraphics;
 use maycoon::core::widget::Widget;
 use maycoon::theme::theme::celeste::CelesteTheme;
@@ -18,8 +16,8 @@ impl Application for MyApp {
     type Graphics = DefaultGraphics;
     type State = ();
 
-    fn build(context: AppContext, _: Self::State) -> impl Widget {
-        let image = FixedSignal::new(ImageData {
+    fn build(_: AppContext, _: Self::State) -> impl Widget {
+        Image::new(ImageData {
             data: Blob::from(
                 image::load_from_memory(IMAGE_DATA)
                     .unwrap()
@@ -31,9 +29,6 @@ impl Application for MyApp {
             width: 427,
             height: 640,
         })
-        .hook(&context);
-
-        Image::new(image.maybe())
     }
 
     fn config(&self) -> MayConfig<Self::Theme, Self::Graphics> {
