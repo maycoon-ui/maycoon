@@ -23,6 +23,7 @@ impl TaskRunner {
     /// Returns a task handle to the future.
     ///
     /// Panics, when no task runner feature is enabled.
+    #[tracing::instrument(skip_all)]
     pub fn spawn<Fut>(&self, future: Fut) -> impl Task<Fut::Output>
     where
         Fut: Future + Send + 'static,
@@ -43,6 +44,7 @@ impl TaskRunner {
     ///
     /// Panics, when no task runner feature is enabled.
     #[cfg(native)]
+    #[tracing::instrument(skip_all)]
     pub fn spawn_blocking<R, F>(&self, func: F) -> impl Task<R>
     where
         R: Send + 'static,
@@ -61,6 +63,7 @@ impl TaskRunner {
     ///
     /// Panics, when no task runner feature is enabled.
     #[cfg(native)]
+    #[tracing::instrument(skip_all)]
     pub fn block_on<Fut>(&self, future: Fut) -> Fut::Output
     where
         Fut: Future,

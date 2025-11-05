@@ -58,8 +58,10 @@ pub trait Signal<T: 'static>: 'static {
 
     /// Set the value of the signal and notify listeners.
     fn set(&self, value: T) {
-        self.set_value(value);
-        self.notify();
+        tracing::trace_span!("set signal").in_scope(|| {
+            self.set_value(value);
+            self.notify();
+        });
     }
 
     /// Converts the signal into a [MaybeSignal].

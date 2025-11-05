@@ -5,7 +5,6 @@ use taffy::{
     AvailableSpace, Dimension, NodeId, PrintTree, Size, Style, TaffyResult, TaffyTree,
     TraversePartialTree,
 };
-use tracing::instrument;
 use winit::application::ApplicationHandler;
 use winit::event::WindowEvent;
 use winit::event_loop::ActiveEventLoop;
@@ -54,6 +53,7 @@ where
     V: VectorGraphicsInterface,
 {
     /// Create a new handler with given window attributes, config, widget and state.
+    #[tracing::instrument(level = "trace", skip_all)]
     pub fn new(
         attrs: WindowAttributes,
         config: MayConfig<T, V>,
@@ -98,13 +98,13 @@ where
     }
 
     /// Get the application context.
-    #[instrument(level = "trace", skip_all)]
+    #[tracing::instrument(level = "trace", skip_all)]
     pub fn context(&self) -> AppContext {
         AppContext::new(self.update.clone(), self.info.diagnostics)
     }
 
     /// Add the parent node and its children to the layout tree.
-    #[instrument(level = "trace", skip(self, style))]
+    #[tracing::instrument(level = "trace", skip(self, style))]
     fn layout_widget(&mut self, parent: NodeId, style: &StyleNode) -> TaffyResult<()> {
         let node = self.taffy.new_leaf(style.style.clone().into())?;
 
@@ -118,7 +118,7 @@ where
     }
 
     /// Compute the layout of the root node and its children.
-    #[instrument(level = "trace", skip(self))]
+    #[tracing::instrument(level = "trace", skip(self))]
     fn compute_layout(&mut self) -> TaffyResult<()> {
         self.taffy.compute_layout(
             self.window_node,
@@ -135,7 +135,7 @@ where
     }
 
     /// Collect the computed layout of the given node and its children. Make sure to call [AppHandler::compute_layout] before, to not get dirty results.
-    #[instrument(level = "trace", skip(self, style))]
+    #[tracing::instrument(level = "trace", skip(self, style))]
     fn collect_layout(&mut self, node: NodeId, style: &StyleNode) -> TaffyResult<LayoutNode> {
         tracing::trace!("collecting node layout {node:?}");
 
@@ -156,13 +156,13 @@ where
     }
 
     /// Request a window redraw.
-    #[instrument(level = "trace", skip(self))]
+    #[tracing::instrument(level = "trace", skip(self))]
     fn request_redraw(&self) {
         tracing::trace!("requesting redraw");
         self.window.as_ref().unwrap().request_redraw();
     }
 
-    #[instrument(level = "trace", skip(self))]
+    #[tracing::instrument(level = "trace", skip(self))]
     fn render(
         &mut self,
         window: Arc<Window>,
@@ -180,7 +180,7 @@ where
     }
 
     /// Update the app and process events.
-    #[instrument(level = "trace", skip_all)]
+    #[tracing::instrument(level = "trace", skip_all)]
     fn update(&mut self, event_loop: &ActiveEventLoop) {
         // update plugins
         tracing::trace!("updating plugins");
@@ -200,16 +200,16 @@ where
 
         // completely layout widgets if taffy is not set up yet (e.g. during first update)
         if self.taffy.child_count(self.window_node) == 0 {
-            tracing::trace!("completely laying out widgets");
+            tracing::trace_span!("complete layout").in_scope(|| {
+                let style = self.widget.as_ref().unwrap().layout_style();
 
-            let style = self.widget.as_ref().unwrap().layout_style();
+                self.layout_widget(self.window_node, &style)
+                    .expect("Failed to layout window");
 
-            self.layout_widget(self.window_node, &style)
-                .expect("Failed to layout window");
+                self.compute_layout().expect("Failed to compute layout");
 
-            self.compute_layout().expect("Failed to compute layout");
-
-            self.update.insert(Update::FORCE);
+                self.update.insert(Update::FORCE);
+            });
         }
 
         let style = self.widget.as_ref().unwrap().layout_style();
@@ -234,52 +234,56 @@ where
 
         // check if app should re-evaluate layout
         if self.update.get().intersects(Update::LAYOUT | Update::FORCE) {
-            // clear all nodes (except root window node)
-            self.taffy
-                .set_children(self.window_node, &[])
-                .expect("Failed to set children");
+            tracing::trace_span!("layout").in_scope(|| {
+                // clear all nodes (except root window node)
+                self.taffy
+                    .set_children(self.window_node, &[])
+                    .expect("Failed to set children");
 
-            let style = self.widget.as_ref().unwrap().layout_style();
+                let style = self.widget.as_ref().unwrap().layout_style();
 
-            self.layout_widget(self.window_node, &style)
-                .expect("Failed to layout window");
+                self.layout_widget(self.window_node, &style)
+                    .expect("Failed to layout window");
 
-            self.compute_layout().expect("Failed to compute layout");
+                self.compute_layout().expect("Failed to compute layout");
 
-            layout_node = self
-                .collect_layout(
-                    self.taffy.child_at_index(self.window_node, 0).unwrap(),
-                    &style,
-                )
-                .expect("Failed to collect layout");
+                layout_node = self
+                    .collect_layout(
+                        self.taffy.child_at_index(self.window_node, 0).unwrap(),
+                        &style,
+                    )
+                    .expect("Failed to collect layout");
+            });
         }
 
         // check if app should redraw
         if self.update.get().intersects(Update::FORCE | Update::DRAW) {
-            // clear scene
-            tracing::trace!("resetting vector graphics interface scene");
-            self.scene.reset();
+            tracing::trace_span!("draw").in_scope(|| {
+                // clear scene
+                tracing::trace!("resetting vector graphics interface scene");
+                self.scene.reset();
 
-            let context = self.context();
+                let context = self.context();
 
-            tracing::trace!("drawing root widget");
-            self.widget.as_mut().unwrap().render(
-                &mut self.scene,
-                &mut self.config.theme,
-                &layout_node,
-                &self.info,
-                context,
-            );
+                tracing::trace!("drawing root widget");
+                self.widget.as_mut().unwrap().render(
+                    &mut self.scene,
+                    &mut self.config.theme,
+                    &layout_node,
+                    &self.info,
+                    context,
+                );
 
-            let window = self.window.clone().expect("Window not initialized");
+                let window = self.window.clone().expect("Window not initialized");
 
-            // check surface validity
-            if window.inner_size().width != 0 && window.inner_size().height != 0 {
-                self.render(window, event_loop)
-                    .expect("Failed rendering process");
-            } else {
-                tracing::debug!("skipping render due to invalid surface");
-            }
+                // check surface validity
+                if window.inner_size().width != 0 && window.inner_size().height != 0 {
+                    self.render(window, event_loop)
+                        .expect("Failed rendering process");
+                } else {
+                    tracing::debug!("skipping render due to invalid surface");
+                }
+            });
         }
 
         // check if app should re-evaluate
@@ -327,7 +331,7 @@ where
     F: Fn(AppContext, S) -> W,
     V: VectorGraphicsInterface,
 {
-    #[instrument(level = "trace", skip_all)]
+    #[tracing::instrument(level = "trace", skip_all)]
     fn resumed(&mut self, event_loop: &ActiveEventLoop) {
         tracing::debug!("resuming plugins");
         self.plugins.run(|pl| {
@@ -381,7 +385,7 @@ where
         self.update.set(Update::FORCE);
     }
 
-    #[instrument(level = "trace", skip_all, fields(event =
+    #[tracing::instrument(level = "trace", skip_all, fields(event =
         ?event))]
     fn window_event(
         &mut self,
@@ -511,7 +515,7 @@ where
         }
     }
 
-    #[instrument(level = "trace", skip_all)]
+    #[tracing::instrument(level = "trace", skip_all)]
     fn suspended(&mut self, event_loop: &ActiveEventLoop) {
         tracing::trace!("destroying vector graphics interface");
         let window = self.window.clone().unwrap();
