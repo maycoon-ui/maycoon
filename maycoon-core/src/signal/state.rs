@@ -26,6 +26,7 @@ impl<T: 'static> StateSignal<T> {
     /// Mutate the inner value in a set scope.
     ///
     /// This scope is needed in order to notify the app for changes.
+    #[tracing::instrument(skip_all)]
     pub fn mutate(&self, op: impl FnOnce(&mut T)) {
         op(&mut self.value.borrow_mut());
         self.notify();

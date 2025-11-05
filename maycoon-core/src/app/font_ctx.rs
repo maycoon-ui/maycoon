@@ -1,7 +1,6 @@
 use indexmap::IndexMap;
 use peniko::{Blob, FontData};
 use std::sync::Arc;
-use tracing::instrument;
 
 /// A font manager for maycoon applications.
 ///
@@ -29,7 +28,7 @@ impl FontContext {
     /// Loads a font with a custom name into the font context.
     ///
     /// If the font with the same name already exists, it will be overwritten and the old font will be returned.
-    #[instrument(level = "trace", skip_all, fields(name = name.to_string()))]
+    #[tracing::instrument(level = "trace", skip_all, fields(name = name.to_string()))]
     pub fn load(&mut self, name: impl ToString, font: FontData) -> Option<FontData> {
         tracing::trace!("loading font named {}", name.to_string());
         self.fonts.insert(name.to_string(), font)
