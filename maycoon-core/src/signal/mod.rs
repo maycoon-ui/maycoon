@@ -1,6 +1,7 @@
 use crate::app::context::AppContext;
 use crate::reference::Ref;
 use crate::signal::fixed::FixedSignal;
+use crate::signal::listener::Listener;
 use crate::signal::map::MapSignal;
 use std::rc::Rc;
 
@@ -19,8 +20,8 @@ pub mod map;
 /// Contains the [eval::EvalSignal] signal.
 pub mod eval;
 
-/// Listener function for [Signal].
-pub type Listener<T> = Box<dyn Fn(Ref<T>)>;
+/// Contains the [Listener] listener.
+pub mod listener;
 
 /// A [Signal] in a [Box].
 pub type BoxedSignal<T> = Box<dyn Signal<T>>;

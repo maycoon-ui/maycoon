@@ -3,6 +3,7 @@ use crate::app::update::{Update, UpdateManager};
 use crate::signal::Signal;
 use crate::signal::eval::EvalSignal;
 use crate::signal::fixed::FixedSignal;
+use crate::signal::listener::Listener;
 use crate::signal::memoized::MemoizedSignal;
 use crate::signal::state::StateSignal;
 use tracing::instrument;
@@ -44,10 +45,7 @@ impl AppContext {
     #[instrument(level = "trace", skip_all, fields(signal = std::any::type_name::<T>()))]
     pub fn hook_signal<T: 'static, S: Signal<T>>(&self, signal: &mut S) {
         let update = self.update();
-
-        signal.listen(Box::new(move |_| {
-            update.insert(Update::EVAL);
-        }));
+        signal.listen(Listener::new(move |_| update.insert(Update::EVAL)));
     }
 
     /// Hook the given [Signal] to the [UpdateManager] of this application and return it.

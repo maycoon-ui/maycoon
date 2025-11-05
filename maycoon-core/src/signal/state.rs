@@ -1,3 +1,4 @@
+use crate::signal::listener::ListenerRegister;
 use crate::signal::{Listener, Ref, Signal};
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -10,7 +11,7 @@ use std::rc::Rc;
 /// See the section about these errors in [Signal] for more.
 pub struct StateSignal<T: 'static> {
     value: Rc<RefCell<T>>,
-    listeners: Vec<Rc<Listener<T>>>,
+    listeners: ListenerRegister<T>,
 }
 
 impl<T: 'static> StateSignal<T> {
@@ -18,7 +19,7 @@ impl<T: 'static> StateSignal<T> {
     pub fn new(value: T) -> Self {
         Self {
             value: Rc::new(RefCell::new(value)),
-            listeners: Vec::with_capacity(1),
+            listeners: ListenerRegister::new(),
         }
     }
 
@@ -41,13 +42,11 @@ impl<T: 'static> Signal<T> for StateSignal<T> {
     }
 
     fn listen(&mut self, listener: Listener<T>) {
-        self.listeners.push(Rc::new(listener));
+        self.listeners.register(listener);
     }
 
     fn notify(&self) {
-        for listener in &self.listeners {
-            listener(self.get());
-        }
+        self.listeners.notify(|| self.get());
     }
 
     fn dyn_clone(&self) -> Box<dyn Signal<T>> {
