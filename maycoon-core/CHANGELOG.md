@@ -7,6 +7,55 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.1](https://github.com/maycoon-ui/maycoon/compare/maycoon-core-v0.4.0...maycoon-core-v0.4.1) - 2025-11-05
+
+### Added
+
+- more tracing calls
+- Signal listeners
+- platform module
+- futures task runner
+- Unified Vector Graphics Interface
+- Exit functionality
+- Reworked task runner architecture
+- Render Context for AppContext
+- Diagnostics for AppContext
+- ActionSignal signal
+- is_locked method for RwSignal
+- RwSignal shortcut
+- RwSignal based on the RwLock
+
+### Fixed
+
+- Clippy unused variable
+- Unused generic in Task<T>
+- Hidden elided lifetime
+- Remove unnecessary Arc's
+- Unnecessary  Arc
+
+### Other
+
+- Update bitflags to `2.10.0`
+- Rework task architecture
+- Rework Signal architecture
+- Remove parking_lot dependency
+- Add cfg aliases
+- Remove `VectorGraphicsInterface` lifetime
+- Remove system font functionality
+- Rework task architecture
+- Add tracing instrumentation
+- Use `tracing` instead of log for logging and tracing
+- Update render dependencies
+- Update parking_lot to 0.12.5
+- Update font-kit to 0.14.3
+- Update bitflags to 2.9.4
+- Update taffy to 0.9.1
+- Update winit to 0.30.12
+- Change RenderContext reference to Arc reference
+- Update runner() method
+- Update context.rs
+- Re-organize features
+
 ## [0.4.0](https://github.com/maycoon-ui/maycoon/compare/maycoon-core-v0.3.2...maycoon-core-v0.4.0) - 2025-04-29
 
 ### Added
