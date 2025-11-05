@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.1](https://github.com/maycoon-ui/maycoon/compare/maycoon-macros-v0.4.0...maycoon-macros-v0.4.1) - 2025-11-05
+
+### Other
+
+- Update macro dependencies
+
 ## [0.4.0](https://github.com/maycoon-ui/maycoon/compare/maycoon-macros-v0.3.2...maycoon-macros-v0.4.0) - 2025-04-29
 
 ### Other
