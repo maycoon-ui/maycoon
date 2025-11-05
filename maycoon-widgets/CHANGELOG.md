@@ -7,6 +7,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.1](https://github.com/maycoon-ui/maycoon/compare/maycoon-widgets-v0.4.0...maycoon-widgets-v0.4.1) - 2025-11-05
+
+### Added
+
+- Unified Vector Graphics Interface
+- Reworked task runner architecture
+
+### Fixed
+
+- Unused generic in Task<T>
+- Unused future clippy warning
+
+### Other
+
+- Rework task architecture
+- Rework Signal architecture
+- Rework task architecture
+- Update render dependencies
+- Re-organize features
+
 ## [0.4.0](https://github.com/maycoon-ui/maycoon/compare/maycoon-widgets-v0.3.2...maycoon-widgets-v0.4.0) - 2025-04-29
 
 ### Other
