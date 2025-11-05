@@ -13,7 +13,7 @@ homepage.workspace = true
 [dependencies]
 winit = "0.30.12"
 taffy = "0.9.1"
-bitflags = "2.9.4"
+bitflags = "2.10.0"
 
 tokio = { version = "1.48.0", features = ["parking_lot", "rt-multi-thread", "net", "time"], optional = true }
 
