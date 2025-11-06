@@ -43,3 +43,6 @@ tokio-runner = ["tokio"]
 dummy-runner = []
 svg = ["usvg"]
 vello-vg = ["vello", "vello_svg", "skrifa", "bytemuck", "wgpu-types"]
+
+[package.metadata.docs.rs]
+features = ["dummy-runner"]
