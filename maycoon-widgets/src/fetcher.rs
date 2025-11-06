@@ -2,75 +2,98 @@ use maycoon_core::app::context::AppContext;
 use maycoon_core::app::info::AppInfo;
 use maycoon_core::app::update::Update;
 use maycoon_core::layout::{LayoutNode, LayoutStyle, StyleNode};
-use maycoon_core::tasks;
-use maycoon_core::tasks::task::Task;
+use maycoon_core::tasks::fetcher::Fetcher;
 use maycoon_core::vgi::Scene;
 use maycoon_core::widget::Widget;
 use maycoon_theme::id::WidgetId;
 use maycoon_theme::theme::Theme;
 use std::future::Future;
 
-/// Widget builder to fetch data from an asynchronous task. The [TaskRunner](tasks::runner::TaskRunner) needs to be initialized.
-/// This is similar to the [FutureBuilder](https://api.flutter.dev/flutter/widgets/FutureBuilder-class.html) from Flutter.
+/// A widget to build an inner widget from an asynchronous task.
+/// This is a [Widget] version of [Fetcher].
+///
+/// It is similar to the [FutureBuilder](https://api.flutter.dev/flutter/widgets/FutureBuilder-class.html) from Flutter.
 ///
 /// ### Async + UI
-/// Normally, a UI Application is not able to asynchronously spawn tasks and will block the UI thread instead of running tasks in the background.
-/// The [WidgetFetcher] is able to spawn asynchronous tasks on a global runner and construct a widget based on the result of the task.
-/// You can use it to fetch asynchronous data and either return something like a loading screen or the actual data.
+/// When working with a future, you usually need to block on it to produce a value.
+/// This would however block the main thread and freeze the whole application temporarily until the task is done.
+/// Blocking is less than ideal for any UI application,
+/// so the [Fetcher] and [WidgetFetcher] structures exist to run a task in the background,
+/// while still providing the user with a smooth interface experience.
+///
+/// The [WidgetFetcher] will spawn the given task in the background.
+/// While the task is still running/loading, the fetcher will still be able to produce a widget via a given factory function.
+/// This factory function takes `Option<T>` as an argument, where `T` is the output of the spawned task.
+/// If the task is not ready yet, the factory will be called with `None`, otherwise it will be called with `Some(T)`.
+///
+/// ### Spawning the task
+/// By default, the task is spawned inside the [TaskRunner](maycoon_core::tasks::runner::TaskRunner) in a non-blocking manner.
+/// If you want to spawn a blocking task (which is however, only supported on native platforms), use [WidgetFetcher::new_blocking]
+///
+/// **NOTE:** If the future is spawned on a thread pool or not,
+/// is up to the [TaskRunner](maycoon_core::tasks::runner::TaskRunner) implementation.
+/// Blocking tasks will always be spawned on a thread pool.
+///
+/// ### Note for the Web
+/// On the web, blocking a task is not possible and will freeze the browser,
+/// so only futures can be spawned.
+/// Furthermore, the futures will be executed on the local thread,
+/// since WebAssembly doesn't support threading out-of-the-box yet.
 ///
 /// ### Workflow of a [WidgetFetcher].
 /// 1. Run the task in the background using the [TaskRunner](tasks::runner::TaskRunner).
-/// 2. Construct the widget with [None] as the result (task is still loading).
-/// 3. Once the task is done, update the UI with the new result and trigger an [Update].
+/// 2. Construct the widget with [None] passed into the factory function (while task is still loading).
+/// 3. Once the task is done, the UI is updated with the new result and an [Update] is triggered.
 ///
 /// ### Theming
 /// The widget itself only draws the underlying widget, so theming is useless.
-pub struct WidgetFetcher<T: Send + 'static, W: Widget, F: Fn(Option<T>) -> W> {
-    task: Option<Box<dyn Task<T>>>,
-    render: F,
-    widget: Option<W>,
+pub struct WidgetFetcher<T: Send + 'static, W: Widget> {
+    fetcher: Fetcher<T, W>,
     update: Update,
 }
 
-impl<T: Send + 'static, W: Widget, F: Fn(Option<T>) -> W> WidgetFetcher<T, W, F> {
+impl<T: Send + 'static, W: Widget> WidgetFetcher<T, W> {
     /// Creates a new [WidgetFetcher] with parameters:
     /// - `future`: The future to execute.
     /// - `update`: The update to trigger when the data is updated (when loading is done).
-    /// - `render`: The function to render the widget. The first parameter is the result of the future and the second parameter is the mutable app state.
-    pub fn new<Fut>(future: Fut, update: Update, render: F) -> Self
+    /// - `render`: The function to render the widget. It takes a possible task result as the only parameter.
+    ///
+    /// Unlike [WidgetFetcher::new_blocking]. this will spawn a future in the background.
+    /// It's up to the task runner implementation, if the task is spawned on a thread pool or not.
+    pub fn new<Fut>(future: Fut, render: impl Fn(Option<T>) -> W + 'static, update: Update) -> Self
     where
         Fut: Future<Output = T> + Send + 'static,
     {
-        let task = tasks::spawn(future);
-
         Self {
-            task: Some(task),
-            render,
-            widget: None,
+            fetcher: Fetcher::spawn(future, render),
             update,
         }
     }
 
-    /// Tries to fetch the result of the task.
+    /// Creates a new [WidgetFetcher] with parameters:
+    /// - `func`: The blocking task to execute.
+    /// - `update`: The update to trigger when the data is updated (when loading is done).
+    /// - `render`: The function to render the widget. It takes a possible task result as the only parameter.
     ///
-    /// Returns [None] if the task is not ready yet or if the task value has already been consumed.
-    pub fn try_fetch(&mut self) -> Option<T> {
-        if self.task.is_some() {
-            if self.task.as_ref().unwrap().is_ready() {
-                let mut task = self.task.take().unwrap();
-                let value = task.take().unwrap();
-
-                Some(value)
-            } else {
-                None
-            }
-        } else {
-            None
+    /// Unlike [WidgetFetcher::new], this takes a function which will be run on a separate thread pool.
+    /// This is only supported on native platforms.
+    #[cfg(native)]
+    pub fn new_blocking<F>(
+        func: F,
+        render: impl Fn(Option<T>) -> W + 'static,
+        update: Update,
+    ) -> Self
+    where
+        F: Fn() -> T + Send + 'static,
+    {
+        Self {
+            fetcher: Fetcher::spawn_blocking(func, render),
+            update,
         }
     }
 }
 
-impl<T: Send + 'static, W: Widget, F: Fn(Option<T>) -> W> Widget for WidgetFetcher<T, W, F> {
+impl<T: Send + 'static, W: Widget> Widget for WidgetFetcher<T, W> {
     fn render(
         &mut self,
         scene: &mut dyn Scene,
@@ -79,13 +102,13 @@ impl<T: Send + 'static, W: Widget, F: Fn(Option<T>) -> W> Widget for WidgetFetch
         info: &AppInfo,
         context: AppContext,
     ) {
-        if let Some(widget) = &mut self.widget {
+        if let Some(widget) = self.fetcher.value_mut() {
             widget.render(scene, theme, layout_node, info, context.clone())
         }
     }
 
     fn layout_style(&self) -> StyleNode {
-        if let Some(widget) = &self.widget {
+        if let Some(widget) = self.fetcher.value_ref() {
             widget.layout_style()
         } else {
             StyleNode {
@@ -96,21 +119,20 @@ impl<T: Send + 'static, W: Widget, F: Fn(Option<T>) -> W> Widget for WidgetFetch
     }
 
     fn update(&mut self, layout: &LayoutNode, context: AppContext, info: &AppInfo) -> Update {
-        if let Some(value) = self.try_fetch() {
-            self.widget = Some((self.render)(Some(value)));
-        } else if self.widget.is_none() {
-            self.widget = Some((self.render)(None));
+        let mut update = Update::empty();
+
+        // Make sure to update the widget if the task is about to be polled
+        if self.fetcher.is_ready() {
+            update.insert(self.update);
         }
 
-        // Widget is guaranteed to be some at this point
-        self.widget.as_mut().unwrap().update(layout, context, info) | self.update
+        let widget = self.fetcher.fetch();
+
+        widget.update(layout, context, info) | update
     }
 
     fn widget_id(&self) -> WidgetId {
-        if let Some(widget) = &self.widget {
-            widget.widget_id()
-        } else {
-            WidgetId::new("maycoon-widgets", "WidgetFetcher")
-        }
+        // Value is guaranteed to be set at this point
+        self.fetcher.value_ref().unwrap().widget_id()
     }
 }

@@ -17,13 +17,17 @@ impl Application for MyApp {
     type State = ();
 
     fn build(_: AppContext, _: Self::State) -> impl Widget {
-        WidgetFetcher::new(Box::pin(get_random_quote()), Update::DRAW, |data| {
-            if let Some(data) = data {
-                Text::new(format!(" \"{}\" \n - {}", data.quote, data.author))
-            } else {
-                Text::new(" Loading Quote...".to_string())
-            }
-        })
+        WidgetFetcher::new(
+            Box::pin(get_random_quote()),
+            |data| {
+                if let Some(data) = data {
+                    Text::new(format!(" \"{}\" \n - {}", data.quote, data.author))
+                } else {
+                    Text::new(" Loading Quote...".to_string())
+                }
+            },
+            Update::DRAW,
+        )
     }
 
     fn config(&self) -> MayConfig<Self::Theme, Self::Graphics> {
