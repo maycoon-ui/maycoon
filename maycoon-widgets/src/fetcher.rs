@@ -25,21 +25,21 @@ use std::future::Future;
 ///
 /// ### Theming
 /// The widget itself only draws the underlying widget, so theming is useless.
-pub struct WidgetFetcher<T: Send + Unpin + 'static, W: Widget, F: Fn(Option<T>) -> W> {
+pub struct WidgetFetcher<T: Send + 'static, W: Widget, F: Fn(Option<T>) -> W> {
     task: Option<Box<dyn Task<T>>>,
     render: F,
     widget: Option<W>,
     update: Update,
 }
 
-impl<T: Send + Unpin + Unpin + 'static, W: Widget, F: Fn(Option<T>) -> W> WidgetFetcher<T, W, F> {
+impl<T: Send + 'static, W: Widget, F: Fn(Option<T>) -> W> WidgetFetcher<T, W, F> {
     /// Creates a new [WidgetFetcher] with parameters:
     /// - `future`: The future to execute.
     /// - `update`: The update to trigger when the data is updated (when loading is done).
     /// - `render`: The function to render the widget. The first parameter is the result of the future and the second parameter is the mutable app state.
     pub fn new<Fut>(future: Fut, update: Update, render: F) -> Self
     where
-        Fut: Future<Output = T> + Send + Unpin + 'static,
+        Fut: Future<Output = T> + Send + 'static,
     {
         let task = tasks::spawn(future);
 
@@ -57,7 +57,8 @@ impl<T: Send + Unpin + Unpin + 'static, W: Widget, F: Fn(Option<T>) -> W> Widget
     pub fn try_fetch(&mut self) -> Option<T> {
         if self.task.is_some() {
             if self.task.as_ref().unwrap().is_ready() {
-                let value = self.task.take().unwrap().take().unwrap();
+                let mut task = self.task.take().unwrap();
+                let value = task.take().unwrap();
 
                 Some(value)
             } else {
@@ -69,9 +70,7 @@ impl<T: Send + Unpin + Unpin + 'static, W: Widget, F: Fn(Option<T>) -> W> Widget
     }
 }
 
-impl<T: Send + Unpin + 'static, W: Widget, F: Fn(Option<T>) -> W> Widget
-    for WidgetFetcher<T, W, F>
-{
+impl<T: Send + 'static, W: Widget, F: Fn(Option<T>) -> W> Widget for WidgetFetcher<T, W, F> {
     fn render(
         &mut self,
         scene: &mut dyn Scene,

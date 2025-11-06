@@ -29,8 +29,8 @@ impl TaskRunner {
     #[tracing::instrument(skip_all)]
     pub fn spawn<Fut>(&self, _future: Fut) -> Box<dyn Task<Fut::Output>>
     where
-        Fut: Future + Send + Unpin + 'static,
-        Fut::Output: Send + Unpin + 'static,
+        Fut: Future + Send + 'static,
+        Fut::Output: Send + 'static,
     {
         match self {
             #[cfg(feature = "tokio-runner")]
@@ -57,8 +57,8 @@ impl TaskRunner {
     #[tracing::instrument(skip_all)]
     pub fn spawn_blocking<R, F>(&self, _func: F) -> Box<dyn Task<R>>
     where
-        R: Send + Unpin + 'static,
-        F: FnOnce() -> R + Send + Unpin + 'static,
+        R: Send + 'static,
+        F: FnOnce() -> R + Send + 'static,
     {
         match self {
             #[cfg(feature = "tokio-runner")]
@@ -99,26 +99,26 @@ impl TaskRunner {
 /// A trait that provides a task runner implementation.
 pub trait TaskRunnerImpl: Debug + 'static {
     /// The task type, that this task runner implementation uses.
-    type Task<T: Send + Unpin + 'static>: Task<T>;
+    type Task<T: Send + 'static>: Task<T>;
 
     /// The local task type, that this task runner implementation uses.
-    type LocalTask<T: Unpin + 'static>: LocalTask<T>;
+    type LocalTask<T: 'static>: LocalTask<T>;
 
     /// Spawns a task, possibly in the background.
     ///
     /// Returns a task handle to the future.
     fn spawn<Fut>(&self, future: Fut) -> Self::Task<Fut::Output>
     where
-        Fut: Future + Send + Unpin + 'static,
-        Fut::Output: Send + Unpin + 'static;
+        Fut: Future + Send + 'static,
+        Fut::Output: Send + 'static;
 
     /// Spawns a blocking task in the background.
     ///
     /// Returns a task handle to the operation.
     fn spawn_blocking<R, F>(&self, func: F) -> Self::Task<R>
     where
-        R: Send + Unpin + 'static,
-        F: FnOnce() -> R + Send + Unpin + 'static;
+        R: Send + 'static,
+        F: FnOnce() -> R + Send + 'static;
 
     /// Blocks on the given future, until it's completed.
     fn block_on<Fut>(&self, future: Fut) -> Fut::Output

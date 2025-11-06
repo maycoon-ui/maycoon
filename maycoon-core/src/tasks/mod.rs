@@ -40,8 +40,8 @@ pub fn runner<'a>() -> &'a TaskRunner {
 /// depends on the [TaskRunner] type that is in use.
 pub fn spawn<Fut>(future: Fut) -> Box<dyn Task<Fut::Output>>
 where
-    Fut: Future + Send + Unpin + 'static,
-    Fut::Output: Send + Unpin + 'static,
+    Fut: Future + Send + 'static,
+    Fut::Output: Send + 'static,
 {
     runner().spawn(future)
 }
@@ -55,8 +55,8 @@ where
 #[cfg(native)]
 pub fn spawn_blocking<R, F>(func: F) -> Box<dyn Task<R>>
 where
-    R: Send + Unpin + 'static,
-    F: FnOnce() -> R + Send + Unpin + 'static,
+    R: Send + 'static,
+    F: FnOnce() -> R + Send + 'static,
 {
     runner().spawn_blocking(func)
 }

@@ -1,11 +1,10 @@
-use crate::tasks::waker;
 use std::pin::Pin;
 use std::task::{Context, Poll};
 
 /// A task that **can** be spawned on a background thread.
 ///
-/// The inner value requires to be [Send], [Unpin] and [Send].
-pub trait Task<T: Send + 'static>: Future<Output = T> + Send + Unpin + 'static {
+/// The inner value requires to be [Send] and `static`.
+pub trait Task<T: Send + 'static>: Future<Output = T> + Send + 'static {
     /// Returns if the task is finished or still pending.
     fn is_ready(&self) -> bool;
 
@@ -16,22 +15,13 @@ pub trait Task<T: Send + 'static>: Future<Output = T> + Send + Unpin + 'static {
     /// This should only be called if you are sure the task is ready (check via [Task::is_ready]).
     /// Furthermore, calling this multiple times when the task is finished will probably raise a panic,
     /// so make sure to only call this once, if the task is finished.
-    fn take(&mut self) -> Option<T> {
-        let pinned = Pin::new(self);
-        let waker = waker::noop_waker();
-        let mut cx = Context::from_waker(&waker);
-
-        match pinned.poll(&mut cx) {
-            Poll::Ready(val) => Some(val),
-            Poll::Pending => None,
-        }
-    }
+    fn take(&mut self) -> Option<T>;
 }
 
 /// A task that is executed on the local thread.
 ///
 /// Unlike [Task], the inner type does not need to be [Send].
-pub trait LocalTask<T>: Future<Output = T> + Unpin + 'static {
+pub trait LocalTask<T>: Future<Output = T> + 'static {
     /// Returns if the task is finished or still pending.
     fn is_ready(&self) -> bool;
 
@@ -42,32 +32,23 @@ pub trait LocalTask<T>: Future<Output = T> + Unpin + 'static {
     /// This should only be called if you are sure the task is ready (check via [Task::is_ready]).
     /// Furthermore, calling this multiple times when the task is finished will probably raise a panic,
     /// so make sure to only call this once, if the task is finished.
-    fn take(&mut self) -> Option<T> {
-        let pinned = Pin::new(self);
-        let waker = waker::noop_waker();
-        let mut cx = Context::from_waker(&waker);
-
-        match pinned.poll(&mut cx) {
-            Poll::Ready(val) => Some(val),
-            Poll::Pending => None,
-        }
-    }
+    fn take(&mut self) -> Option<T>;
 }
 
 /// A task that never completes.
 ///
 /// This is the [Send]-safe variant of [LocalNeverTask].
 #[derive(Debug)]
-pub struct NeverTask<T: Send + Unpin + 'static>(std::marker::PhantomData<T>);
+pub struct NeverTask<T: Send + 'static>(std::marker::PhantomData<T>);
 
-impl<T: Send + Unpin + 'static> NeverTask<T> {
+impl<T: Send + 'static> NeverTask<T> {
     /// Creates a new [NeverTask].
     pub const fn new() -> Self {
         Self(std::marker::PhantomData)
     }
 }
 
-impl<T: Send + Unpin + 'static> Future for NeverTask<T> {
+impl<T: Send + 'static> Future for NeverTask<T> {
     type Output = T;
 
     fn poll(self: Pin<&mut Self>, _cx: &mut Context<'_>) -> Poll<Self::Output> {
@@ -75,9 +56,13 @@ impl<T: Send + Unpin + 'static> Future for NeverTask<T> {
     }
 }
 
-impl<T: Send + Unpin + 'static> Task<T> for NeverTask<T> {
+impl<T: Send + 'static> Task<T> for NeverTask<T> {
     fn is_ready(&self) -> bool {
         false
+    }
+
+    fn take(&mut self) -> Option<T> {
+        None
     }
 }
 
@@ -85,16 +70,16 @@ impl<T: Send + Unpin + 'static> Task<T> for NeverTask<T> {
 ///
 /// This is the non-[Send]-safe variant of [NeverTask].
 #[derive(Debug, Default)]
-pub struct LocalNeverTask<T: Unpin + 'static>(std::marker::PhantomData<T>);
+pub struct LocalNeverTask<T: 'static>(std::marker::PhantomData<T>);
 
-impl<T: Unpin + 'static> LocalNeverTask<T> {
+impl<T: 'static> LocalNeverTask<T> {
     /// Create a new [LocalNeverTask].
     pub const fn new() -> Self {
         Self(std::marker::PhantomData)
     }
 }
 
-impl<T: Unpin + 'static> Future for LocalNeverTask<T> {
+impl<T: 'static> Future for LocalNeverTask<T> {
     type Output = T;
 
     fn poll(self: Pin<&mut Self>, _cx: &mut Context<'_>) -> Poll<Self::Output> {
@@ -102,8 +87,12 @@ impl<T: Unpin + 'static> Future for LocalNeverTask<T> {
     }
 }
 
-impl<T: Unpin + 'static> LocalTask<T> for LocalNeverTask<T> {
+impl<T: 'static> LocalTask<T> for LocalNeverTask<T> {
     fn is_ready(&self) -> bool {
         false
+    }
+
+    fn take(&mut self) -> Option<T> {
+        None
     }
 }

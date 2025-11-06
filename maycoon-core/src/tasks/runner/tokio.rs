@@ -1,5 +1,6 @@
 use crate::tasks::runner::TaskRunnerImpl;
 use crate::tasks::task::{LocalTask, Task};
+use crate::tasks::waker::noop_waker;
 use std::pin::Pin;
 use std::task::{Context, Poll};
 use std::time::Duration;
@@ -70,21 +71,21 @@ impl TaskRunner {
 }
 
 impl TaskRunnerImpl for TaskRunner {
-    type Task<T: Send + Unpin + 'static> = TokioTask<T>;
-    type LocalTask<T: Unpin + 'static> = LocalTokioTask<T>;
+    type Task<T: Send + 'static> = TokioTask<T>;
+    type LocalTask<T: 'static> = LocalTokioTask<T>;
 
     fn spawn<Fut>(&self, future: Fut) -> Self::Task<Fut::Output>
     where
-        Fut: Future + Send + Unpin + 'static,
-        Fut::Output: Send + Unpin + 'static,
+        Fut: Future + Send + 'static,
+        Fut::Output: Send + 'static,
     {
         TokioTask(self.rt.spawn(future))
     }
 
     fn spawn_blocking<R, F>(&self, func: F) -> Self::Task<R>
     where
-        R: Send + Unpin + 'static,
-        F: FnOnce() -> R + Send + Unpin + 'static,
+        R: Send + 'static,
+        F: FnOnce() -> R + Send + 'static,
     {
         TokioTask(self.rt.spawn_blocking(func))
     }
@@ -100,13 +101,24 @@ impl TaskRunnerImpl for TaskRunner {
 /// A [Task] implementation that uses [tokio].
 pub struct TokioTask<T: Send + 'static>(JoinHandle<T>);
 
-impl<T: Send + Unpin + 'static> Task<T> for TokioTask<T> {
+impl<T: Send + 'static> Task<T> for TokioTask<T> {
     fn is_ready(&self) -> bool {
         self.0.is_finished()
     }
+
+    fn take(&mut self) -> Option<T> {
+        let pinned = Pin::new(&mut self.0);
+        let waker = noop_waker();
+        let mut ctx = Context::from_waker(&waker);
+
+        match pinned.poll(&mut ctx) {
+            Poll::Ready(value) => Some(value.expect("Failed to poll tokio task")),
+            Poll::Pending => None,
+        }
+    }
 }
 
-impl<T: Send + Unpin + 'static> Future for TokioTask<T> {
+impl<T: Send + 'static> Future for TokioTask<T> {
     type Output = T;
 
     fn poll(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<T> {
@@ -120,15 +132,19 @@ impl<T: Send + Unpin + 'static> Future for TokioTask<T> {
 }
 
 /// A [LocalTask] implementation that uses [tokio].
-pub struct LocalTokioTask<T: Unpin + 'static>(JoinHandle<T>);
+pub struct LocalTokioTask<T: 'static>(JoinHandle<T>);
 
-impl<T: Unpin + 'static> LocalTask<T> for LocalTokioTask<T> {
+impl<T: 'static> LocalTask<T> for LocalTokioTask<T> {
     fn is_ready(&self) -> bool {
         self.0.is_finished()
     }
+
+    fn take(&mut self) -> Option<T> {
+        todo!()
+    }
 }
 
-impl<T: Unpin + 'static> Future for LocalTokioTask<T> {
+impl<T: 'static> Future for LocalTokioTask<T> {
     type Output = T;
 
     fn poll(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<T> {
