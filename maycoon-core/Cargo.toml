@@ -39,7 +39,6 @@ cfg_aliases = "0.2.1"
 
 [features]
 default = []
-include-noto-sans = []
 tokio-runner = ["tokio"]
 svg = ["usvg"]
 vello-vg = ["vello", "vello_svg", "skrifa", "bytemuck", "wgpu-types"]

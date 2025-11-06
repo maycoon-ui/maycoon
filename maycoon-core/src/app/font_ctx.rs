@@ -1,6 +1,5 @@
 use indexmap::IndexMap;
-use peniko::{Blob, FontData};
-use std::sync::Arc;
+use peniko::FontData;
 
 /// A font manager for maycoon applications.
 ///
@@ -59,7 +58,6 @@ impl FontContext {
     }
 }
 
-#[cfg(feature = "include-noto-sans")]
 impl Default for FontContext {
     fn default() -> Self {
         let mut ctx = FontContext::new("Noto Sans".to_string());
@@ -67,7 +65,10 @@ impl Default for FontContext {
         tracing::debug!("loading noto sans system font");
         ctx.load(
             "Noto Sans",
-            FontData::new(Blob::new(Arc::new(crate::DEFAULT_FONT)), 0),
+            FontData::new(
+                peniko::Blob::new(std::sync::Arc::new(crate::DEFAULT_FONT)),
+                0,
+            ),
         );
 
         ctx

@@ -43,16 +43,13 @@ peniko = { workspace = true }
 nalgebra = { workspace = true }
 
 [features]
-default = ["macros", "include-noto-sans", "vello-vg", "tokio-runner"]
+default = ["macros", "vello-vg", "tokio-runner"]
 
 # Exports useful macros for working with maycoon.
 macros = ["maycoon-macros"]
 
 # Enables the `Canvas` widget for drawing to the screen.
 canvas = ["maycoon-widgets/canvas"]
-
-# Include the `Noto Sans` font as a default font. If disabled, you must specify a default font using the `FontContext`.
-include-noto-sans = ["maycoon-core/include-noto-sans"]
 
 # Use the `tokio` runtime for running tasks inside a task runner.
 tokio-runner = ["maycoon-core/tokio-runner"]

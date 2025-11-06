@@ -2,7 +2,6 @@ use crate::app::context::AppContext;
 use crate::app::runner::MayRunner;
 use crate::config::MayConfig;
 use crate::plugin::PluginManager;
-use crate::tasks;
 use crate::vgi::VectorGraphicsInterface;
 use crate::widget::Widget;
 use maycoon_theme::theme::Theme;
@@ -68,8 +67,8 @@ pub trait Application: Sized {
         #[cfg(feature = "tokio-runner")]
         {
             tracing::info!("initializing tokio task runner");
-            tasks::init(tasks::runner::TaskRunner::Tokio(
-                tasks::runner::tokio::TaskRunner::new(
+            crate::tasks::init(crate::tasks::runner::TaskRunner::Tokio(
+                crate::tasks::runner::tokio::TaskRunner::new(
                     true, None, None, None, None, None, None, None,
                 ),
             ));
