@@ -27,14 +27,14 @@ impl TaskRunner {
     ///
     /// Panics, when no task runner feature is enabled.
     #[tracing::instrument(skip_all)]
-    pub fn spawn<Fut>(&self, _future: Fut) -> impl Task<Fut::Output>
+    pub fn spawn<Fut>(&self, _future: Fut) -> Box<dyn Task<Fut::Output>>
     where
-        Fut: Future + Send + 'static,
-        Fut::Output: Send + 'static,
+        Fut: Future + Send + Unpin + 'static,
+        Fut::Output: Send + Unpin + 'static,
     {
         match self {
             #[cfg(feature = "tokio-runner")]
-            TaskRunner::Tokio(rt) => rt.spawn(_future),
+            TaskRunner::Tokio(rt) => Box::new(rt.spawn(_future)),
 
             _ => {
                 panic!(
@@ -43,7 +43,7 @@ impl TaskRunner {
 
                 // Required for code to compile
                 #[allow(unreachable_code)]
-                crate::tasks::task::NeverTask::new()
+                Box::new(crate::tasks::task::NeverTask::new())
             },
         }
     }
@@ -55,14 +55,14 @@ impl TaskRunner {
     /// Panics, when no task runner feature is enabled.
     #[cfg(native)]
     #[tracing::instrument(skip_all)]
-    pub fn spawn_blocking<R, F>(&self, _func: F) -> impl Task<R>
+    pub fn spawn_blocking<R, F>(&self, _func: F) -> Box<dyn Task<R>>
     where
-        R: Send + 'static,
-        F: FnOnce() -> R + Send + 'static,
+        R: Send + Unpin + 'static,
+        F: FnOnce() -> R + Send + Unpin + 'static,
     {
         match self {
             #[cfg(feature = "tokio-runner")]
-            TaskRunner::Tokio(rt) => rt.spawn_blocking(_func),
+            TaskRunner::Tokio(rt) => Box::new(rt.spawn_blocking(_func)),
 
             _ => {
                 panic!(
@@ -71,7 +71,7 @@ impl TaskRunner {
 
                 // Required for code to compile
                 #[allow(unreachable_code)]
-                crate::tasks::task::NeverTask::new()
+                Box::new(crate::tasks::task::NeverTask::new())
             },
         }
     }
@@ -99,26 +99,26 @@ impl TaskRunner {
 /// A trait that provides a task runner implementation.
 pub trait TaskRunnerImpl: Debug + 'static {
     /// The task type, that this task runner implementation uses.
-    type Task<T: Send + 'static>: Task<T>;
+    type Task<T: Send + Unpin + 'static>: Task<T>;
 
     /// The local task type, that this task runner implementation uses.
-    type LocalTask<T>: LocalTask<T>;
+    type LocalTask<T: Unpin + 'static>: LocalTask<T>;
 
     /// Spawns a task, possibly in the background.
     ///
     /// Returns a task handle to the future.
     fn spawn<Fut>(&self, future: Fut) -> Self::Task<Fut::Output>
     where
-        Fut: Future + Send + 'static,
-        Fut::Output: Send + 'static;
+        Fut: Future + Send + Unpin + 'static,
+        Fut::Output: Send + Unpin + 'static;
 
     /// Spawns a blocking task in the background.
     ///
     /// Returns a task handle to the operation.
     fn spawn_blocking<R, F>(&self, func: F) -> Self::Task<R>
     where
-        R: Send + 'static,
-        F: FnOnce() -> R + Send + 'static;
+        R: Send + Unpin + 'static,
+        F: FnOnce() -> R + Send + Unpin + 'static;
 
     /// Blocks on the given future, until it's completed.
     fn block_on<Fut>(&self, future: Fut) -> Fut::Output

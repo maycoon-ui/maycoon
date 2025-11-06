@@ -26,25 +26,25 @@ use std::future::Future;
 /// ### Theming
 /// The widget itself only draws the underlying widget, so theming is useless.
 pub struct WidgetFetcher<T: Send + Unpin + 'static, W: Widget, F: Fn(Option<T>) -> W> {
-    task: Option<Box<dyn Task<T> + Unpin>>,
+    task: Option<Box<dyn Task<T>>>,
     render: F,
     widget: Option<W>,
     update: Update,
 }
 
-impl<T: Send + Unpin + 'static, W: Widget, F: Fn(Option<T>) -> W> WidgetFetcher<T, W, F> {
+impl<T: Send + Unpin + Unpin + 'static, W: Widget, F: Fn(Option<T>) -> W> WidgetFetcher<T, W, F> {
     /// Creates a new [WidgetFetcher] with parameters:
     /// - `future`: The future to execute.
     /// - `update`: The update to trigger when the data is updated (when loading is done).
     /// - `render`: The function to render the widget. The first parameter is the result of the future and the second parameter is the mutable app state.
     pub fn new<Fut>(future: Fut, update: Update, render: F) -> Self
     where
-        Fut: Future<Output = T> + Send + 'static,
+        Fut: Future<Output = T> + Send + Unpin + 'static,
     {
         let task = tasks::spawn(future);
 
         Self {
-            task: Some(Box::new(task)),
+            task: Some(task),
             render,
             widget: None,
             update,

@@ -38,10 +38,10 @@ pub fn runner<'a>() -> &'a TaskRunner {
 ///
 /// If this actually spawns a task on a background task or just spawns a local task,
 /// depends on the [TaskRunner] type that is in use.
-pub fn spawn<Fut>(future: Fut) -> impl Task<Fut::Output>
+pub fn spawn<Fut>(future: Fut) -> Box<dyn Task<Fut::Output>>
 where
-    Fut: Future + Send + 'static,
-    Fut::Output: Send + 'static,
+    Fut: Future + Send + Unpin + 'static,
+    Fut::Output: Send + Unpin + 'static,
 {
     runner().spawn(future)
 }
@@ -53,10 +53,10 @@ where
 ///
 /// Only available on native platforms.
 #[cfg(native)]
-pub fn spawn_blocking<R, F>(func: F) -> impl Task<R>
+pub fn spawn_blocking<R, F>(func: F) -> Box<dyn Task<R>>
 where
-    R: Send + 'static,
-    F: FnOnce() -> R + Send + 'static,
+    R: Send + Unpin + 'static,
+    F: FnOnce() -> R + Send + Unpin + 'static,
 {
     runner().spawn_blocking(func)
 }

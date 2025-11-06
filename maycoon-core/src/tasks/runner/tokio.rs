@@ -70,21 +70,21 @@ impl TaskRunner {
 }
 
 impl TaskRunnerImpl for TaskRunner {
-    type Task<T: Send + 'static> = TokioTask<T>;
-    type LocalTask<T> = LocalTokioTask<T>;
+    type Task<T: Send + Unpin + 'static> = TokioTask<T>;
+    type LocalTask<T: Unpin + 'static> = LocalTokioTask<T>;
 
     fn spawn<Fut>(&self, future: Fut) -> Self::Task<Fut::Output>
     where
-        Fut: Future + Send + 'static,
-        Fut::Output: Send + 'static,
+        Fut: Future + Send + Unpin + 'static,
+        Fut::Output: Send + Unpin + 'static,
     {
         TokioTask(self.rt.spawn(future))
     }
 
     fn spawn_blocking<R, F>(&self, func: F) -> Self::Task<R>
     where
-        R: Send + 'static,
-        F: FnOnce() -> R + Send + 'static,
+        R: Send + Unpin + 'static,
+        F: FnOnce() -> R + Send + Unpin + 'static,
     {
         TokioTask(self.rt.spawn_blocking(func))
     }
@@ -100,13 +100,13 @@ impl TaskRunnerImpl for TaskRunner {
 /// A [Task] implementation that uses [tokio].
 pub struct TokioTask<T: Send + 'static>(JoinHandle<T>);
 
-impl<T: Send + 'static> Task<T> for TokioTask<T> {
+impl<T: Send + Unpin + 'static> Task<T> for TokioTask<T> {
     fn is_ready(&self) -> bool {
         self.0.is_finished()
     }
 }
 
-impl<T: Send + 'static> Future for TokioTask<T> {
+impl<T: Send + Unpin + 'static> Future for TokioTask<T> {
     type Output = T;
 
     fn poll(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<T> {
@@ -120,15 +120,15 @@ impl<T: Send + 'static> Future for TokioTask<T> {
 }
 
 /// A [LocalTask] implementation that uses [tokio].
-pub struct LocalTokioTask<T>(JoinHandle<T>);
+pub struct LocalTokioTask<T: Unpin + 'static>(JoinHandle<T>);
 
-impl<T> LocalTask<T> for LocalTokioTask<T> {
+impl<T: Unpin + 'static> LocalTask<T> for LocalTokioTask<T> {
     fn is_ready(&self) -> bool {
         self.0.is_finished()
     }
 }
 
-impl<T> Future for LocalTokioTask<T> {
+impl<T: Unpin + 'static> Future for LocalTokioTask<T> {
     type Output = T;
 
     fn poll(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<T> {
