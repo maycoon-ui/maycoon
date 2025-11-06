@@ -11,6 +11,9 @@ pub mod task;
 /// Contains a dummy implementation of a waker. Used in [Task::take].
 pub mod waker;
 
+/// Contains the [fetcher::Fetcher] structure.
+pub mod fetcher;
+
 /// The global task runner.
 static RUNNER: OnceLock<TaskRunner> = OnceLock::new();
 
