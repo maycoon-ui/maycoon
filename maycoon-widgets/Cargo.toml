@@ -15,6 +15,9 @@ maycoon-theme = { workspace = true }
 maycoon-core = { workspace = true, features = ["dummy-runner"] }
 nalgebra = { workspace = true }
 
+[build-dependencies]
+cfg_aliases = { workspace = true }
+
 [features]
 default = []
 canvas = []
