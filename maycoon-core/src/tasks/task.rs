@@ -1,4 +1,5 @@
 use crate::tasks::waker;
+use std::pin::Pin;
 use std::task::{Context, Poll};
 
 /// A task that **can** be spawned on a background thread.
@@ -19,7 +20,7 @@ pub trait Task<T: Send + 'static>: Future<Output = T> + Send + 'static {
     where
         Self: Unpin,
     {
-        let pinned = std::pin::Pin::new(self);
+        let pinned = Pin::new(self);
         let waker = waker::noop_waker();
         let mut cx = Context::from_waker(&waker);
 
@@ -48,7 +49,7 @@ pub trait LocalTask<T>: Future<Output = T> {
     where
         Self: Unpin,
     {
-        let pinned = std::pin::Pin::new(self);
+        let pinned = Pin::new(self);
         let waker = waker::noop_waker();
         let mut cx = Context::from_waker(&waker);
 
@@ -56,5 +57,59 @@ pub trait LocalTask<T>: Future<Output = T> {
             Poll::Ready(val) => Some(val),
             Poll::Pending => None,
         }
+    }
+}
+
+/// A task that never completes.
+///
+/// This is the [Send]-safe variant of [LocalNeverTask].
+#[derive(Debug)]
+pub struct NeverTask<T: Send + 'static>(std::marker::PhantomData<T>);
+
+impl<T: Send + 'static> NeverTask<T> {
+    /// Creates a new [NeverTask].
+    pub const fn new() -> Self {
+        Self(std::marker::PhantomData)
+    }
+}
+
+impl<T: Send + 'static> Future for NeverTask<T> {
+    type Output = T;
+
+    fn poll(self: Pin<&mut Self>, _cx: &mut Context<'_>) -> Poll<Self::Output> {
+        Poll::Pending
+    }
+}
+
+impl<T: Send + 'static> Task<T> for NeverTask<T> {
+    fn is_ready(&self) -> bool {
+        false
+    }
+}
+
+/// A task that never completes.
+///
+/// This is the non-[Send]-safe variant of [NeverTask].
+#[derive(Debug, Default)]
+pub struct LocalNeverTask<T>(std::marker::PhantomData<T>);
+
+impl<T: Send + 'static> LocalNeverTask<T> {
+    /// Create a new [LocalNeverTask].
+    pub const fn new() -> Self {
+        Self(std::marker::PhantomData)
+    }
+}
+
+impl<T> Future for LocalNeverTask<T> {
+    type Output = T;
+
+    fn poll(self: Pin<&mut Self>, _cx: &mut Context<'_>) -> Poll<Self::Output> {
+        Poll::Pending
+    }
+}
+
+impl<T> LocalTask<T> for LocalNeverTask<T> {
+    fn is_ready(&self) -> bool {
+        false
     }
 }
