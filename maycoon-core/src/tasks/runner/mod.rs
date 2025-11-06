@@ -13,8 +13,11 @@ pub enum TaskRunner {
     /// A task runner that uses the [tokio] runtime.
     #[cfg(feature = "tokio-runner")]
     Tokio(tokio::TaskRunner),
-    /// Not a real task runner. Panics on any method call.
-    None,
+    /// A dummy task runner that will panic on any method call.
+    /// Useful if you want to disable the task runner feature,
+    /// but still want the build script to work (e.g. for libraries).
+    #[cfg(feature = "dummy-runner")]
+    Dummy,
 }
 
 impl TaskRunner {
@@ -24,17 +27,24 @@ impl TaskRunner {
     ///
     /// Panics, when no task runner feature is enabled.
     #[tracing::instrument(skip_all)]
-    pub fn spawn<Fut>(&self, future: Fut) -> impl Task<Fut::Output>
+    pub fn spawn<Fut>(&self, _future: Fut) -> impl Task<Fut::Output>
     where
         Fut: Future + Send + 'static,
         Fut::Output: Send + 'static,
     {
         match self {
             #[cfg(feature = "tokio-runner")]
-            TaskRunner::Tokio(rt) => rt.spawn(future),
-            _ => panic!(
-                "No valid task runner feature selected. Please select a `-runner` feature (e.g. `tokio-runner`)."
-            ),
+            TaskRunner::Tokio(rt) => rt.spawn(_future),
+
+            _ => {
+                panic!(
+                    "No valid task runner feature selected. Please select a `-runner` feature (e.g. `tokio-runner`)."
+                );
+
+                // Required for code to compile
+                #[allow(unreachable_code)]
+                crate::tasks::task::NeverTask::new()
+            },
         }
     }
 
@@ -45,17 +55,24 @@ impl TaskRunner {
     /// Panics, when no task runner feature is enabled.
     #[cfg(native)]
     #[tracing::instrument(skip_all)]
-    pub fn spawn_blocking<R, F>(&self, func: F) -> impl Task<R>
+    pub fn spawn_blocking<R, F>(&self, _func: F) -> impl Task<R>
     where
         R: Send + 'static,
         F: FnOnce() -> R + Send + 'static,
     {
         match self {
             #[cfg(feature = "tokio-runner")]
-            TaskRunner::Tokio(rt) => rt.spawn_blocking(func),
-            _ => panic!(
-                "No valid task runner feature selected. Please select a `-runner` feature (e.g. `tokio-runner`)."
-            ),
+            TaskRunner::Tokio(rt) => rt.spawn_blocking(_func),
+
+            _ => {
+                panic!(
+                    "No valid task runner feature selected. Please select a `-runner` feature (e.g. `tokio-runner`)."
+                );
+
+                // Required for code to compile
+                #[allow(unreachable_code)]
+                crate::tasks::task::NeverTask::new()
+            },
         }
     }
 
@@ -64,13 +81,14 @@ impl TaskRunner {
     /// Panics, when no task runner feature is enabled.
     #[cfg(native)]
     #[tracing::instrument(skip_all)]
-    pub fn block_on<Fut>(&self, future: Fut) -> Fut::Output
+    pub fn block_on<Fut>(&self, _future: Fut) -> Fut::Output
     where
         Fut: Future,
     {
         match self {
             #[cfg(feature = "tokio-runner")]
-            TaskRunner::Tokio(rt) => rt.block_on(future),
+            TaskRunner::Tokio(rt) => rt.block_on(_future),
+
             _ => panic!(
                 "No valid task runner feature selected. Please select a `-runner` feature (e.g. `tokio-runner`)."
             ),

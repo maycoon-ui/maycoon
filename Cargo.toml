@@ -51,6 +51,9 @@ macros = ["maycoon-macros"]
 # Enables the `Canvas` widget for drawing to the screen.
 canvas = ["maycoon-widgets/canvas"]
 
+# A dummy task runner. Can be used, when you don't want to specify a task runner, but still let the build script execute.
+dummy-runner = ["maycoon-core/dummy-runner"]
+
 # Use the `tokio` runtime for running tasks inside a task runner.
 tokio-runner = ["maycoon-core/tokio-runner"]
 

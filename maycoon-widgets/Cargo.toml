@@ -12,7 +12,7 @@ homepage.workspace = true
 
 [dependencies]
 maycoon-theme = { workspace = true }
-maycoon-core = { workspace = true }
+maycoon-core = { workspace = true, features = ["dummy-runner"] }
 nalgebra = { workspace = true }
 
 [features]
