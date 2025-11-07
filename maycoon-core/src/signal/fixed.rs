@@ -21,7 +21,7 @@ impl<T: 'static> FixedSignal<T> {
 
 impl<T: 'static> Signal<T> for FixedSignal<T> {
     fn get(&self) -> Ref<'_, T> {
-        Ref::Rc(self.value.clone())
+        Ref::Borrow(self.value.as_ref())
     }
 
     fn set_value(&self, _: T) {}

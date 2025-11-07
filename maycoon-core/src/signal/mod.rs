@@ -122,7 +122,7 @@ impl<T: 'static> MaybeSignal<T> {
     pub fn get(&self) -> Ref<'_, T> {
         match self {
             MaybeSignal::Signal(signal) => signal.get(),
-            MaybeSignal::Value(value) => Ref::Rc(value.clone()),
+            MaybeSignal::Value(value) => Ref::Borrow(value.as_ref()),
         }
     }
 
