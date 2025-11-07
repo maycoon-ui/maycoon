@@ -66,6 +66,12 @@ impl<T: Send + 'static> Task<T> for NeverTask<T> {
     }
 }
 
+impl<T: Send + 'static> Default for NeverTask<T> {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 /// A task that never completes.
 ///
 /// This is the non-[Send]-safe variant of [NeverTask].
