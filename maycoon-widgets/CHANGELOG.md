@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.1](https://github.com/maycoon-ui/maycoon/compare/maycoon-widgets-v0.5.0...maycoon-widgets-v0.5.1) - 2025-11-07
+
+### Fixed
+
+- Unpin issues with Task
+
+### Other
+
+- Make the `WidgetFetcher` use the `Fetcher` as a backend
+- Add build configuration for maycoon-widgets
+
 ## [0.4.1](https://github.com/maycoon-ui/maycoon/compare/maycoon-widgets-v0.4.0...maycoon-widgets-v0.4.1) - 2025-11-05
 
 ### Added
