@@ -20,6 +20,13 @@ impl<T> ListenerRegister<T> {
         }
     }
 
+    /// Create an empty listener register.
+    pub fn empty() -> Self {
+        Self {
+            listeners: Vec::new(),
+        }
+    }
+
     /// Register a new listener.
     pub fn register(&mut self, listener: Listener<T>) {
         self.listeners.push(listener);
