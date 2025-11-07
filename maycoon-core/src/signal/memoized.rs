@@ -21,11 +21,22 @@ impl<T: 'static> MemoizedSignal<T> {
             factory: Rc::new(factory),
         }
     }
+
+    /// Returns if the value has been initialized or not.
+    pub fn is_init(&self) -> bool {
+        self.inner.get().is_some()
+    }
 }
 
 impl<T: 'static> Signal<T> for MemoizedSignal<T> {
     fn get(&self) -> Ref<'_, T> {
-        Ref::Borrow(self.inner.get_or_init(&*self.factory))
+        if !self.is_init() {
+            self.inner.set((self.factory)()).ok().unwrap();
+
+            self.notify();
+        }
+
+        Ref::Borrow(self.inner.get().unwrap())
     }
 
     fn set_value(&self, _: T) {}
