@@ -465,6 +465,7 @@ where
                 },
 
                 WindowEvent::RedrawRequested => {
+                    window.request_redraw();
                     self.update(event_loop);
                 },
 
