@@ -4,14 +4,13 @@ use std::fmt::{Debug, Display, Formatter};
 /// It contains a namespace, which should be the crate name and the id of the widget.
 ///
 /// ```
-/// use maycoon_theme::id::WidgetId;
-///
+/// # use maycoon_theme::id::WidgetId;
 /// WidgetId::new("fancy_text_widget", "FancyText");
 /// ```
-#[derive(Debug, Clone, PartialEq, PartialOrd, Eq, Ord)]
+#[derive(Debug, Copy, Clone, PartialEq, PartialOrd, Eq, Ord, Hash)]
 pub struct WidgetId {
-    namespace: String,
-    id: String,
+    namespace: &'static str,
+    id: &'static str,
 }
 
 impl WidgetId {
@@ -20,28 +19,27 @@ impl WidgetId {
     ///
     /// Example:
     /// ```
-    /// let id = maycoon_theme::id::WidgetId::new("my_crate", "MyWidget");
+    /// # use maycoon_theme::id::WidgetId;
+    /// let id = WidgetId::new("my_crate", "MyWidget");
     /// ```
-    pub fn new(namespace: impl ToString, id: impl ToString) -> Self {
-        Self {
-            namespace: namespace.to_string(),
-            id: id.to_string(),
-        }
+    pub fn new(namespace: &'static str, id: &'static str) -> Self {
+        Self { namespace, id }
     }
 
     /// Returns the namespace of the widget id.
-    pub fn namespace(&self) -> &str {
-        &self.namespace
+    pub fn namespace(&self) -> &'static str {
+        self.namespace
     }
 
     /// Returns the actual widget id.
-    pub fn id(&self) -> &str {
-        &self.id
+    pub fn id(&self) -> &'static str {
+        self.id
     }
 }
 
 impl Display for WidgetId {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        // TODO: use const formatting/writing when const format is stable
         write!(f, "{}:{}", self.namespace, self.id)
     }
 }
