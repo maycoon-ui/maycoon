@@ -22,6 +22,9 @@ pub mod checkbox;
 /// Contains the [slider::Slider] widget.
 pub mod slider;
 
+/// Contains the [switch::Switch] widget.
+pub mod switch;
+
 /// Contains the [fetcher::WidgetFetcher] widget.
 pub mod fetcher;
 
