@@ -17,7 +17,7 @@ use nalgebra::Vector2;
 /// See the [checkbox](https://github.com/maycoon-ui/maycoon/blob/master/examples/checkbox/src/main.rs) example for how to use it in practice.
 ///
 /// ### Theming
-/// Styling the checkbox require following properties:
+/// Styling the checkbox requires following properties:
 /// - `color_unchecked` -  The color of the checkbox, when it's not checked (inner value is false).
 /// - `color_checked` - The color of the checkbox, when it's checked (inner value is true).
 pub struct Checkbox {
@@ -48,13 +48,13 @@ impl Checkbox {
         }
     }
 
-    /// Sets the value of the checkbox and returns itself.
+    /// Sets the value of the checkbox and returns self.
     pub fn with_value(mut self, value: impl Into<MaybeSignal<bool>>) -> Self {
         self.value = value.into();
         self
     }
 
-    /// Sets the update value to apply on changes.
+    /// Sets the update value to apply on changes and returns self.
     pub fn with_on_change(mut self, on_change: impl Into<MaybeSignal<Update>>) -> Self {
         self.on_change = on_change.into();
         self
