@@ -13,6 +13,8 @@ use maycoon_theme::theme::Theme;
 ///
 /// ### Theming
 /// The canvas cannot be themed, since it does not draw something on itself.
+///
+/// The [WidgetId] is equal to `maycoon-widgets:Canvas`.
 pub struct Canvas {
     painter: Box<dyn FnMut(&mut dyn Scene, &AppInfo)>,
 }

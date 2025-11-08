@@ -20,6 +20,8 @@ use maycoon_theme::theme::Theme;
 /// ### Theming
 /// The [GestureDetector] should not be themed and does not draw anything on itself.
 /// It just contains the given child widget.
+///
+/// The [WidgetId] is equal to `maycoon-widgets:GestureDetector`.
 pub struct GestureDetector {
     child: BoxedWidget,
     on_press: MaybeSignal<Update>,

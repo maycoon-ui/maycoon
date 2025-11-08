@@ -20,6 +20,8 @@ use nalgebra::Vector2;
 /// Styling the checkbox requires following properties:
 /// - `color_unchecked` -  The color of the checkbox, when it's not checked (inner value is false).
 /// - `color_checked` - The color of the checkbox, when it's checked (inner value is true).
+///
+/// The [WidgetId] is equal to `maycoon-widgets:Checkbox`.
 pub struct Checkbox {
     layout_style: MaybeSignal<LayoutStyle>,
     value: MaybeSignal<bool>,

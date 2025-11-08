@@ -15,6 +15,8 @@ use nalgebra::Vector2;
 ///
 /// ### Theming
 /// The widget itself only draws the underlying image, so theming is useless.
+///
+/// The [WidgetId] is equal to `maycoon-widgets:Image`.
 pub struct Image {
     image: MaybeSignal<ImageData>,
     style: MaybeSignal<LayoutStyle>,

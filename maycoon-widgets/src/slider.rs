@@ -18,6 +18,8 @@ use nalgebra::Vector2;
 /// You can style the slider using following properties:
 /// - `color` - The color of the slider bar.
 /// - `color_ball` - The color of the slider ball.
+///
+/// The [WidgetId] is equal to `maycoon-widgets:Slider`.
 pub struct Slider {
     layout_style: MaybeSignal<LayoutStyle>,
     value: MaybeSignal<f32>,

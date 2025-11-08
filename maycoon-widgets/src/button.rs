@@ -20,6 +20,8 @@ use maycoon_theme::theme::Theme;
 /// - `color_pressed` -  The color of the button when pressed.
 /// - `color_idle` - The color of the button when not pressed and not hovered (idling).
 /// - `color_hovered` - The color of the button when hovered on.
+///
+/// The [WidgetId] is equal to `maycoon-widgets:Button`.
 pub struct Button {
     child: BoxedWidget,
     state: ButtonState,

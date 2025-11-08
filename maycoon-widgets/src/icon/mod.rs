@@ -19,6 +19,8 @@ pub mod svg;
 ///
 /// ### Theming
 /// The widget itself only draws the underlying icon, so theming is useless.
+///
+/// The [WidgetId] is equal to `maycoon-widgets:Icon`.
 pub struct Icon {
     layout_style: MaybeSignal<LayoutStyle>,
     icon: MaybeSignal<SvgIcon>,

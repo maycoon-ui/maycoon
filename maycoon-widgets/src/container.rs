@@ -16,6 +16,8 @@ use maycoon_theme::theme::Theme;
 ///
 /// ### Theming
 /// The container widget doesn't actually draw anything but the child widgets, so theming is useless.
+///
+/// The [WidgetId] is equal to `maycoon-widgets:Container`.
 #[derive(Default)]
 pub struct Container {
     style: MaybeSignal<LayoutStyle>,

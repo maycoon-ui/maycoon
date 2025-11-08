@@ -9,6 +9,8 @@ use maycoon_theme::theme::Theme;
 use std::time::{Duration, Instant};
 
 /// A widget that animates another widget using an animation function.
+///
+/// The [WidgetId] is equal to `maycoon-widgets:Animator`.
 pub struct Animator<W: Widget, A: Fn(&mut W, f32) -> Update> {
     start: Instant,
     duration: Duration,

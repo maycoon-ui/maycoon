@@ -47,6 +47,8 @@ use std::future::Future;
 ///
 /// ### Theming
 /// The widget itself only draws the underlying widget, so theming is useless.
+///
+/// The [WidgetId] is equal to `maycoon-widgets:WidgetFetcher`.
 pub struct WidgetFetcher<T: Send + 'static, W: Widget> {
     fetcher: Fetcher<T, W>,
     update: Update,
@@ -132,7 +134,6 @@ impl<T: Send + 'static, W: Widget> Widget for WidgetFetcher<T, W> {
     }
 
     fn widget_id(&self) -> WidgetId {
-        // Value is guaranteed to be set at this point
-        self.fetcher.value_ref().unwrap().widget_id()
+        WidgetId::new("maycoon-widgets", "WidgetFetcher")
     }
 }
