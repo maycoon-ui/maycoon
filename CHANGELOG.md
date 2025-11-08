@@ -7,6 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.1](https://github.com/maycoon-ui/maycoon/compare/maycoon-v0.5.0...maycoon-v0.5.1) - 2025-11-07
+
+### Added
+
+- Default impl for NeverTask
+- empty function for ListenerRegistry
+- Task Fetcher for general usage
+
+### Fixed
+
+- MemoizeSignal not notifying on init
+- Docs.rs not compiling maycoon-core
+
+### Other
+
+- Remove Arc and Rc variants of Ref
+- Update indexmap to 2.12.0
+- Update dependencies
+- Make the `WidgetFetcher` use the `Fetcher` as a backend
+- Add build configuration for maycoon-widgets
+
 ## [0.4.1](https://github.com/maycoon-ui/maycoon/compare/maycoon-v0.4.0...maycoon-v0.4.1) - 2025-11-05
 
 ### Added
