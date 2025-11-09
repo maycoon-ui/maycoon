@@ -394,22 +394,63 @@ impl vgi::Scene for Scene {
         font: &FontData,
         size: f32,
         line_gap: f32,
+        max_width: f32,
     ) {
         let font_ref = FontRef::new(font.data.as_ref()).expect("Failed to load font ref");
 
         let location = font_ref.axes().location::<&[VariationSetting; 0]>(&[]);
-
         let metrics = font_ref.metrics(Size::new(size), &location);
-
         let glyph_metrics = font_ref.glyph_metrics(Size::new(size), &location);
-
         let line_height = metrics.ascent + metrics.descent + metrics.leading;
-
         let charmap = font_ref.charmap();
+        let max_pen_x = position.x + max_width;
 
         let mut pen_x = position.x;
-
         let mut pen_y = position.y + size;
+
+        // TODO: use char counting, but more performant than just `text.chars().count()`
+        let mut glyphs = Vec::with_capacity(text.len());
+
+        for word in text.split_inclusive(|c| [' ', '\n'].contains(&c)) {
+            if word.contains('\n') {
+                pen_y += line_height + line_gap;
+                pen_x = position.x;
+                continue;
+            }
+
+            let word_width: f32 = word
+                .chars()
+                .filter_map(|c| {
+                    let gid = charmap.map(c)?;
+                    glyph_metrics.advance_width(gid)
+                })
+                .sum();
+
+            if pen_x + word_width > max_pen_x {
+                pen_y += line_height + line_gap;
+                pen_x = position.x;
+            }
+
+            for c in word.chars() {
+                if c == ' ' {
+                    pen_x += glyph_metrics
+                        .advance_width(charmap.map(' ').unwrap_or_default())
+                        .unwrap_or_default();
+                    continue;
+                }
+
+                let gid = charmap.map(c).unwrap_or_default();
+                let advance = glyph_metrics.advance_width(gid).unwrap_or_default();
+
+                glyphs.push(Glyph {
+                    id: gid.to_u32(),
+                    x: pen_x,
+                    y: pen_y,
+                });
+
+                pen_x += advance;
+            }
+        }
 
         self.scene
             .draw_glyphs(font)
@@ -418,28 +459,7 @@ impl vgi::Scene for Scene {
             .brush(brush)
             .normalized_coords(bytemuck::cast_slice(location.coords()))
             .hint(hinting)
-            .draw(
-                &peniko::Style::Fill(Fill::NonZero),
-                text.chars().filter_map(|c| {
-                    if c == '\n' {
-                        pen_y += line_height + line_gap;
-                        pen_x = position.x;
-                        return None;
-                    }
-
-                    let gid = charmap.map(c).unwrap_or_default();
-                    let advance = glyph_metrics.advance_width(gid).unwrap_or_default();
-                    let x = pen_x;
-
-                    pen_x += advance;
-
-                    Some(Glyph {
-                        id: gid.to_u32(),
-                        x,
-                        y: pen_y,
-                    })
-                }),
-            );
+            .draw(&peniko::Style::Fill(Fill::NonZero), glyphs.into_iter());
     }
 
     #[cfg(feature = "svg")]

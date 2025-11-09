@@ -252,7 +252,9 @@ pub trait Scene: 'static {
     ///
     /// Apply an optional transform to the text (after the position is inserted).
     ///
-    /// You can also specify hinting, size and line gap.
+    /// You can also specify hinting, size, and the line gap.
+    ///
+    /// Furthermore, you can choose if the text should be wrapped by passing `max_width`.
     fn draw_text(
         &mut self,
         brush: &Brush,
@@ -263,6 +265,7 @@ pub trait Scene: 'static {
         font: &FontData,
         size: f32,
         line_gap: f32,
+        max_width: f32,
     );
 
     // TODO: add `Affine` transform arg as soon as vello_svg supports it

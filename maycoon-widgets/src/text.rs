@@ -1,6 +1,7 @@
 use maycoon_core::app::context::AppContext;
 use maycoon_core::app::info::AppInfo;
 use maycoon_core::app::update::Update;
+use maycoon_core::layout;
 use maycoon_core::layout::{Dimension, LayoutNode, LayoutStyle, StyleNode};
 use maycoon_core::signal::MaybeSignal;
 use maycoon_core::vgi::{Brush, Scene};
@@ -27,8 +28,10 @@ pub struct Text {
     text: MaybeSignal<String>,
     font: MaybeSignal<Option<String>>,
     font_size: MaybeSignal<f32>,
-    hinting: MaybeSignal<bool>,
     line_gap: MaybeSignal<f32>,
+    wrap: MaybeSignal<bool>,
+    hinting: MaybeSignal<bool>,
+    max_width: f32,
 }
 
 impl Text {
@@ -39,9 +42,17 @@ impl Text {
             text: text.into(),
             font: None.into(),
             font_size: 30.0.into(),
-            hinting: true.into(),
             line_gap: 7.5.into(),
+            wrap: true.into(),
+            hinting: true.into(),
+            max_width: 0.0,
         }
+    }
+
+    /// Set whether to wrap the text.
+    pub fn with_wrap(mut self, linebreaks: impl Into<MaybeSignal<bool>>) -> Self {
+        self.wrap = linebreaks.into();
+        self
     }
 
     /// Set the hinting of the text.
@@ -89,9 +100,6 @@ impl Widget for Text {
         info: &AppInfo,
         _: AppContext,
     ) {
-        let font_size = *self.font_size.get();
-        let hinting = *self.hinting.get();
-
         let font_name = self.font.get();
 
         let font = if font_name.is_some() {
@@ -112,19 +120,22 @@ impl Widget for Text {
             theme.defaults().text().foreground()
         };
 
-        let line_gap = *self.line_gap.get();
-
-        let text = self.text.get();
+        if *self.wrap.get() {
+            self.max_width = layout_node.layout.size.width;
+        } else {
+            self.max_width = f32::INFINITY;
+        }
 
         scene.draw_text(
             &Brush::Solid(color),
             None,
             Vector2::new(layout_node.layout.location.x, layout_node.layout.location.y),
-            text.as_str(),
-            hinting,
+            self.text.get().as_str(),
+            *self.hinting.get(),
             &font,
-            font_size,
-            line_gap,
+            *self.font_size.get(),
+            *self.line_gap.get(),
+            self.max_width,
         );
     }
 
@@ -147,8 +158,13 @@ impl Widget for Text {
         }
     }
 
-    fn update(&mut self, _: &LayoutNode, _: AppContext, _: &AppInfo) -> Update {
-        Update::empty()
+    fn update(&mut self, layout: &LayoutNode, _: AppContext, _: &AppInfo) -> Update {
+        // Re-layout if the maximum width of the text changes.
+        if *self.wrap.get() && !layout::equal(layout.layout.size.width, self.max_width) {
+            Update::LAYOUT
+        } else {
+            Update::empty()
+        }
     }
 
     fn widget_id(&self) -> WidgetId {
