@@ -6,6 +6,35 @@ pub use taffy::{
     TaffyTree,
 };
 
+/// The tiniest difference two floats should have, in a layout context, to be considered "unequal".
+///
+/// This value is equal to half a pixel.
+///
+/// When comparing two floats in a layout context,
+/// we can check if the difference is higher than this threshold,
+/// in order to determine if redrawing is necessary.
+///
+/// See [equal] for more.
+pub const LAYOUT_EPSILON: f32 = 0.5;
+
+/// Checks if two floats are equal, within the [LAYOUT_EPSILON] threshold.
+///
+/// This is useful for comparing float values in a layout context,
+/// as floating point precision can cause small differences that are not significant
+/// and therefore need no redraw.
+///
+/// Example:
+/// ```
+/// // Significant change. Should redraw.
+/// assert!(!equal(10.0, 20.0));
+///
+/// // Insignificant change. Should not redraw.
+/// assert!(equal(10.0, 10.005));
+/// ```
+pub fn equal(x: f32, y: f32) -> bool {
+    (x - y).abs() < LAYOUT_EPSILON
+}
+
 /// Defines different aspects and properties of a widget layout.
 #[derive(Clone, PartialEq, Debug)]
 pub struct LayoutStyle {
