@@ -37,7 +37,7 @@ impl UpdateManager {
     /// Creates a new `UpdateManager`.
     pub fn new() -> Self {
         Self {
-            update: Arc::new(AtomicU8::new(0)),
+            update: Arc::new(AtomicU8::new(Update::FORCE.bits())),
         }
     }
 
