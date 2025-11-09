@@ -385,7 +385,6 @@ where
         ));
 
         self.window = Some(window);
-        self.update.set(Update::FORCE);
     }
 
     #[tracing::instrument(level = "trace", skip_all, fields(event =
