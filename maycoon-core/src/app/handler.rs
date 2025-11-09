@@ -306,6 +306,9 @@ where
 
         // update diagnostics
         tracing::trace!("updating diagnostics");
+
+        self.info.diagnostics.first_run = false;
+
         if self.last_update.elapsed() >= Duration::from_secs(1) {
             self.last_update = Instant::now();
 
