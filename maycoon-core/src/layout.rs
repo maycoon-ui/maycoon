@@ -35,6 +35,29 @@ pub fn equal(x: f32, y: f32) -> bool {
     (x - y).abs() < LAYOUT_EPSILON
 }
 
+/// Checks if the given point intersects the given layout.
+///
+/// This can be used to check if the cursor is hovering on a widget.
+///
+/// Example:
+/// ```
+/// # use taffy::Layout;
+/// # use maycoon_core::app::info::AppInfo;
+/// # use maycoon_core::layout;
+/// # let info = AppInfo::default();
+/// # let layout = Layout::default();
+///
+/// if let Some(cursor) = info.cursor_pos && layout::intersects(cursor, &layout) {
+///     println!("Hovering on widget!");
+/// }
+/// ```
+pub fn intersects(point: Vector2<f32>, layout: &Layout) -> bool {
+    point.x >= layout.location.x
+        && point.x <= layout.location.x + layout.size.width
+        && point.y >= layout.location.y
+        && point.y <= layout.location.y + layout.size.height
+}
+
 /// Defines different aspects and properties of a widget layout.
 #[derive(Clone, PartialEq, Debug)]
 pub struct LayoutStyle {
