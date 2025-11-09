@@ -45,4 +45,5 @@ pub mod vgi;
 /// Contains conditional types to provide generic platform specific structures.
 pub mod platform;
 
-pub(crate) const DEFAULT_FONT: &[u8] = include_bytes!("NotoSans.ttf");
+/// The data of the default Noto Sans font.
+pub const DEFAULT_FONT: &[u8] = include_bytes!("NotoSans.ttf");
