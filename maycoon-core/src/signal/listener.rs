@@ -14,6 +14,7 @@ impl<T> ListenerRegister<T> {
     ///
     /// By default, the listener register has a capacity of 1,
     /// meaning that it can hold one listener without reallocating.
+    #[inline(always)]
     pub fn new() -> Self {
         Self {
             listeners: Vec::with_capacity(1),
@@ -21,6 +22,7 @@ impl<T> ListenerRegister<T> {
     }
 
     /// Create an empty listener register.
+    #[inline(always)]
     pub fn empty() -> Self {
         Self {
             listeners: Vec::new(),
@@ -28,11 +30,13 @@ impl<T> ListenerRegister<T> {
     }
 
     /// Register a new listener.
+    #[inline(always)]
     pub fn register(&mut self, listener: Listener<T>) {
         self.listeners.push(listener);
     }
 
     /// Notify all listeners with the values produced by `factory`.
+    #[inline(always)]
     pub fn notify<'a>(&self, factory: impl Fn() -> Ref<'a, T>)
     where
         T: 'a,
@@ -44,12 +48,14 @@ impl<T> ListenerRegister<T> {
 }
 
 impl<T> Default for ListenerRegister<T> {
+    #[inline(always)]
     fn default() -> Self {
         Self::new()
     }
 }
 
 impl<T> Clone for ListenerRegister<T> {
+    #[inline(always)]
     fn clone(&self) -> Self {
         Self {
             listeners: self.listeners.clone(),
@@ -69,6 +75,7 @@ impl<T> SendListenerRegistry<T> {
     ///
     /// By default, the listener register has a capacity of 1,
     /// meaning that it can hold one listener without reallocating.
+    #[inline(always)]
     pub fn new() -> Self {
         Self {
             listeners: Vec::with_capacity(1),
@@ -76,11 +83,13 @@ impl<T> SendListenerRegistry<T> {
     }
 
     /// Register a new listener.
+    #[inline(always)]
     pub fn register(&mut self, listener: SendListener<T>) {
         self.listeners.push(listener);
     }
 
     /// Notify all listeners with the values produced by `factory`.
+    #[inline(always)]
     pub fn notify<'a>(&self, factory: impl Fn() -> Ref<'a, T>)
     where
         T: 'a,
@@ -92,12 +101,14 @@ impl<T> SendListenerRegistry<T> {
 }
 
 impl<T> Default for SendListenerRegistry<T> {
+    #[inline(always)]
     fn default() -> Self {
         Self::new()
     }
 }
 
 impl<T> Clone for SendListenerRegistry<T> {
+    #[inline(always)]
     fn clone(&self) -> Self {
         Self {
             listeners: self.listeners.clone(),
@@ -120,6 +131,7 @@ pub struct Listener<T> {
 
 impl<T> Listener<T> {
     /// Create a new listener.
+    #[inline(always)]
     pub fn new(function: impl Fn(Ref<'_, T>) + 'static) -> Self {
         Self {
             function: Rc::new(function),
@@ -127,17 +139,20 @@ impl<T> Listener<T> {
     }
 
     /// Create a new listener from a raw reference counted function.
+    #[inline(always)]
     pub fn from_rc(function: Rc<dyn Fn(Ref<'_, T>)>) -> Self {
         Self { function }
     }
 
     /// Call the listener with a value.
+    #[inline(always)]
     pub fn call(&self, value: Ref<'_, T>) {
         (self.function)(value)
     }
 }
 
 impl<T> Default for Listener<T> {
+    #[inline(always)]
     fn default() -> Self {
         Self {
             function: Rc::new(|_| {}),
@@ -146,6 +161,7 @@ impl<T> Default for Listener<T> {
 }
 
 impl<T> Clone for Listener<T> {
+    #[inline(always)]
     fn clone(&self) -> Self {
         Self {
             function: self.function.clone(),
@@ -168,6 +184,7 @@ pub struct SendListener<T> {
 
 impl<T> SendListener<T> {
     /// Create a new listener.
+    #[inline(always)]
     pub fn new(function: impl Fn(Ref<'_, T>) + 'static) -> Self {
         Self {
             function: Arc::new(function),
@@ -175,17 +192,20 @@ impl<T> SendListener<T> {
     }
 
     /// Create a new listener from a raw atomically reference counted function.
+    #[inline(always)]
     pub fn from_arc(function: Arc<dyn Fn(Ref<'_, T>)>) -> Self {
         Self { function }
     }
 
     /// Call the listener with a value.
+    #[inline(always)]
     pub fn call(&self, value: Ref<'_, T>) {
         (self.function)(value)
     }
 }
 
 impl<T> Default for SendListener<T> {
+    #[inline(always)]
     fn default() -> Self {
         Self {
             function: Arc::new(|_| {}),
@@ -194,6 +214,7 @@ impl<T> Default for SendListener<T> {
 }
 
 impl<T> Clone for SendListener<T> {
+    #[inline(always)]
     fn clone(&self) -> Self {
         Self {
             function: self.function.clone(),

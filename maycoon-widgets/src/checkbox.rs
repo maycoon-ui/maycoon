@@ -32,6 +32,7 @@ impl Checkbox {
     /// Create a new checkbox with the given value.
     ///
     /// The value should be a signal, so it's mutable.
+    #[inline(always)]
     pub fn new(value: impl Into<MaybeSignal<bool>>) -> Self {
         Self {
             layout_style: LayoutStyle {
@@ -51,12 +52,14 @@ impl Checkbox {
     }
 
     /// Sets the value of the checkbox and returns self.
+    #[inline(always)]
     pub fn with_value(mut self, value: impl Into<MaybeSignal<bool>>) -> Self {
         self.value = value.into();
         self
     }
 
     /// Sets the update value to apply on changes and returns self.
+    #[inline(always)]
     pub fn with_on_change(mut self, on_change: impl Into<MaybeSignal<Update>>) -> Self {
         self.on_change = on_change.into();
         self
@@ -64,6 +67,7 @@ impl Checkbox {
 }
 
 impl WidgetLayoutExt for Checkbox {
+    #[inline(always)]
     fn set_layout_style(&mut self, layout_style: impl Into<MaybeSignal<LayoutStyle>>) {
         self.layout_style = layout_style.into();
     }
@@ -127,6 +131,7 @@ impl Widget for Checkbox {
         }
     }
 
+    #[inline(always)]
     fn layout_style(&self) -> StyleNode {
         StyleNode {
             style: self.layout_style.get().clone(),
@@ -156,6 +161,7 @@ impl Widget for Checkbox {
         update
     }
 
+    #[inline(always)]
     fn widget_id(&self) -> WidgetId {
         WidgetId::new("maycoon-widgets", "Checkbox")
     }

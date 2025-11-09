@@ -53,6 +53,7 @@ where
     V: VectorGraphicsInterface,
 {
     /// Create a new handler with given window attributes, config, widget and state.
+    #[inline(always)]
     #[tracing::instrument(level = "trace", skip_all)]
     pub fn new(
         attrs: WindowAttributes,
@@ -98,6 +99,7 @@ where
     }
 
     /// Get the application context.
+    #[inline(always)]
     #[tracing::instrument(level = "trace", skip_all)]
     pub fn context(&self) -> AppContext {
         AppContext::new(self.update.clone(), self.info.diagnostics)
@@ -118,6 +120,7 @@ where
     }
 
     /// Compute the layout of the root node and its children.
+    #[inline(always)]
     #[tracing::instrument(level = "trace", skip(self))]
     fn compute_layout(&mut self) -> TaffyResult<()> {
         self.taffy.compute_layout(
@@ -135,6 +138,7 @@ where
     }
 
     /// Collect the computed layout of the given node and its children. Make sure to call [AppHandler::compute_layout] before, to not get dirty results.
+    #[inline(always)]
     #[tracing::instrument(level = "trace", skip(self, style))]
     fn collect_layout(&mut self, node: NodeId, style: &StyleNode) -> TaffyResult<LayoutNode> {
         tracing::trace!("collecting node layout {node:?}");
@@ -156,12 +160,15 @@ where
     }
 
     /// Request a window redraw.
+    #[inline(always)]
     #[tracing::instrument(level = "trace", skip(self))]
     fn request_redraw(&self) {
         tracing::trace!("requesting redraw");
         self.window.as_ref().unwrap().request_redraw();
     }
 
+    /// Render the application via the vector graphics interface.
+    #[inline(always)]
     #[tracing::instrument(level = "trace", skip(self))]
     fn render(
         &mut self,
@@ -180,6 +187,7 @@ where
     }
 
     /// Update the app and process events.
+    #[inline(always)]
     #[tracing::instrument(level = "trace", skip_all)]
     fn update(&mut self, event_loop: &ActiveEventLoop) {
         // update plugins
@@ -334,6 +342,7 @@ where
     F: Fn(AppContext, S) -> W,
     V: VectorGraphicsInterface,
 {
+    #[inline(always)]
     #[tracing::instrument(level = "trace", skip_all)]
     fn resumed(&mut self, event_loop: &ActiveEventLoop) {
         tracing::debug!("resuming plugins");
@@ -387,6 +396,7 @@ where
         self.window = Some(window);
     }
 
+    #[inline(always)]
     #[tracing::instrument(level = "trace", skip_all, fields(event =
         ?event))]
     fn window_event(
@@ -518,6 +528,7 @@ where
         }
     }
 
+    #[cold]
     #[tracing::instrument(level = "trace", skip_all)]
     fn suspended(&mut self, event_loop: &ActiveEventLoop) {
         tracing::trace!("destroying vector graphics interface");

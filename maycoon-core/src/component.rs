@@ -21,6 +21,7 @@ pub trait Component {
     fn widget_id(&self) -> WidgetId;
 
     /// Composes this component into a [Widget] using [ComposedWidget].
+    #[inline(always)]
     fn compose(self) -> Composed<Self>
     where
         Self: Sized,
@@ -40,6 +41,7 @@ pub struct Composed<C: Component> {
 
 impl<C: Component> Composed<C> {
     /// Creates a new [Composed] widget from a [Component].
+    #[inline(always)]
     pub fn new(component: C) -> Self {
         Self {
             component,
@@ -49,6 +51,7 @@ impl<C: Component> Composed<C> {
 }
 
 impl<C: Component> Widget for Composed<C> {
+    #[inline(always)]
     fn render(
         &mut self,
         scene: &mut dyn Scene,
@@ -64,6 +67,7 @@ impl<C: Component> Widget for Composed<C> {
         }
     }
 
+    #[inline(always)]
     fn layout_style(&self) -> StyleNode {
         if let Some(widget) = &self.widget {
             widget.layout_style()
@@ -75,6 +79,7 @@ impl<C: Component> Widget for Composed<C> {
         }
     }
 
+    #[inline(always)]
     fn update(&mut self, layout: &LayoutNode, context: AppContext, info: &AppInfo) -> Update {
         if let Some(widget) = &mut self.widget {
             widget.update(layout, context, info)
@@ -84,16 +89,19 @@ impl<C: Component> Widget for Composed<C> {
         }
     }
 
+    #[inline(always)]
     fn widget_id(&self) -> WidgetId {
         self.component.widget_id()
     }
 }
 
 impl<C: Component + WidgetChildrenExt> WidgetChildrenExt for Composed<C> {
+    #[inline(always)]
     fn set_children(&mut self, children: Vec<BoxedWidget>) {
         self.component.set_children(children)
     }
 
+    #[inline(always)]
     fn with_children(self, children: Vec<BoxedWidget>) -> Self
     where
         Self: Sized,
@@ -101,10 +109,12 @@ impl<C: Component + WidgetChildrenExt> WidgetChildrenExt for Composed<C> {
         self.component.with_children(children).compose()
     }
 
+    #[inline(always)]
     fn add_child(&mut self, child: impl Widget + 'static) {
         self.component.add_child(child)
     }
 
+    #[inline(always)]
     fn with_child(self, child: impl Widget + 'static) -> Self
     where
         Self: Sized,
@@ -114,10 +124,12 @@ impl<C: Component + WidgetChildrenExt> WidgetChildrenExt for Composed<C> {
 }
 
 impl<C: Component + WidgetChildExt> WidgetChildExt for Composed<C> {
+    #[inline(always)]
     fn set_child(&mut self, child: impl Widget + 'static) {
         self.component.set_child(child)
     }
 
+    #[inline(always)]
     fn with_child(self, child: impl Widget + 'static) -> Self
     where
         Self: Sized,
@@ -127,10 +139,12 @@ impl<C: Component + WidgetChildExt> WidgetChildExt for Composed<C> {
 }
 
 impl<C: Component + WidgetLayoutExt> WidgetLayoutExt for Composed<C> {
+    #[inline(always)]
     fn set_layout_style(&mut self, layout_style: impl Into<MaybeSignal<LayoutStyle>>) {
         self.component.set_layout_style(layout_style)
     }
 
+    #[inline(always)]
     fn with_layout_style(self, layout_style: impl Into<MaybeSignal<LayoutStyle>>) -> Self
     where
         Self: Sized,
@@ -140,6 +154,7 @@ impl<C: Component + WidgetLayoutExt> WidgetLayoutExt for Composed<C> {
 }
 
 impl<C: Component + Clone> Clone for Composed<C> {
+    #[inline(always)]
     fn clone(&self) -> Self {
         Self {
             component: self.component.clone(),
@@ -149,6 +164,7 @@ impl<C: Component + Clone> Clone for Composed<C> {
 }
 
 impl<C: Component + Debug> Debug for Composed<C> {
+    #[inline(always)]
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("ComposedWidget")
             .field("component", &self.component)
@@ -160,12 +176,14 @@ impl<C: Component + Debug> Debug for Composed<C> {
 impl<C: Component> Deref for Composed<C> {
     type Target = C;
 
+    #[inline(always)]
     fn deref(&self) -> &Self::Target {
         &self.component
     }
 }
 
 impl<C: Component> DerefMut for Composed<C> {
+    #[inline(always)]
     fn deref_mut(&mut self) -> &mut Self::Target {
         &mut self.component
     }

@@ -17,6 +17,7 @@ impl FontContext {
     ///
     /// Make sure to load the default font via [FontContext::load],
     /// before passing this context to the application runner.
+    #[inline(always)]
     pub fn new(default: impl ToString) -> Self {
         Self {
             default: default.to_string(),
@@ -27,6 +28,7 @@ impl FontContext {
     /// Loads a font with a custom name into the font context.
     ///
     /// If the font with the same name already exists, it will be overwritten and the old font will be returned.
+    #[inline(always)]
     #[tracing::instrument(level = "trace", skip_all, fields(name = name.to_string()))]
     pub fn load(&mut self, name: impl ToString, font: FontData) -> Option<FontData> {
         tracing::trace!("loading font named {}", name.to_string());
@@ -36,21 +38,25 @@ impl FontContext {
     /// Set the default font.
     ///
     /// **NOTE:** The font must be loaded before usage with [FontContext::load].
+    #[inline(always)]
     pub fn set_default_font(&mut self, name: impl ToString) {
         self.default = name.to_string();
     }
 
     /// Get a font by a specified name. Returns [None] if the font could not be found.
+    #[inline(always)]
     pub fn get(&self, name: impl ToString) -> Option<FontData> {
         self.fonts.get(&name.to_string()).cloned()
     }
 
     /// Removes a font by the given name and returns it or [None] if the font could not be found.
+    #[inline(always)]
     pub fn remove(&mut self, name: impl ToString) -> Option<FontData> {
         self.fonts.swap_remove(&name.to_string())
     }
 
     /// Returns the default font. [Roboto](https://fonts.google.com/specimen/Roboto) by default.
+    #[inline(always)]
     pub fn default_font(&self) -> &FontData {
         self.fonts
             .get(&self.default)
@@ -59,6 +65,7 @@ impl FontContext {
 }
 
 impl Default for FontContext {
+    #[inline(always)]
     fn default() -> Self {
         let mut ctx = FontContext::new("Noto Sans".to_string());
 

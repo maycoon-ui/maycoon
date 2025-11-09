@@ -24,6 +24,7 @@ pub struct Image {
 
 impl Image {
     /// Create an image widget from the given [ImageData].
+    #[inline(always)]
     pub fn new(image: impl Into<MaybeSignal<ImageData>>) -> Self {
         Self {
             image: image.into(),
@@ -32,6 +33,7 @@ impl Image {
     }
 
     /// Set the image.
+    #[inline(always)]
     pub fn with_image(mut self, image: impl Into<MaybeSignal<ImageData>>) -> Self {
         self.image = image.into();
         self
@@ -39,12 +41,14 @@ impl Image {
 }
 
 impl WidgetLayoutExt for Image {
+    #[inline(always)]
     fn set_layout_style(&mut self, layout_style: impl Into<MaybeSignal<LayoutStyle>>) {
         self.style = layout_style.into();
     }
 }
 
 impl Widget for Image {
+    #[inline(always)]
     fn render(
         &mut self,
         scene: &mut dyn Scene,
@@ -63,6 +67,7 @@ impl Widget for Image {
         );
     }
 
+    #[inline(always)]
     fn layout_style(&self) -> StyleNode {
         StyleNode {
             style: self.style.get().clone(),
@@ -70,10 +75,12 @@ impl Widget for Image {
         }
     }
 
+    #[inline(always)]
     fn update(&mut self, _: &LayoutNode, _: AppContext, _: &AppInfo) -> Update {
         Update::empty()
     }
 
+    #[inline(always)]
     fn widget_id(&self) -> WidgetId {
         WidgetId::new("maycoon-widgets", "Image")
     }

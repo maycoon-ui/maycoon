@@ -13,6 +13,7 @@ pub struct MapSignal<T: 'static, U: 'static> {
 
 impl<T: 'static, U: 'static> MapSignal<T, U> {
     /// Create a new map signal using the given inner signal and mapping function.
+    #[inline(always)]
     pub fn new(signal: BoxedSignal<T>, map: impl Fn(Ref<T>) -> Ref<U> + 'static) -> Self {
         Self {
             signal,
@@ -23,35 +24,43 @@ impl<T: 'static, U: 'static> MapSignal<T, U> {
     /// Get the inner signal.
     ///
     /// Can be used to mutate the inner value.
+    #[inline(always)]
     pub fn signal(&self) -> BoxedSignal<T> {
         self.signal.dyn_clone()
     }
 
     /// Get the inner signal's value, without applying the mapping function.
+    #[inline(always)]
     pub fn get_unmapped(&self) -> Ref<'_, T> {
         self.signal.get()
     }
 }
 
 impl<T: 'static, U: 'static> Signal<U> for MapSignal<T, U> {
+    #[inline(always)]
     fn get(&self) -> Ref<'_, U> {
         (self.map)(self.get_unmapped())
     }
 
+    #[inline(always)]
     fn set_value(&self, _: U) {}
 
+    #[inline(always)]
     fn listen(&mut self, _: Listener<U>) {}
 
+    #[inline(always)]
     fn notify(&self) {
         self.signal.notify();
     }
 
+    #[inline(always)]
     fn dyn_clone(&self) -> Box<dyn Signal<U>> {
         Box::new(self.clone())
     }
 }
 
 impl<T: 'static, U: 'static> Clone for MapSignal<T, U> {
+    #[inline(always)]
     fn clone(&self) -> Self {
         Self {
             signal: self.signal.dyn_clone(),

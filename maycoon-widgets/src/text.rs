@@ -36,6 +36,7 @@ pub struct Text {
 
 impl Text {
     /// Create a new text widget with the given text.
+    #[inline(always)]
     pub fn new(text: impl Into<MaybeSignal<String>>) -> Self {
         Self {
             style: LayoutStyle::default().into(),
@@ -50,6 +51,7 @@ impl Text {
     }
 
     /// Set whether to wrap the text.
+    #[inline(always)]
     pub fn with_wrap(mut self, linebreaks: impl Into<MaybeSignal<bool>>) -> Self {
         self.wrap = linebreaks.into();
         self
@@ -59,18 +61,21 @@ impl Text {
     ///
     /// Hinting adjusts the display of an outline font so that it lines up with a rasterized grid.
     /// At low screen resolutions and font size, hinting can produce clearer text.
+    #[inline(always)]
     pub fn with_hinting(mut self, hinting: impl Into<MaybeSignal<bool>>) -> Self {
         self.hinting = hinting.into();
         self
     }
 
     /// Set the font of the text.
+    #[inline(always)]
     pub fn with_font(mut self, font: impl Into<MaybeSignal<Option<String>>>) -> Self {
         self.font = font.into();
         self
     }
 
     /// Set the font size of the text.
+    #[inline(always)]
     pub fn with_font_size(mut self, size: impl Into<MaybeSignal<f32>>) -> Self {
         self.font_size = size.into();
         self
@@ -79,6 +84,7 @@ impl Text {
     /// Set the line gap of the text.
     ///
     /// The line gap is the space between lines of text. Defaults to `7.5`.
+    #[inline(always)]
     pub fn with_line_gap(mut self, gap: impl Into<MaybeSignal<f32>>) -> Self {
         self.line_gap = gap.into();
         self
@@ -86,6 +92,7 @@ impl Text {
 }
 
 impl WidgetLayoutExt for Text {
+    #[inline(always)]
     fn set_layout_style(&mut self, layout_style: impl Into<MaybeSignal<LayoutStyle>>) {
         self.style = layout_style.into();
     }
@@ -158,6 +165,7 @@ impl Widget for Text {
         }
     }
 
+    #[inline(always)]
     fn update(&mut self, layout: &LayoutNode, _: AppContext, _: &AppInfo) -> Update {
         // Re-layout if the maximum width of the text changes.
         if *self.wrap.get() && !layout::equal(layout.layout.size.width, self.max_width) {
@@ -167,6 +175,7 @@ impl Widget for Text {
         }
     }
 
+    #[inline(always)]
     fn widget_id(&self) -> WidgetId {
         WidgetId::new("maycoon-widgets", "Text")
     }

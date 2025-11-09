@@ -16,6 +16,7 @@ pub struct AppContext {
 
 impl AppContext {
     /// Create a new application context using the given [UpdateManager].
+    #[inline(always)]
     #[tracing::instrument(level = "trace", skip_all)]
     pub fn new(update: UpdateManager, diagnostics: Diagnostics) -> Self {
         Self {
@@ -25,16 +26,19 @@ impl AppContext {
     }
 
     /// Get the [Diagnostics] of the application.
+    #[inline(always)]
     pub fn diagnostics(&self) -> Diagnostics {
         self.diagnostics
     }
 
     /// Get the [UpdateManager] of the application.
+    #[inline(always)]
     pub fn update(&self) -> UpdateManager {
         self.update.clone()
     }
 
     /// Make the application exit by setting [Update::EXIT].
+    #[inline(always)]
     pub fn exit(&self) {
         self.update.insert(Update::EXIT);
     }
@@ -42,6 +46,7 @@ impl AppContext {
     /// Hook the given [Signal] to the [UpdateManager] of this application.
     ///
     /// This makes the signal reactive, so it will notify the renderer when the inner value changes.
+    #[inline(always)]
     #[tracing::instrument(level = "trace", skip_all, fields(signal = std::any::type_name::<T>()))]
     pub fn hook_signal<T: 'static, S: Signal<T>>(&self, signal: &mut S) {
         let update = self.update();
@@ -51,6 +56,7 @@ impl AppContext {
     /// Hook the given [Signal] to the [UpdateManager] of this application and return it.
     ///
     /// See [AppContext::hook_signal] for more.
+    #[inline(always)]
     pub fn use_signal<T: 'static, S: Signal<T>>(&self, mut signal: S) -> S {
         self.hook_signal(&mut signal);
 
@@ -58,21 +64,25 @@ impl AppContext {
     }
 
     /// Shortcut for creating and hooking a [StateSignal] into the application lifecycle.
+    #[inline(always)]
     pub fn use_state<T: 'static>(&self, value: T) -> StateSignal<T> {
         self.use_signal(StateSignal::new(value))
     }
 
     /// Shortcut for creating and hooking a [MemoizedSignal] into the application lifecycle.
+    #[inline(always)]
     pub fn use_memoized<T: 'static>(&self, value: impl Fn() -> T + 'static) -> MemoizedSignal<T> {
         self.use_signal(MemoizedSignal::new(value))
     }
 
     /// Shortcut for creating and hooking a [FixedSignal] into the application lifecycle.
+    #[inline(always)]
     pub fn use_fixed<T: 'static>(&self, value: T) -> FixedSignal<T> {
         self.use_signal(FixedSignal::new(value))
     }
 
     /// Shortcut for creating and hooking an [EvalSignal] into the application lifecycle.
+    #[inline(always)]
     pub fn use_eval<T: 'static>(&self, eval: impl Fn() -> T + 'static) -> EvalSignal<T> {
         self.use_signal(EvalSignal::new(eval))
     }

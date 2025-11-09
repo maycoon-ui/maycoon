@@ -38,6 +38,7 @@ pub trait WidgetChildExt {
     fn set_child(&mut self, child: impl Widget + 'static);
 
     /// Sets the child widget of the widget and returns self.
+    #[inline(always)]
     fn with_child(mut self, child: impl Widget + 'static) -> Self
     where
         Self: Sized,
@@ -53,6 +54,7 @@ pub trait WidgetChildrenExt {
     fn set_children(&mut self, children: Vec<BoxedWidget>);
 
     /// Sets the child widgets of the widget and returns self.
+    #[inline(always)]
     fn with_children(mut self, children: Vec<BoxedWidget>) -> Self
     where
         Self: Sized,
@@ -65,6 +67,7 @@ pub trait WidgetChildrenExt {
     fn add_child(&mut self, child: impl Widget + 'static);
 
     /// Adds a child widget to the widget and returns self.
+    #[inline(always)]
     fn with_child(mut self, child: impl Widget + 'static) -> Self
     where
         Self: Sized,
@@ -80,6 +83,7 @@ pub trait WidgetLayoutExt {
     fn set_layout_style(&mut self, layout_style: impl Into<MaybeSignal<LayoutStyle>>);
 
     /// Sets the layout style of the widget and returns self.
+    #[inline(always)]
     fn with_layout_style(mut self, layout_style: impl Into<MaybeSignal<LayoutStyle>>) -> Self
     where
         Self: Sized,

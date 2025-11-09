@@ -17,6 +17,7 @@ impl TaskRunner {
     /// Creates a new [TaskRunner] with the given configuration.
     ///
     /// Giving [None] to some config parameters will use the default value (that [tokio] uses).
+    #[inline(always)]
     pub fn new(
         io: bool,
         stack_size: Option<usize>,
@@ -74,6 +75,7 @@ impl TaskRunnerImpl for TaskRunner {
     type Task<T: Send + 'static> = TokioTask<T>;
     type LocalTask<T: 'static> = LocalTokioTask<T>;
 
+    #[inline(always)]
     fn spawn<Fut>(&self, future: Fut) -> Self::Task<Fut::Output>
     where
         Fut: Future + Send + 'static,
@@ -82,6 +84,7 @@ impl TaskRunnerImpl for TaskRunner {
         TokioTask(self.rt.spawn(future))
     }
 
+    #[inline(always)]
     fn spawn_blocking<R, F>(&self, func: F) -> Self::Task<R>
     where
         R: Send + 'static,
@@ -90,6 +93,7 @@ impl TaskRunnerImpl for TaskRunner {
         TokioTask(self.rt.spawn_blocking(func))
     }
 
+    #[inline(always)]
     fn block_on<Fut>(&self, future: Fut) -> Fut::Output
     where
         Fut: Future,
@@ -102,10 +106,12 @@ impl TaskRunnerImpl for TaskRunner {
 pub struct TokioTask<T: Send + 'static>(JoinHandle<T>);
 
 impl<T: Send + 'static> Task<T> for TokioTask<T> {
+    #[inline(always)]
     fn is_ready(&self) -> bool {
         self.0.is_finished()
     }
 
+    #[inline(always)]
     fn take(&mut self) -> Option<T> {
         let pinned = Pin::new(&mut self.0);
         let waker = noop_waker();
@@ -121,6 +127,7 @@ impl<T: Send + 'static> Task<T> for TokioTask<T> {
 impl<T: Send + 'static> Future for TokioTask<T> {
     type Output = T;
 
+    #[inline(always)]
     fn poll(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<T> {
         let pinned = Pin::new(&mut self.0);
 
@@ -135,10 +142,12 @@ impl<T: Send + 'static> Future for TokioTask<T> {
 pub struct LocalTokioTask<T: 'static>(JoinHandle<T>);
 
 impl<T: 'static> LocalTask<T> for LocalTokioTask<T> {
+    #[inline(always)]
     fn is_ready(&self) -> bool {
         self.0.is_finished()
     }
 
+    #[inline(always)]
     fn take(&mut self) -> Option<T> {
         todo!()
     }
@@ -147,6 +156,7 @@ impl<T: 'static> LocalTask<T> for LocalTokioTask<T> {
 impl<T: 'static> Future for LocalTokioTask<T> {
     type Output = T;
 
+    #[inline(always)]
     fn poll(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<T> {
         let pinned = Pin::new(&mut self.0);
 

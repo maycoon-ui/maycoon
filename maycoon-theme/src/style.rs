@@ -9,6 +9,7 @@ pub struct Style {
 
 impl Style {
     /// Create a new empty style.
+    #[inline(always)]
     pub fn new() -> Self {
         Self {
             map: IndexMap::with_capacity(16),
@@ -16,6 +17,7 @@ impl Style {
     }
 
     /// Create a style from an array of strings and style values.
+    #[inline(always)]
     pub fn from_values(values: impl IntoIterator<Item = (String, StyleVal)>) -> Self {
         Self {
             map: IndexMap::from_iter(values),
@@ -23,63 +25,75 @@ impl Style {
     }
 
     /// Removes the style value from the map with the give name.
+    #[inline(always)]
     pub fn remove(&mut self, name: impl ToString) {
         self.map.swap_remove(&name.to_string());
     }
 
     /// Insert a style value with the given name into the style map.
+    #[inline(always)]
     pub fn with_value(mut self, name: impl ToString, value: StyleVal) -> Self {
         self.map.insert(name.to_string(), value);
         self
     }
 
     /// Set a style value by name.
+    #[inline(always)]
     pub fn set(&mut self, name: impl ToString, value: StyleVal) {
         self.map.insert(name.to_string(), value);
     }
 
     /// Set a color style value by name.
+    #[inline(always)]
     pub fn set_color(&mut self, name: impl ToString, color: Color) {
         self.map.insert(name.to_string(), StyleVal::Color(color));
     }
 
     /// Set a gradient style value by name.
+    #[inline(always)]
     pub fn set_gradient(&mut self, name: impl ToString, gradient: Gradient) {
         self.map
             .insert(name.to_string(), StyleVal::Gradient(gradient));
     }
 
     /// Set a bool style value by name.
+    #[inline(always)]
     pub fn set_bool(&mut self, name: impl ToString, value: bool) {
         self.map.insert(name.to_string(), StyleVal::Bool(value));
     }
 
     /// Set a brush style value by name.
+    #[inline(always)]
     pub fn set_brush(&mut self, name: impl ToString, brush: Brush) {
         self.map.insert(name.to_string(), StyleVal::Brush(brush));
     }
 
     /// Set a float style value by name.
+    #[inline(always)]
     pub fn set_float(&mut self, name: impl ToString, value: f32) {
         self.map.insert(name.to_string(), StyleVal::Float(value));
     }
 
     /// Set an int style value by name.
+    #[inline(always)]
     pub fn set_int(&mut self, name: impl ToString, value: i32) {
         self.map.insert(name.to_string(), StyleVal::Int(value));
     }
 
     /// Set an unsized int style value by name.
+    #[inline(always)]
     pub fn set_uint(&mut self, name: impl ToString, value: u32) {
         self.map.insert(name.to_string(), StyleVal::UInt(value));
     }
 
     /// Get a style value by name. Returns [None] if the value name does not exist.
+    #[inline(always)]
     pub fn get(&self, name: impl ToString) -> Option<StyleVal> {
         self.map.get(&name.to_string()).cloned()
     }
 
     /// Get a color style value by name. Returns [None] if the value name does not exist.
+    #[inline(always)]
     pub fn get_color(&self, name: impl ToString) -> Option<Color> {
         if let Some(val) = self.map.get(&name.to_string()) {
             match val {
@@ -92,6 +106,7 @@ impl Style {
     }
 
     /// Get a gradient style value by name. Returns [None] if the value name does not exist.
+    #[inline(always)]
     pub fn get_gradient(&self, name: impl ToString) -> Option<Gradient> {
         if let Some(val) = self.map.get(&name.to_string()) {
             match val {
@@ -104,6 +119,7 @@ impl Style {
     }
 
     /// Get a brush style value by name. Returns [None] if the value name does not exist.
+    #[inline(always)]
     pub fn get_brush(&self, name: impl ToString) -> Option<Brush> {
         if let Some(val) = self.map.get(&name.to_string()) {
             match val {
@@ -116,6 +132,7 @@ impl Style {
     }
 
     /// Get a float style value by name. Returns [None] if the value name does not exist.
+    #[inline(always)]
     pub fn get_float(&self, name: impl ToString) -> Option<f32> {
         if let Some(val) = self.map.get(&name.to_string()) {
             match val {
@@ -128,6 +145,7 @@ impl Style {
     }
 
     /// Get an int style value by name. Returns [None] if the value name does not exist.
+    #[inline(always)]
     pub fn get_int(&self, name: impl ToString) -> Option<i32> {
         if let Some(val) = self.map.get(&name.to_string()) {
             match val {
@@ -140,6 +158,7 @@ impl Style {
     }
 
     /// Get an unsized int style value by name. Returns [None] if the value name does not exist.
+    #[inline(always)]
     pub fn get_uint(&self, name: impl ToString) -> Option<u32> {
         if let Some(val) = self.map.get(&name.to_string()) {
             match val {
@@ -152,6 +171,7 @@ impl Style {
     }
 
     /// Get a bool style value by name. Returns [None] if the value name does not exist.
+    #[inline(always)]
     pub fn get_bool(&self, name: impl ToString) -> Option<bool> {
         if let Some(val) = self.map.get(&name.to_string()) {
             match val {
@@ -165,6 +185,7 @@ impl Style {
 }
 
 impl Default for Style {
+    #[inline(always)]
     fn default() -> Self {
         Self::new()
     }
@@ -180,6 +201,7 @@ pub struct DefaultStyles {
 
 impl DefaultStyles {
     /// Create new default styles with given styles.
+    #[inline(always)]
     pub fn new(
         text: DefaultTextStyles,
         container: DefaultContainerStyles,
@@ -193,16 +215,19 @@ impl DefaultStyles {
     }
 
     /// Get the default styles for text widgets.
+    #[inline(always)]
     pub fn text(&self) -> &DefaultTextStyles {
         &self.text
     }
 
     /// Get the default styles for container widgets.
+    #[inline(always)]
     pub fn container(&self) -> &DefaultContainerStyles {
         &self.container
     }
 
     /// Get the default styles for interactive widgets.
+    #[inline(always)]
     pub fn interactive(&self) -> &DefaultInteractiveStyles {
         &self.interactive
     }
@@ -217,6 +242,7 @@ pub struct DefaultTextStyles {
 
 impl DefaultTextStyles {
     /// Create new default text styles with given colors.
+    #[inline(always)]
     pub fn new(foreground: Color, background: Color) -> Self {
         Self {
             foreground,
@@ -225,11 +251,13 @@ impl DefaultTextStyles {
     }
 
     /// Get the default foreground color.
+    #[inline(always)]
     pub fn foreground(&self) -> Color {
         self.foreground
     }
 
     /// Get the default background color.
+    #[inline(always)]
     pub fn background(&self) -> Color {
         self.background
     }
@@ -244,6 +272,7 @@ pub struct DefaultContainerStyles {
 
 impl DefaultContainerStyles {
     /// Create new default container styles with given colors.
+    #[inline(always)]
     pub fn new(foreground: Color, background: Color) -> Self {
         Self {
             foreground,
@@ -252,11 +281,13 @@ impl DefaultContainerStyles {
     }
 
     /// Get the default foreground color.
+    #[inline(always)]
     pub fn foreground(&self) -> Color {
         self.foreground
     }
 
     /// Get the default background color.
+    #[inline(always)]
     pub fn background(&self) -> Color {
         self.background
     }
@@ -273,6 +304,7 @@ pub struct DefaultInteractiveStyles {
 
 impl DefaultInteractiveStyles {
     /// Create new default interactive styles with given colors.
+    #[inline(always)]
     pub fn new(active: Color, inactive: Color, hover: Color, disabled: Color) -> Self {
         Self {
             active,
@@ -283,21 +315,25 @@ impl DefaultInteractiveStyles {
     }
 
     /// Get the default active widget color.
+    #[inline(always)]
     pub fn active(&self) -> Color {
         self.active
     }
 
     /// Get the default inactive widget color.
+    #[inline(always)]
     pub fn inactive(&self) -> Color {
         self.inactive
     }
 
     /// Get the default on-hover widget color.
+    #[inline(always)]
     pub fn hover(&self) -> Color {
         self.hover
     }
 
     /// Get the default disabled widget color.
+    #[inline(always)]
     pub fn disabled(&self) -> Color {
         self.disabled
     }

@@ -57,6 +57,7 @@ pub trait Signal<T: 'static>: 'static {
     fn notify(&self);
 
     /// Set the value of the signal and notify listeners.
+    #[inline(always)]
     fn set(&self, value: T) {
         tracing::trace_span!("set signal").in_scope(|| {
             self.set_value(value);
@@ -65,6 +66,7 @@ pub trait Signal<T: 'static>: 'static {
     }
 
     /// Converts the signal into a [MaybeSignal].
+    #[inline(always)]
     fn maybe(&self) -> MaybeSignal<T>
     where
         Self: Sized,
@@ -73,6 +75,7 @@ pub trait Signal<T: 'static>: 'static {
     }
 
     /// Converts this signal into a [MapSignal] and applies the given mapping function.
+    #[inline(always)]
     fn map<U: 'static>(&self, map: impl Fn(Ref<T>) -> Ref<U> + 'static) -> MapSignal<T, U>
     where
         Self: Sized,
@@ -83,6 +86,7 @@ pub trait Signal<T: 'static>: 'static {
     /// Hooks the signal into the given [AppContext].
     ///
     /// Required for the signal to become reactive with the app lifecycle.
+    #[inline(always)]
     fn hook(self, context: &AppContext) -> Self
     where
         Self: Sized,
@@ -106,11 +110,13 @@ pub enum MaybeSignal<T: 'static> {
 
 impl<T: 'static> MaybeSignal<T> {
     /// Wrap a [Signal] inside a [MaybeSignal].
+    #[inline(always)]
     pub fn signal(signal: BoxedSignal<T>) -> Self {
         Self::Signal(signal)
     }
 
     /// Wrap a value inside a [MaybeSignal].
+    #[inline(always)]
     pub fn value(value: T) -> Self {
         Self::Value(Rc::new(value))
     }
@@ -119,6 +125,7 @@ impl<T: 'static> MaybeSignal<T> {
     ///
     /// If the value is a signal, the signal's current value is returned,
     /// otherwise a [Ref::Rc] of the value is returned.
+    #[inline(always)]
     pub fn get(&self) -> Ref<'_, T> {
         match self {
             MaybeSignal::Signal(signal) => signal.get(),
@@ -127,6 +134,7 @@ impl<T: 'static> MaybeSignal<T> {
     }
 
     /// Converts the [MaybeSignal] into an [BoxedSignal] if it is a [MaybeSignal::Signal].
+    #[inline(always)]
     pub fn as_signal(&self) -> Option<BoxedSignal<T>> {
         match self {
             MaybeSignal::Signal(signal) => Some(signal.dyn_clone()),
@@ -137,6 +145,7 @@ impl<T: 'static> MaybeSignal<T> {
     /// Converts the [MaybeSignal] into a [BoxedSignal].
     ///
     /// If the value is a [MaybeSignal::Value], a [FixedSignal] is created.
+    #[inline(always)]
     pub fn into_signal(self) -> BoxedSignal<T> {
         match self {
             MaybeSignal::Signal(signal) => signal,
@@ -147,6 +156,7 @@ impl<T: 'static> MaybeSignal<T> {
     /// Applies the given mapping function to the signal.
     ///
     /// Returns a [MaybeSignal] containing a [MapSignal] which maps the inner value of the signal.
+    #[inline(always)]
     pub fn map<U: 'static>(self, map: impl Fn(Ref<T>) -> Ref<U> + 'static) -> MaybeSignal<U> {
         let signal = self.into_signal();
 
@@ -155,30 +165,35 @@ impl<T: 'static> MaybeSignal<T> {
 }
 
 impl<T: Default + 'static> Default for MaybeSignal<T> {
+    #[inline(always)]
     fn default() -> Self {
         Self::value(T::default())
     }
 }
 
 impl<T: 'static> From<T> for MaybeSignal<T> {
+    #[inline(always)]
     fn from(value: T) -> Self {
         Self::value(value)
     }
 }
 
 impl<T: 'static> From<BoxedSignal<T>> for MaybeSignal<T> {
+    #[inline(always)]
     fn from(signal: BoxedSignal<T>) -> Self {
         Self::signal(signal)
     }
 }
 
 impl<'a, T: 'static> From<&'a BoxedSignal<T>> for MaybeSignal<T> {
+    #[inline(always)]
     fn from(value: &'a BoxedSignal<T>) -> Self {
         Self::signal(value.dyn_clone())
     }
 }
 
 impl<T: 'static, U: 'static> From<MapSignal<T, U>> for MaybeSignal<U> {
+    #[inline(always)]
     fn from(value: MapSignal<T, U>) -> Self {
         Self::signal(Box::new(value))
     }

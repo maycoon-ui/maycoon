@@ -26,6 +26,7 @@ impl TaskRunner {
     /// Returns a task handle to the future.
     ///
     /// Panics, when no task runner feature is enabled.
+    #[inline(always)]
     #[tracing::instrument(skip_all)]
     pub fn spawn<Fut>(&self, _future: Fut) -> Box<dyn Task<Fut::Output>>
     where
@@ -53,6 +54,7 @@ impl TaskRunner {
     /// Returns a task handle to the operation.
     ///
     /// Panics, when no task runner feature is enabled.
+    #[inline(always)]
     #[cfg(native)]
     #[tracing::instrument(skip_all)]
     pub fn spawn_blocking<R, F>(&self, _func: F) -> Box<dyn Task<R>>
@@ -79,6 +81,7 @@ impl TaskRunner {
     /// Blocks on the given future, until it's completed.
     ///
     /// Panics, when no task runner feature is enabled.
+    #[inline(always)]
     #[cfg(native)]
     #[tracing::instrument(skip_all)]
     pub fn block_on<Fut>(&self, _future: Fut) -> Fut::Output

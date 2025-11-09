@@ -62,6 +62,7 @@ impl<T: Send + 'static, W: Widget> WidgetFetcher<T, W> {
     ///
     /// Unlike [WidgetFetcher::new_blocking]. this will spawn a future in the background.
     /// It's up to the task runner implementation, if the task is spawned on a thread pool or not.
+    #[inline(always)]
     pub fn new<Fut>(future: Fut, render: impl Fn(Option<T>) -> W + 'static, update: Update) -> Self
     where
         Fut: Future<Output = T> + Send + 'static,
@@ -79,6 +80,7 @@ impl<T: Send + 'static, W: Widget> WidgetFetcher<T, W> {
     ///
     /// Unlike [WidgetFetcher::new], this takes a function which will be run on a separate thread pool.
     /// This is only supported on native platforms.
+    #[inline(always)]
     #[cfg(native)]
     pub fn new_blocking<F>(
         func: F,
@@ -96,6 +98,7 @@ impl<T: Send + 'static, W: Widget> WidgetFetcher<T, W> {
 }
 
 impl<T: Send + 'static, W: Widget> Widget for WidgetFetcher<T, W> {
+    #[inline(always)]
     fn render(
         &mut self,
         scene: &mut dyn Scene,
@@ -109,6 +112,7 @@ impl<T: Send + 'static, W: Widget> Widget for WidgetFetcher<T, W> {
         }
     }
 
+    #[inline(always)]
     fn layout_style(&self) -> StyleNode {
         if let Some(widget) = self.fetcher.value_ref() {
             widget.layout_style()
@@ -120,6 +124,7 @@ impl<T: Send + 'static, W: Widget> Widget for WidgetFetcher<T, W> {
         }
     }
 
+    #[inline(always)]
     fn update(&mut self, layout: &LayoutNode, context: AppContext, info: &AppInfo) -> Update {
         let mut update = Update::empty();
 
@@ -133,6 +138,7 @@ impl<T: Send + 'static, W: Widget> Widget for WidgetFetcher<T, W> {
         widget.update(layout, context, info) | update
     }
 
+    #[inline(always)]
     fn widget_id(&self) -> WidgetId {
         WidgetId::new("maycoon-widgets", "WidgetFetcher")
     }

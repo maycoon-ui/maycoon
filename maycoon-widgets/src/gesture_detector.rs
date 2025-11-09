@@ -32,6 +32,7 @@ pub struct GestureDetector {
 
 impl GestureDetector {
     /// Creates a new [GestureDetector] with the given child widget.
+    #[inline(always)]
     pub fn new(child: impl Widget + 'static) -> Self {
         Self {
             child: Box::new(child),
@@ -42,46 +43,54 @@ impl GestureDetector {
     }
 
     /// Sets the child widget of the [GestureDetector] and returns self.
+    #[inline(always)]
     pub fn with_child(mut self, child: impl Widget + 'static) -> Self {
         self.child = Box::new(child);
         self
     }
 
     /// Sets the `on_press` callback of the [GestureDetector] and returns self.
+    #[inline(always)]
     pub fn with_on_press(mut self, on_press: impl Into<MaybeSignal<Update>>) -> Self {
         self.on_press = on_press.into();
         self
     }
 
     /// Sets the `on_release` callback of the [GestureDetector] and returns self.
+    #[inline(always)]
     pub fn with_on_release(mut self, on_release: impl Into<MaybeSignal<Update>>) -> Self {
         self.on_release = on_release.into();
         self
     }
 
     /// Sets the `on_hover` callback of the [GestureDetector] and returns self.
+    #[inline(always)]
     pub fn with_on_hover(mut self, on_hover: impl Into<MaybeSignal<Update>>) -> Self {
         self.on_hover = on_hover.into();
         self
     }
 
     /// Call the `on_hover` callback of the [GestureDetector].
+    #[inline(always)]
     pub fn on_hover(&mut self) -> Update {
         *self.on_hover.get()
     }
 
     /// Call the `on_press` callback of the [GestureDetector].
+    #[inline(always)]
     pub fn on_press(&mut self) -> Update {
         *self.on_press.get()
     }
 
     /// Call the `on_release` callback of the [GestureDetector].
+    #[inline(always)]
     pub fn on_release(&mut self) -> Update {
         *self.on_release.get()
     }
 }
 
 impl Widget for GestureDetector {
+    #[inline(always)]
     fn render(
         &mut self,
         scene: &mut dyn Scene,
@@ -93,6 +102,7 @@ impl Widget for GestureDetector {
         self.child.render(scene, theme, layout_node, info, context)
     }
 
+    #[inline(always)]
     fn layout_style(&self) -> StyleNode {
         self.child.layout_style()
     }
@@ -126,6 +136,7 @@ impl Widget for GestureDetector {
         update
     }
 
+    #[inline(always)]
     fn widget_id(&self) -> WidgetId {
         WidgetId::new("maycoon-widgets", "GestureDetector")
     }

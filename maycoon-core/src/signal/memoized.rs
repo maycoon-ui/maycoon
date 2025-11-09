@@ -14,6 +14,7 @@ pub struct MemoizedSignal<T: 'static> {
 }
 
 impl<T: 'static> MemoizedSignal<T> {
+    #[inline(always)]
     /// Create a new memoized signal using the given factory function.
     pub fn new(factory: impl Fn() -> T + 'static) -> Self {
         Self {
@@ -22,6 +23,7 @@ impl<T: 'static> MemoizedSignal<T> {
         }
     }
 
+    #[inline(always)]
     /// Returns if the value has been initialized or not.
     pub fn is_init(&self) -> bool {
         self.inner.get().is_some()
@@ -29,6 +31,7 @@ impl<T: 'static> MemoizedSignal<T> {
 }
 
 impl<T: 'static> Signal<T> for MemoizedSignal<T> {
+    #[inline(always)]
     fn get(&self) -> Ref<'_, T> {
         if !self.is_init() {
             self.inner.set((self.factory)()).ok().unwrap();
@@ -39,18 +42,23 @@ impl<T: 'static> Signal<T> for MemoizedSignal<T> {
         Ref::Borrow(self.inner.get().unwrap())
     }
 
+    #[inline(always)]
     fn set_value(&self, _: T) {}
 
+    #[inline(always)]
     fn listen(&mut self, _: Listener<T>) {}
 
+    #[inline(always)]
     fn notify(&self) {}
 
+    #[inline(always)]
     fn dyn_clone(&self) -> Box<dyn Signal<T>> {
         Box::new(self.clone())
     }
 }
 
 impl<T: 'static> Clone for MemoizedSignal<T> {
+    #[inline(always)]
     fn clone(&self) -> Self {
         Self {
             inner: self.inner.clone(),

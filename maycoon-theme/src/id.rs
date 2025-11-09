@@ -22,22 +22,26 @@ impl WidgetId {
     /// # use maycoon_theme::id::WidgetId;
     /// let id = WidgetId::new("my_crate", "MyWidget");
     /// ```
+    #[inline(always)]
     pub fn new(namespace: &'static str, id: &'static str) -> Self {
         Self { namespace, id }
     }
 
     /// Returns the namespace of the widget id.
+    #[inline(always)]
     pub fn namespace(&self) -> &'static str {
         self.namespace
     }
 
     /// Returns the actual widget id.
+    #[inline(always)]
     pub fn id(&self) -> &'static str {
         self.id
     }
 }
 
 impl Display for WidgetId {
+    #[inline(always)]
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         // TODO: use const formatting/writing when const format is stable
         write!(f, "{}:{}", self.namespace, self.id)

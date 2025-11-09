@@ -23,6 +23,7 @@ impl<W: Widget, A: Fn(&mut W, f32) -> Update> Animator<W, A> {
     ///
     /// The animation function is called with a value between `0.0` and `1.0` based on the elapsed time since the start of the animation
     /// and the total duration of the animation.
+    #[inline(always)]
     pub fn new(duration: Duration, widget: W, animation: A) -> Self {
         Self {
             start: Instant::now(),
@@ -34,6 +35,7 @@ impl<W: Widget, A: Fn(&mut W, f32) -> Update> Animator<W, A> {
 }
 
 impl<W: Widget, A: Fn(&mut W, f32) -> Update> Widget for Animator<W, A> {
+    #[inline(always)]
     fn render(
         &mut self,
         scene: &mut dyn Scene,
@@ -45,6 +47,7 @@ impl<W: Widget, A: Fn(&mut W, f32) -> Update> Widget for Animator<W, A> {
         self.widget.render(scene, theme, layout_node, info, context);
     }
 
+    #[inline(always)]
     fn layout_style(&self) -> StyleNode {
         self.widget.layout_style()
     }
@@ -63,6 +66,7 @@ impl<W: Widget, A: Fn(&mut W, f32) -> Update> Widget for Animator<W, A> {
         update
     }
 
+    #[inline(always)]
     fn widget_id(&self) -> WidgetId {
         WidgetId::new("maycoon-widgets", "Animator")
     }

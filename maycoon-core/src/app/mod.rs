@@ -54,6 +54,7 @@ pub trait Application: Sized {
     fn config(&self) -> MayConfig<Self::Theme, Self::Graphics>;
 
     /// Builds and returns the [PluginManager] for the application.
+    #[inline(always)]
     fn plugins(&self) -> PluginManager<Self::Theme, Self::Graphics> {
         PluginManager::new()
     }
@@ -63,6 +64,7 @@ pub trait Application: Sized {
     /// This function is called before the actual launch of the app.
     ///
     /// The default implementation just initializes the task runner.
+    #[inline(always)]
     fn init(&self) {
         #[cfg(feature = "tokio-runner")]
         {
@@ -78,6 +80,7 @@ pub trait Application: Sized {
     /// Runs the application using the [MayRunner].
     ///
     /// Override this method if you want to use a custom event loop.
+    #[inline(always)]
     fn run(self, state: Self::State) {
         let config = self.config();
 

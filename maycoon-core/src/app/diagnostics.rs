@@ -10,6 +10,7 @@ pub struct Diagnostics {
 }
 
 impl Default for Diagnostics {
+    #[inline(always)]
     fn default() -> Self {
         Self {
             updates: 0,

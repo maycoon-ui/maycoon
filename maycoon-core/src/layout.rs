@@ -31,6 +31,7 @@ pub const LAYOUT_EPSILON: f32 = 0.5;
 /// // Insignificant change. Should not redraw.
 /// assert!(equal(10.0, 10.005));
 /// ```
+#[inline(always)]
 pub fn equal(x: f32, y: f32) -> bool {
     (x - y).abs() < LAYOUT_EPSILON
 }
@@ -51,6 +52,7 @@ pub fn equal(x: f32, y: f32) -> bool {
 ///     println!("Hovering on widget!");
 /// }
 /// ```
+#[inline(always)]
 pub fn intersects(point: Vector2<f32>, layout: &Layout) -> bool {
     point.x >= layout.location.x
         && point.x <= layout.location.x + layout.size.width
@@ -152,6 +154,7 @@ pub struct LayoutStyle {
 }
 
 impl Default for LayoutStyle {
+    #[inline(always)]
     fn default() -> Self {
         LayoutStyle {
             display: Display::default(),
@@ -192,6 +195,7 @@ impl Default for LayoutStyle {
 }
 
 impl From<LayoutStyle> for taffy::Style {
+    #[inline(always)]
     fn from(value: LayoutStyle) -> Self {
         taffy::Style {
             display: value.display,

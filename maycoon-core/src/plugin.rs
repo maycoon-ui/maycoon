@@ -30,6 +30,7 @@ pub trait Plugin<T: Theme, V: VectorGraphicsInterface>: 'static {
     fn on_unregister(&mut self, _manager: &mut PluginManager<T, V>) {}
 
     /// Called right before initializing the [AppHandler](crate::app::handler::AppHandler) and running the event loop.
+    #[inline(always)]
     fn init(
         &mut self,
         _event_loop: &mut EventLoop<()>,
@@ -43,6 +44,7 @@ pub trait Plugin<T: Theme, V: VectorGraphicsInterface>: 'static {
     ///
     /// Desktop applications typically don't get suspended and this function is only called once,
     /// while mobile apps can be suspended and resumed.
+    #[inline(always)]
     fn on_resume(
         &mut self,
         _config: &mut MayConfig<T, V>,
@@ -58,6 +60,7 @@ pub trait Plugin<T: Theme, V: VectorGraphicsInterface>: 'static {
 
     /// Called right before the application handler tries to update the application
     /// and figure out what updates to apply.
+    #[inline(always)]
     fn on_update(
         &mut self,
         _config: &mut MayConfig<T, V>,
@@ -73,6 +76,7 @@ pub trait Plugin<T: Theme, V: VectorGraphicsInterface>: 'static {
     }
 
     /// Called when a window event is received.
+    #[inline(always)]
     fn on_window_event(
         &mut self,
         _event: &mut WindowEvent,
@@ -89,6 +93,7 @@ pub trait Plugin<T: Theme, V: VectorGraphicsInterface>: 'static {
     }
 
     /// Called when the application is suspended.
+    #[cold]
     fn on_suspended(
         &mut self,
         _config: &mut MayConfig<T, V>,
@@ -110,6 +115,7 @@ pub struct PluginManager<T: Theme, V: VectorGraphicsInterface> {
 
 impl<T: Theme, V: VectorGraphicsInterface> PluginManager<T, V> {
     /// Creates a new empty plugin manager.
+    #[inline(always)]
     pub fn new() -> Self {
         Self {
             plugins: IndexMap::new(),
@@ -117,6 +123,7 @@ impl<T: Theme, V: VectorGraphicsInterface> PluginManager<T, V> {
     }
 
     /// Registers a new plugin.
+    #[inline(always)]
     pub fn register(&mut self, mut plugin: impl Plugin<T, V>) {
         plugin.on_register(self);
 
@@ -124,6 +131,7 @@ impl<T: Theme, V: VectorGraphicsInterface> PluginManager<T, V> {
     }
 
     /// Unregisters a plugin.
+    #[cold]
     pub fn unregister(&mut self, name: &'static str) {
         let mut pl = self.plugins.swap_remove(name).expect("Plugin not found");
 
@@ -131,6 +139,7 @@ impl<T: Theme, V: VectorGraphicsInterface> PluginManager<T, V> {
     }
 
     /// Unregisters all plugins.
+    #[cold]
     pub fn clear(&mut self) {
         let plugins = self.plugins.keys().cloned().collect::<Vec<_>>();
 
@@ -140,6 +149,7 @@ impl<T: Theme, V: VectorGraphicsInterface> PluginManager<T, V> {
     }
 
     /// Runs a closure on all plugins.
+    #[inline(always)]
     pub fn run<F>(&mut self, mut op: F)
     where
         F: FnMut(&mut Box<dyn Plugin<T, V>>),
@@ -151,6 +161,7 @@ impl<T: Theme, V: VectorGraphicsInterface> PluginManager<T, V> {
 }
 
 impl<T: Theme, V: VectorGraphicsInterface> Default for PluginManager<T, V> {
+    #[inline(always)]
     fn default() -> Self {
         Self::new()
     }

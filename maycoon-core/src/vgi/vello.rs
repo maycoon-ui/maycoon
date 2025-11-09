@@ -42,6 +42,7 @@ impl vgi::VectorGraphicsInterface for VectorGraphicsInterface {
     type Scene = Scene;
     type Config = VectorGraphicsConfig;
 
+    #[inline(always)]
     fn new(config: Self::Config) -> Result<Self, Self::Error>
     where
         Self: Sized,
@@ -55,6 +56,7 @@ impl vgi::VectorGraphicsInterface for VectorGraphicsInterface {
         })
     }
 
+    #[inline(always)]
     fn init(&mut self, window: Arc<Window>, _: &ActiveEventLoop) -> Result<(), Self::Error> {
         let size = window.inner_size();
 
@@ -93,6 +95,7 @@ impl vgi::VectorGraphicsInterface for VectorGraphicsInterface {
         Ok(())
     }
 
+    #[inline(always)]
     fn render(
         &mut self,
         window: Arc<Window>,
@@ -152,6 +155,7 @@ impl vgi::VectorGraphicsInterface for VectorGraphicsInterface {
         Ok(())
     }
 
+    #[inline(always)]
     fn resize(
         &mut self,
         _: Arc<Window>,
@@ -169,6 +173,7 @@ impl vgi::VectorGraphicsInterface for VectorGraphicsInterface {
         Ok(())
     }
 
+    #[cold]
     fn uninit(&mut self, _: Arc<Window>, _: &ActiveEventLoop) -> Result<(), Self::Error> {
         self.renderer = None;
         self.surface = None;
@@ -176,6 +181,7 @@ impl vgi::VectorGraphicsInterface for VectorGraphicsInterface {
         Ok(())
     }
 
+    #[cold]
     fn destroy(&mut self, _: Arc<Window>, _: &ActiveEventLoop) -> Result<(), Self::Error> {
         for device in &self.context.devices {
             device.device.destroy();
@@ -186,6 +192,7 @@ impl vgi::VectorGraphicsInterface for VectorGraphicsInterface {
 }
 
 impl Debug for VectorGraphicsInterface {
+    #[inline(always)]
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("VectorGraphicsInterface")
             .field("config", &self.config)
@@ -219,6 +226,7 @@ pub struct VectorGraphicsConfig {
 }
 
 impl Default for VectorGraphicsConfig {
+    #[inline(always)]
     fn default() -> Self {
         Self {
             present_mode: PresentMode::AutoNoVsync,
@@ -248,6 +256,7 @@ pub struct Scene {
 }
 
 impl Scene {
+    #[inline(always)]
     fn draw(
         &mut self,
         brush: &Brush,
@@ -267,28 +276,34 @@ impl Scene {
 }
 
 impl vgi::Scene for Scene {
+    #[inline(always)]
     fn new() -> Self {
         Self {
             scene: vello::Scene::new(),
         }
     }
 
+    #[inline(always)]
     fn as_any(&self) -> &dyn Any {
         self
     }
 
+    #[inline(always)]
     fn as_any_mut(&mut self) -> &mut dyn Any {
         self
     }
 
+    #[inline(always)]
     fn dyn_clone(&self) -> Box<dyn vgi::Scene> {
         Box::new(self.clone())
     }
 
+    #[inline(always)]
     fn reset(&mut self) {
         self.scene.reset();
     }
 
+    #[inline(always)]
     fn append(&mut self, other: &dyn vgi::Scene, transform: Option<Affine>) {
         let any = other.as_any();
         let scene = any.downcast_ref::<Scene>().unwrap();
@@ -296,6 +311,7 @@ impl vgi::Scene for Scene {
         self.scene.append(&scene.scene, transform)
     }
 
+    #[inline(always)]
     fn draw_rect(
         &mut self,
         brush: &Brush,
@@ -306,6 +322,7 @@ impl vgi::Scene for Scene {
         self.draw(brush, transform, stroke, rect)
     }
 
+    #[inline(always)]
     fn draw_rounded_rect(
         &mut self,
         brush: &Brush,
@@ -316,6 +333,7 @@ impl vgi::Scene for Scene {
         self.draw(brush, transform, stroke, rect)
     }
 
+    #[inline(always)]
     fn draw_circle(
         &mut self,
         brush: &Brush,
@@ -326,6 +344,7 @@ impl vgi::Scene for Scene {
         self.draw(brush, transform, stroke, circle)
     }
 
+    #[inline(always)]
     fn draw_circle_segment(
         &mut self,
         brush: &Brush,
@@ -336,6 +355,7 @@ impl vgi::Scene for Scene {
         self.draw(brush, transform, stroke, circle_segment)
     }
 
+    #[inline(always)]
     fn draw_ellipse(
         &mut self,
         brush: &Brush,
@@ -346,6 +366,7 @@ impl vgi::Scene for Scene {
         self.draw(brush, transform, stroke, ellipse)
     }
 
+    #[inline(always)]
     fn draw_cubic_bezier(
         &mut self,
         brush: &Brush,
@@ -356,6 +377,7 @@ impl vgi::Scene for Scene {
         self.draw(brush, transform, stroke, cubic_bez)
     }
 
+    #[inline(always)]
     fn draw_quadratic_bezier(
         &mut self,
         brush: &Brush,
@@ -366,6 +388,7 @@ impl vgi::Scene for Scene {
         self.draw(brush, transform, stroke, quad_bez)
     }
 
+    #[inline(always)]
     fn draw_triangle(
         &mut self,
         brush: &Brush,
@@ -376,6 +399,7 @@ impl vgi::Scene for Scene {
         self.draw(brush, transform, stroke, triangle)
     }
 
+    #[inline(always)]
     fn draw_image(&mut self, img: &ImageBrush, transform: Option<Affine>, position: Vector2<f32>) {
         let transform = transform
             .unwrap_or_default()
@@ -462,6 +486,7 @@ impl vgi::Scene for Scene {
             .draw(&peniko::Style::Fill(Fill::NonZero), glyphs.into_iter());
     }
 
+    #[inline(always)]
     #[cfg(feature = "svg")]
     fn draw_svg(&mut self, svg: &usvg::Tree, affine: Option<Affine>) {
         let mut scene = vello::Scene::new();

@@ -34,6 +34,7 @@ impl Switch {
     /// Create a new switch with the given value.
     ///
     /// The value should be a signal, so it's mutable.
+    #[inline(always)]
     pub fn new(value: impl Into<MaybeSignal<bool>>) -> Self {
         Self {
             layout: LayoutStyle {
@@ -53,12 +54,14 @@ impl Switch {
     }
 
     /// Sets the value of the checkbox and returns self.
+    #[inline(always)]
     pub fn with_value(mut self, value: impl Into<MaybeSignal<bool>>) -> Self {
         self.value = value.into();
         self
     }
 
     /// Sets the update value to apply on changes and returns self.
+    #[inline(always)]
     pub fn with_on_change(mut self, update: impl Into<MaybeSignal<Update>>) -> Self {
         self.on_change = update.into();
         self
@@ -66,6 +69,7 @@ impl Switch {
 }
 
 impl WidgetLayoutExt for Switch {
+    #[inline(always)]
     fn set_layout_style(&mut self, layout_style: impl Into<MaybeSignal<LayoutStyle>>) {
         self.layout = layout_style.into();
     }
@@ -126,6 +130,7 @@ impl Widget for Switch {
         );
     }
 
+    #[inline(always)]
     fn layout_style(&self) -> StyleNode {
         StyleNode {
             style: self.layout.get().clone(),
@@ -155,6 +160,7 @@ impl Widget for Switch {
         update
     }
 
+    #[inline(always)]
     fn widget_id(&self) -> WidgetId {
         WidgetId::new("maycoon-widgets", "Switch")
     }

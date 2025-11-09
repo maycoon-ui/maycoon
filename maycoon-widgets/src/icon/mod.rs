@@ -28,6 +28,7 @@ pub struct Icon {
 
 impl Icon {
     /// Creates a new icon widget from the given svg icon.
+    #[inline(always)]
     pub fn new(icon: impl Into<MaybeSignal<SvgIcon>>) -> Self {
         Self {
             layout_style: LayoutStyle {
@@ -41,6 +42,7 @@ impl Icon {
 }
 
 impl Widget for Icon {
+    #[inline(always)]
     fn render(
         &mut self,
         scene: &mut dyn Scene,
@@ -64,6 +66,7 @@ impl Widget for Icon {
         scene.draw_svg(icon.tree(), Some(affine));
     }
 
+    #[inline(always)]
     fn layout_style(&self) -> StyleNode {
         StyleNode {
             style: self.layout_style.get().clone(),
@@ -71,16 +74,19 @@ impl Widget for Icon {
         }
     }
 
+    #[inline(always)]
     fn update(&mut self, _: &LayoutNode, _: AppContext, _: &AppInfo) -> Update {
         Update::empty()
     }
 
+    #[inline(always)]
     fn widget_id(&self) -> WidgetId {
         WidgetId::new("maycoon-widgets", "Icon")
     }
 }
 
 impl WidgetLayoutExt for Icon {
+    #[inline(always)]
     fn set_layout_style(&mut self, layout_style: impl Into<MaybeSignal<LayoutStyle>>) {
         self.layout_style = layout_style.into();
     }

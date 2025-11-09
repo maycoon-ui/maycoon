@@ -24,6 +24,7 @@ pub struct AppInfo {
 
 impl AppInfo {
     /// Reset the application information for a new frame.
+    #[inline(always)]
     #[tracing::instrument(level = "trace", skip_all)]
     pub fn reset(&mut self) {
         self.buttons.clear();
@@ -33,6 +34,7 @@ impl AppInfo {
 }
 
 impl Default for AppInfo {
+    #[inline(always)]
     fn default() -> Self {
         Self {
             cursor_pos: None,

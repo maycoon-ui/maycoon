@@ -20,6 +20,7 @@ pub struct MayRunner<T: Theme, V: VectorGraphicsInterface> {
 
 impl<T: Theme, V: VectorGraphicsInterface> MayRunner<T, V> {
     /// Create a new App with the given [MayConfig].
+    #[inline(always)]
     #[tracing::instrument(level = "trace", skip_all)]
     pub fn new(config: MayConfig<T, V>) -> Self {
         Self {
@@ -31,18 +32,21 @@ impl<T: Theme, V: VectorGraphicsInterface> MayRunner<T, V> {
     /// Loads a new font into the font context.
     ///
     /// See [FontContext::load] for more.
+    #[inline(always)]
     pub fn with_font(mut self, name: impl ToString, font: FontData) -> Self {
         self.font_ctx.load(name, font);
         self
     }
 
     /// Set the font context. Can be used to configure fonts.
+    #[inline(always)]
     pub fn with_font_context(mut self, font_ctx: FontContext) -> Self {
         self.font_ctx = font_ctx;
         self
     }
 
     /// Run the application with given widget and state.
+    #[inline(always)]
     #[tracing::instrument(level = "info", skip_all)]
     pub fn run<S, W, F>(mut self, state: S, builder: F, mut plugins: PluginManager<T, V>)
     where

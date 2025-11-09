@@ -21,6 +21,7 @@ pub struct Canvas {
 
 impl Canvas {
     /// Create a new Canvas widget from a painter function.
+    #[inline(always)]
     pub fn new(painter: impl FnMut(&mut dyn Scene, &AppInfo) + 'static) -> Self {
         Self {
             painter: Box::new(painter),
@@ -28,6 +29,7 @@ impl Canvas {
     }
 
     /// Set a painter function and return itself.
+    #[inline(always)]
     pub fn with_painter(mut self, painter: impl FnMut(&mut dyn Scene, &AppInfo) + 'static) -> Self {
         self.painter = Box::new(painter);
         self
@@ -35,6 +37,7 @@ impl Canvas {
 }
 
 impl Widget for Canvas {
+    #[inline(always)]
     fn render(
         &mut self,
         scene: &mut dyn Scene,
@@ -51,6 +54,7 @@ impl Widget for Canvas {
         scene.append(canvas.as_ref(), None);
     }
 
+    #[inline(always)]
     fn layout_style(&self) -> StyleNode {
         StyleNode {
             style: LayoutStyle::default(),
@@ -58,10 +62,12 @@ impl Widget for Canvas {
         }
     }
 
+    #[inline(always)]
     fn update(&mut self, _: &LayoutNode, _: AppContext, _: &AppInfo) -> Update {
         Update::DRAW | Update::LAYOUT
     }
 
+    #[inline(always)]
     fn widget_id(&self) -> WidgetId {
         WidgetId::new("maycoon-widgets", "Canvas")
     }

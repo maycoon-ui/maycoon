@@ -20,6 +20,7 @@ pub enum Ref<'a, T> {
 impl<'a, T> Deref for Ref<'a, T> {
     type Target = T;
 
+    #[inline(always)]
     fn deref(&self) -> &Self::Target {
         match self {
             Ref::Owned(value) => value,
@@ -31,24 +32,28 @@ impl<'a, T> Deref for Ref<'a, T> {
 }
 
 impl<'a, T> From<T> for Ref<'a, T> {
+    #[inline(always)]
     fn from(value: T) -> Self {
         Ref::Owned(value)
     }
 }
 
 impl<'a, T> From<&'a T> for Ref<'a, T> {
+    #[inline(always)]
     fn from(value: &'a T) -> Self {
         Ref::Borrow(value)
     }
 }
 
 impl<'a, T> From<std::cell::Ref<'a, T>> for Ref<'a, T> {
+    #[inline(always)]
     fn from(value: std::cell::Ref<'a, T>) -> Self {
         Ref::Ref(value)
     }
 }
 
 impl<'a, T> From<RwLockReadGuard<'a, T>> for Ref<'a, T> {
+    #[inline(always)]
     fn from(value: RwLockReadGuard<'a, T>) -> Self {
         Ref::ReadGuard(value)
     }

@@ -18,6 +18,7 @@ pub struct Fetcher<I: Send + 'static, O> {
 
 impl<I: Send + 'static, O> Fetcher<I, O> {
     /// Create a new task fetcher with the given task and factory function.
+    #[inline(always)]
     pub fn new(task: Box<dyn Task<I>>, factory: Box<dyn Fn(Option<I>) -> O + 'static>) -> Self {
         Self {
             task: Some(task),
@@ -30,6 +31,7 @@ impl<I: Send + 'static, O> Fetcher<I, O> {
     /// and create a new [Fetcher] with the resulting task and the given factory function.
     ///
     /// If you want to spawn a blocking task, use [Fetcher::spawn_blocking] instead.
+    #[inline(always)]
     pub fn spawn(
         future: impl Future<Output = I> + Send + 'static,
         factory: impl Fn(Option<I>) -> O + 'static,
@@ -44,6 +46,7 @@ impl<I: Send + 'static, O> Fetcher<I, O> {
     /// and create a new [Fetcher] with the resulting task and the given factory function.
     ///
     /// If your task is non-blocking (a simple future), use [Fetcher::spawn] instead.
+    #[inline(always)]
     #[cfg(native)]
     pub fn spawn_blocking(
         func: impl Fn() -> I + Send + 'static,
@@ -58,6 +61,7 @@ impl<I: Send + 'static, O> Fetcher<I, O> {
     /// Returns a mutable reference to the possible output value.
     ///
     /// This is mostly used internally and will return the cached output value.
+    #[inline(always)]
     pub fn value_mut(&mut self) -> Option<&mut O> {
         self.value.as_mut()
     }
@@ -65,6 +69,7 @@ impl<I: Send + 'static, O> Fetcher<I, O> {
     /// Returns a reference to the possible output value.
     ///
     /// This is mostly used internally and will return the cached output value.
+    #[inline(always)]
     pub fn value_ref(&self) -> Option<&O> {
         self.value.as_ref()
     }
@@ -73,11 +78,13 @@ impl<I: Send + 'static, O> Fetcher<I, O> {
     ///
     /// **NOTE:** This will only return `true`, if the inner task has finished,
     /// but the value has not been consumed yet.
+    #[inline(always)]
     pub fn is_ready(&self) -> bool {
         self.task.as_ref().map(|t| t.is_ready()).unwrap_or(false)
     }
 
     /// Returns whether the inner task has finished and the value has been computed.
+    #[inline(always)]
     pub fn is_fetched(&self) -> bool {
         self.task.is_none() && self.value.is_some()
     }
@@ -86,6 +93,7 @@ impl<I: Send + 'static, O> Fetcher<I, O> {
     ///
     /// If the inner task is not ready, the factory function will be called with `None`.
     /// Otherwise, it will be called with `Some(I)`.
+    #[inline(always)]
     pub fn compute(&mut self) {
         if self.is_ready() {
             let mut task = self.task.take().unwrap();
@@ -102,6 +110,7 @@ impl<I: Send + 'static, O> Fetcher<I, O> {
     /// This will only actually compute the value,
     /// if the task is not fully finished yet,
     /// so it's safe to call, even if the task is already done.
+    #[inline(always)]
     pub fn fetch(&mut self) -> &mut O {
         if !self.is_fetched() {
             self.compute();

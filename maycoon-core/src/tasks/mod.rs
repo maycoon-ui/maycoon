@@ -20,12 +20,14 @@ static RUNNER: OnceLock<TaskRunner> = OnceLock::new();
 /// Initializes the global task runner.
 ///
 /// Panics if the task runner is already initialized.
+#[inline(always)]
 pub fn init(runner: TaskRunner) {
     RUNNER.set(runner).expect("Task runner already initialized");
 }
 
 /// Try to get the global task runner.
 /// Returns [None] if the task runner is not initialized.
+#[inline(always)]
 pub fn try_runner<'a>() -> Option<&'a TaskRunner> {
     RUNNER.get()
 }
@@ -33,6 +35,7 @@ pub fn try_runner<'a>() -> Option<&'a TaskRunner> {
 /// Get the global task runner.
 ///
 /// Panics if the task runner is not initialized.
+#[inline(always)]
 pub fn runner<'a>() -> &'a TaskRunner {
     RUNNER.get().expect("Task runner not initialized")
 }
@@ -41,6 +44,7 @@ pub fn runner<'a>() -> &'a TaskRunner {
 ///
 /// If this actually spawns a task on a background task or just spawns a local task,
 /// depends on the [TaskRunner] type that is in use.
+#[inline(always)]
 pub fn spawn<Fut>(future: Fut) -> Box<dyn Task<Fut::Output>>
 where
     Fut: Future + Send + 'static,
@@ -55,6 +59,7 @@ where
 /// as local spawning would block the thread.
 ///
 /// Only available on native platforms.
+#[inline(always)]
 #[cfg(native)]
 pub fn spawn_blocking<R, F>(func: F) -> Box<dyn Task<R>>
 where
@@ -67,6 +72,7 @@ where
 /// Blocks the current thread on the global task runner until the future is ready.
 ///
 /// Only available on native platforms.
+#[inline(always)]
 #[cfg(native)]
 pub fn block_on<Fut>(future: Fut) -> Fut::Output
 where

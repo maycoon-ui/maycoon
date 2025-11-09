@@ -35,6 +35,7 @@ pub struct UpdateManager {
 
 impl UpdateManager {
     /// Creates a new `UpdateManager`.
+    #[inline(always)]
     pub fn new() -> Self {
         Self {
             update: Arc::new(AtomicU8::new(Update::FORCE.bits())),
@@ -42,36 +43,42 @@ impl UpdateManager {
     }
 
     /// Inserts the given `Update` into the `UpdateManager` using bitwise OR.
+    #[inline(always)]
     pub fn insert(&self, update: Update) {
         tracing::debug!("inserting update {update:?}");
         self.update.fetch_or(update.bits(), Ordering::AcqRel);
     }
 
     /// Removes the given `Update` from the `UpdateManager` using bitwise AND.
+    #[inline(always)]
     pub fn remove(&self, update: Update) {
         tracing::debug!("removing update {update:?}");
         self.update.fetch_and(!update.bits(), Ordering::AcqRel);
     }
 
     /// Returns the current `Update` of the `UpdateManager`.
+    #[inline(always)]
     pub fn get(&self) -> Update {
         Update::from_bits(self.update.load(Ordering::Acquire))
             .expect("failed to decode update bits")
     }
 
     /// Sets the current `Update` of the `UpdateManager`.
+    #[inline(always)]
     pub fn set(&self, update: Update) {
         tracing::debug!("setting update {update:?}");
         self.update.store(update.bits(), Ordering::Release);
     }
 
     /// Clears the current `Update` flags of the `UpdateManager`.
+    #[inline(always)]
     pub fn clear(&self) {
         self.update.store(0, Ordering::Release);
     }
 }
 
 impl Default for UpdateManager {
+    #[inline(always)]
     fn default() -> Self {
         Self::new()
     }

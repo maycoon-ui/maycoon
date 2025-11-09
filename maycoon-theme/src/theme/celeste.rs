@@ -1,4 +1,4 @@
-use peniko::{color::palette, Color};
+use peniko::{Color, color::palette};
 
 use crate::globals::Globals;
 use crate::id::WidgetId;
@@ -83,6 +83,7 @@ impl Theme for CelesteTheme {
         }
     }
 
+    #[inline(always)]
     fn defaults(&self) -> DefaultStyles {
         DefaultStyles::new(
             DefaultTextStyles::new(palette::css::BLACK, palette::css::WHITE_SMOKE),
@@ -96,16 +97,19 @@ impl Theme for CelesteTheme {
         )
     }
 
+    #[inline(always)]
     fn window_background(&self) -> Color {
         Color::WHITE
     }
 
+    #[inline(always)]
     fn globals(&self) -> &Globals {
         match &self {
             CelesteTheme::Light(globals) => globals,
         }
     }
 
+    #[inline(always)]
     fn globals_mut(&mut self) -> &mut Globals {
         match self {
             CelesteTheme::Light(globals) => globals,

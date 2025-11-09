@@ -18,6 +18,7 @@ pub struct MayConfig<T: Theme, V: VectorGraphicsInterface> {
 }
 
 impl<T: Default + Theme, V: VectorGraphicsInterface> Default for MayConfig<T, V> {
+    #[inline(always)]
     fn default() -> Self {
         Self {
             window: WindowConfig::default(),
@@ -73,6 +74,7 @@ pub struct WindowConfig {
 }
 
 impl Default for WindowConfig {
+    #[inline(always)]
     fn default() -> Self {
         Self {
             title: "New App".to_string(),

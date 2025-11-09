@@ -43,6 +43,7 @@ pub struct NeverTask<T: Send + 'static>(std::marker::PhantomData<T>);
 
 impl<T: Send + 'static> NeverTask<T> {
     /// Creates a new [NeverTask].
+    #[inline(always)]
     pub const fn new() -> Self {
         Self(std::marker::PhantomData)
     }
@@ -51,22 +52,26 @@ impl<T: Send + 'static> NeverTask<T> {
 impl<T: Send + 'static> Future for NeverTask<T> {
     type Output = T;
 
+    #[inline(always)]
     fn poll(self: Pin<&mut Self>, _cx: &mut Context<'_>) -> Poll<Self::Output> {
         Poll::Pending
     }
 }
 
 impl<T: Send + 'static> Task<T> for NeverTask<T> {
+    #[inline(always)]
     fn is_ready(&self) -> bool {
         false
     }
 
+    #[inline(always)]
     fn take(&mut self) -> Option<T> {
         None
     }
 }
 
 impl<T: Send + 'static> Default for NeverTask<T> {
+    #[inline(always)]
     fn default() -> Self {
         Self::new()
     }
@@ -80,6 +85,7 @@ pub struct LocalNeverTask<T: 'static>(std::marker::PhantomData<T>);
 
 impl<T: 'static> LocalNeverTask<T> {
     /// Create a new [LocalNeverTask].
+    #[inline(always)]
     pub const fn new() -> Self {
         Self(std::marker::PhantomData)
     }
@@ -88,16 +94,19 @@ impl<T: 'static> LocalNeverTask<T> {
 impl<T: 'static> Future for LocalNeverTask<T> {
     type Output = T;
 
+    #[inline(always)]
     fn poll(self: Pin<&mut Self>, _cx: &mut Context<'_>) -> Poll<Self::Output> {
         Poll::Pending
     }
 }
 
 impl<T: 'static> LocalTask<T> for LocalNeverTask<T> {
+    #[inline(always)]
     fn is_ready(&self) -> bool {
         false
     }
 
+    #[inline(always)]
     fn take(&mut self) -> Option<T> {
         None
     }

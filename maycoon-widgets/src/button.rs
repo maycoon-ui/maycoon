@@ -31,6 +31,7 @@ pub struct Button {
 
 impl Button {
     /// Create a new button with the given child widget.
+    #[inline(always)]
     pub fn new(child: impl Widget + 'static) -> Self {
         Self {
             child: Box::new(child),
@@ -50,6 +51,7 @@ impl Button {
     }
 
     /// Sets the function to be called when the button is pressed.
+    #[inline(always)]
     pub fn with_on_pressed(mut self, on_pressed: impl Into<MaybeSignal<Update>>) -> Self {
         self.on_pressed = on_pressed.into();
         self
@@ -57,12 +59,14 @@ impl Button {
 }
 
 impl WidgetChildExt for Button {
+    #[inline(always)]
     fn set_child(&mut self, child: impl Widget + 'static) {
         self.child = Box::new(child);
     }
 }
 
 impl WidgetLayoutExt for Button {
+    #[inline(always)]
     fn set_layout_style(&mut self, layout_style: impl Into<MaybeSignal<LayoutStyle>>) {
         self.layout_style = layout_style.into();
     }
@@ -134,6 +138,7 @@ impl Widget for Button {
         }
     }
 
+    #[inline(always)]
     fn layout_style(&self) -> StyleNode {
         StyleNode {
             style: self.layout_style.get().clone(),
@@ -183,6 +188,7 @@ impl Widget for Button {
         update
     }
 
+    #[inline(always)]
     fn widget_id(&self) -> WidgetId {
         WidgetId::new("maycoon-widgets", "Button")
     }

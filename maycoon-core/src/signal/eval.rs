@@ -12,6 +12,7 @@ pub struct EvalSignal<T: 'static> {
 
 impl<T: 'static> EvalSignal<T> {
     /// Create a new eval signal using the given evaluation function.
+    #[inline(always)]
     pub fn new(eval: impl Fn() -> T + 'static) -> Self {
         Self {
             eval: Rc::new(eval),
@@ -20,22 +21,28 @@ impl<T: 'static> EvalSignal<T> {
 }
 
 impl<T: 'static> Signal<T> for EvalSignal<T> {
+    #[inline(always)]
     fn get(&self) -> Ref<'_, T> {
         Ref::Owned((self.eval)())
     }
 
+    #[inline(always)]
     fn set_value(&self, _: T) {}
 
+    #[inline(always)]
     fn listen(&mut self, _: Listener<T>) {}
 
+    #[inline(always)]
     fn notify(&self) {}
 
+    #[inline(always)]
     fn dyn_clone(&self) -> Box<dyn Signal<T>> {
         Box::new(self.clone())
     }
 }
 
 impl<T: 'static> Clone for EvalSignal<T> {
+    #[inline(always)]
     fn clone(&self) -> Self {
         Self {
             eval: self.eval.clone(),

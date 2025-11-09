@@ -26,6 +26,7 @@ pub struct Container {
 
 impl Container {
     /// Creates a new container with given children.
+    #[inline(always)]
     pub fn new(children: Vec<BoxedWidget>) -> Self {
         Self {
             style: LayoutStyle::default().into(),
@@ -35,22 +36,26 @@ impl Container {
 }
 
 impl WidgetChildrenExt for Container {
+    #[inline(always)]
     fn set_children(&mut self, children: Vec<BoxedWidget>) {
         self.children = children.into_iter().collect();
     }
 
+    #[inline(always)]
     fn add_child(&mut self, child: impl Widget + 'static) {
         self.children.push(Box::new(child));
     }
 }
 
 impl WidgetLayoutExt for Container {
+    #[inline(always)]
     fn set_layout_style(&mut self, layout_style: impl Into<MaybeSignal<LayoutStyle>>) {
         self.style = layout_style.into();
     }
 }
 
 impl Widget for Container {
+    #[inline(always)]
     fn render(
         &mut self,
         scene: &mut dyn Scene,
@@ -70,6 +75,7 @@ impl Widget for Container {
         }
     }
 
+    #[inline(always)]
     fn layout_style(&self) -> StyleNode {
         let style = self.style.get().clone();
 
@@ -82,6 +88,7 @@ impl Widget for Container {
         StyleNode { style, children }
     }
 
+    #[inline(always)]
     fn update(&mut self, layout: &LayoutNode, context: AppContext, info: &AppInfo) -> Update {
         let mut update = Update::empty();
 
@@ -92,6 +99,7 @@ impl Widget for Container {
         update
     }
 
+    #[inline(always)]
     fn widget_id(&self) -> WidgetId {
         WidgetId::new("maycoon-widgets", "Container")
     }

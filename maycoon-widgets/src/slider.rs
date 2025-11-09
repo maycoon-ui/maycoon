@@ -29,6 +29,7 @@ pub struct Slider {
 
 impl Slider {
     /// Create a new Slider widget from a value (should be a signal) and an `on_change` callback.
+    #[inline(always)]
     pub fn new(value: impl Into<MaybeSignal<f32>>) -> Self {
         Self {
             layout_style: LayoutStyle {
@@ -49,12 +50,14 @@ impl Slider {
     }
 
     /// Sets the layout style of the slider and returns itself.
+    #[inline(always)]
     pub fn with_value(mut self, value: impl Into<MaybeSignal<f32>>) -> Self {
         self.value = value.into();
         self
     }
 
     /// Sets the function to be called when the slider is clicked/changed.
+    #[inline(always)]
     pub fn with_on_change(mut self, on_change: impl Into<MaybeSignal<Update>>) -> Self {
         self.on_change = on_change.into();
         self
@@ -62,6 +65,7 @@ impl Slider {
 }
 
 impl WidgetLayoutExt for Slider {
+    #[inline(always)]
     fn set_layout_style(&mut self, layout_style: impl Into<MaybeSignal<LayoutStyle>>) {
         self.layout_style = layout_style.into();
     }
@@ -121,6 +125,7 @@ impl Widget for Slider {
         );
     }
 
+    #[inline(always)]
     fn layout_style(&self) -> StyleNode {
         StyleNode {
             style: self.layout_style.get().clone(),
@@ -157,6 +162,7 @@ impl Widget for Slider {
         update
     }
 
+    #[inline(always)]
     fn widget_id(&self) -> WidgetId {
         WidgetId::new("maycoon-widgets", "Slider")
     }
