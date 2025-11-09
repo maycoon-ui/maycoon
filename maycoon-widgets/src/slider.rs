@@ -131,29 +131,24 @@ impl Widget for Slider {
     fn update(&mut self, layout: &LayoutNode, _: AppContext, info: &AppInfo) -> Update {
         let mut update = Update::empty();
 
-        if let Some(cursor) = info.cursor_pos {
-            if cursor.x as f32 >= layout.layout.location.x
-                && cursor.x as f32 <= layout.layout.location.x + layout.layout.size.width
-                && cursor.y as f32 >= layout.layout.location.y
-                && cursor.y as f32 <= layout.layout.location.y + layout.layout.size.height
-            {
-                for (_, btn, el_state) in &info.buttons {
-                    if btn == &MouseButton::Left && el_state.is_pressed() {
-                        self.dragging = el_state.is_pressed();
-                    }
+        if let Some(cursor) = info.cursor_pos
+            && layout::intersects(cursor, &layout.layout)
+        {
+            for (_, btn, el_state) in &info.buttons {
+                if btn == &MouseButton::Left && el_state.is_pressed() {
+                    self.dragging = el_state.is_pressed();
+                }
+            }
+
+            if self.dragging {
+                let new_value = (cursor.x - layout.layout.location.x) / layout.layout.size.width;
+
+                if let Some(sig) = self.value.as_signal() {
+                    sig.set(new_value);
                 }
 
-                if self.dragging {
-                    let new_value =
-                        (cursor.x as f32 - layout.layout.location.x) / layout.layout.size.width;
-
-                    if let Some(sig) = self.value.as_signal() {
-                        sig.set(new_value);
-                    }
-
-                    update.insert(*self.on_change.get());
-                    update.insert(Update::DRAW);
-                }
+                update.insert(*self.on_change.get());
+                update.insert(Update::DRAW);
             }
         } else {
             self.dragging = false;

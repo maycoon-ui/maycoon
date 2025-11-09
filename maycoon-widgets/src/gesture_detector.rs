@@ -1,6 +1,7 @@
 use maycoon_core::app::context::AppContext;
 use maycoon_core::app::info::AppInfo;
 use maycoon_core::app::update::Update;
+use maycoon_core::layout;
 use maycoon_core::layout::{LayoutNode, StyleNode};
 use maycoon_core::signal::MaybeSignal;
 use maycoon_core::vgi::Scene;
@@ -100,10 +101,7 @@ impl Widget for GestureDetector {
         let mut update = Update::empty();
 
         if let Some(cursor) = info.cursor_pos
-            && (cursor.x as f32 >= layout.layout.location.x
-                && cursor.x as f32 <= layout.layout.location.x + layout.layout.size.width
-                && cursor.y as f32 >= layout.layout.location.y
-                && cursor.y as f32 <= layout.layout.location.y + layout.layout.size.height)
+            && layout::intersects(cursor, &layout.layout)
         {
             update |= self.on_hover();
 

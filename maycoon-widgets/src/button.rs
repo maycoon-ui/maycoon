@@ -146,36 +146,29 @@ impl Widget for Button {
         let old_state = self.state;
 
         // check for hovering
-        if let Some(cursor) = info.cursor_pos {
-            if cursor.x as f32 >= layout.layout.location.x
-                && cursor.x as f32 <= layout.layout.location.x + layout.layout.size.width
-                && cursor.y as f32 >= layout.layout.location.y
-                && cursor.y as f32 <= layout.layout.location.y + layout.layout.size.height
-            {
-                // fixes state going to hover if the button is pressed but not yet released
-                if self.state != ButtonState::Pressed {
-                    self.state = ButtonState::Hovered;
-                }
+        if let Some(cursor) = info.cursor_pos
+            && layout::intersects(cursor, &layout.layout)
+        {
+            // fixes state going to hover if the button is pressed but not yet released
+            if self.state != ButtonState::Pressed {
+                self.state = ButtonState::Hovered;
+            }
 
-                // check for click
-                for (_, btn, el) in &info.buttons {
-                    if *btn == MouseButton::Left {
-                        match el {
-                            ElementState::Pressed => {
-                                self.state = ButtonState::Pressed;
-                            },
+            // check for click
+            for (_, btn, el) in &info.buttons {
+                if *btn == MouseButton::Left {
+                    match el {
+                        ElementState::Pressed => {
+                            self.state = ButtonState::Pressed;
+                        },
 
-                            // actually fire the event if the button is released
-                            ElementState::Released => {
-                                self.state = ButtonState::Released;
-                                update |= *self.on_pressed.get();
-                            },
-                        }
+                        // actually fire the event if the button is released
+                        ElementState::Released => {
+                            self.state = ButtonState::Released;
+                            update |= *self.on_pressed.get();
+                        },
                     }
                 }
-            } else {
-                // cursor not in area, so button is idle
-                self.state = ButtonState::Idle;
             }
         } else {
             // cursor is not in window, so button is idle

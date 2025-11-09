@@ -477,7 +477,7 @@ where
                 },
 
                 WindowEvent::CursorMoved { position, .. } => {
-                    self.info.cursor_pos = Some(Vector2::new(position.x, position.y));
+                    self.info.cursor_pos = Some(Vector2::new(position.x as f32, position.y as f32));
                     self.request_redraw();
                 },
 

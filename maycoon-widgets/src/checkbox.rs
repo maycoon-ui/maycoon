@@ -137,11 +137,8 @@ impl Widget for Checkbox {
     fn update(&mut self, layout: &LayoutNode, _: AppContext, info: &AppInfo) -> Update {
         let mut update = Update::empty();
 
-        if let Some(cursor) = &info.cursor_pos
-            && (cursor.x as f32 >= layout.layout.location.x
-                && cursor.x as f32 <= layout.layout.location.x + layout.layout.size.width
-                && cursor.y as f32 >= layout.layout.location.y
-                && cursor.y as f32 <= layout.layout.location.y + layout.layout.size.height)
+        if let Some(cursor) = info.cursor_pos
+            && layout::intersects(cursor, &layout.layout)
         {
             for (_, btn, el) in &info.buttons {
                 if btn == &MouseButton::Left && *el == ElementState::Released {
