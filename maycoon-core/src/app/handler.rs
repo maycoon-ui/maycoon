@@ -177,7 +177,7 @@ where
     ) -> Result<(), V::Error> {
         tracing::trace!("rendering via vector graphics interface");
         self.graphics.render(
-            window.clone(),
+            window,
             event_loop,
             &self.scene,
             self.config.theme.window_background(),
@@ -333,6 +333,20 @@ where
 
         tracing::debug!("updates per sec: {}", self.info.diagnostics.updates_per_sec);
     }
+
+    #[cold]
+    fn close(&mut self, window: Arc<Window>, event_loop: &ActiveEventLoop) {
+        tracing::trace!("close requested");
+
+        self.graphics
+            .destroy(window, event_loop)
+            .expect("Failed to destroy vector graphics interface");
+
+        if self.config.window.close_on_request {
+            tracing::info!("exiting event loop");
+            event_loop.exit();
+        }
+    }
 }
 
 impl<T, W, S, F, V> ApplicationHandler for AppHandler<T, W, S, F, V>
@@ -464,16 +478,7 @@ where
                 },
 
                 WindowEvent::CloseRequested => {
-                    tracing::trace!("close requested");
-
-                    self.graphics
-                        .destroy(window.clone(), event_loop)
-                        .expect("Failed to destroy vector graphics interface");
-
-                    if self.config.window.close_on_request {
-                        tracing::info!("exiting event loop");
-                        event_loop.exit();
-                    }
+                    self.close(window.clone(), event_loop);
                 },
 
                 WindowEvent::RedrawRequested => {
