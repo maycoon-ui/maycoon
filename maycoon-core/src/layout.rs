@@ -25,11 +25,13 @@ pub const LAYOUT_EPSILON: f32 = 0.5;
 ///
 /// Example:
 /// ```
+/// # use maycoon_core::layout;
+///
 /// // Significant change. Should redraw.
-/// assert!(!equal(10.0, 20.0));
+/// assert!(!layout::equal(10.0, 20.0));
 ///
 /// // Insignificant change. Should not redraw.
-/// assert!(equal(10.0, 10.005));
+/// assert!(layout::equal(10.0, 10.005));
 /// ```
 #[inline(always)]
 pub fn equal(x: f32, y: f32) -> bool {
