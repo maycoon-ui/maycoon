@@ -118,12 +118,14 @@ pub trait TaskRunnerImpl: Debug + 'static {
     /// Spawns a blocking task in the background.
     ///
     /// Returns a task handle to the operation.
+    #[cfg(native)]
     fn spawn_blocking<R, F>(&self, func: F) -> Self::Task<R>
     where
         R: Send + 'static,
         F: FnOnce() -> R + Send + 'static;
 
     /// Blocks on the given future, until it's completed.
+    #[cfg(native)]
     fn block_on<Fut>(&self, future: Fut) -> Fut::Output
     where
         Fut: Future;
