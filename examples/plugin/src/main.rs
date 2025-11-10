@@ -30,10 +30,6 @@ impl Application for MyApp {
     }
 
     fn plugins(&self) -> PluginManager<Self::Theme, Self::Graphics> {
-        let mut plugins = PluginManager::new();
-
-        plugins.register(MyPlugin);
-
-        plugins
+        PluginManager::new().register(MyPlugin)
     }
 }

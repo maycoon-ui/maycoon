@@ -4,7 +4,6 @@ use crate::globals::Globals;
 use crate::id::WidgetId;
 use crate::style::{
     DefaultContainerStyles, DefaultInteractiveStyles, DefaultStyles, DefaultTextStyles, Style,
-    StyleVal,
 };
 use crate::theme::Theme;
 
@@ -32,51 +31,10 @@ impl Theme for CelesteTheme {
     fn of(&self, id: WidgetId) -> Option<Style> {
         match id.namespace() {
             "maycoon-widgets" => match id.id() {
-                "Text" => Some(Style::from_values([
-                    ("color".to_string(), StyleVal::Color(palette::css::BLACK)),
-                    (
-                        "color_invert".to_string(),
-                        StyleVal::Color(palette::css::WHITE),
-                    ),
-                ])),
-
-                "Button" => Some(Style::from_values([
-                    (
-                        "color_idle".to_string(),
-                        StyleVal::Color(Color::from_rgb8(150, 170, 250)),
-                    ),
-                    (
-                        "color_pressed".to_string(),
-                        StyleVal::Color(Color::from_rgb8(130, 150, 230)),
-                    ),
-                    (
-                        "color_hovered".to_string(),
-                        StyleVal::Color(Color::from_rgb8(140, 160, 240)),
-                    ),
-                ])),
-
-                "Checkbox" => Some(Style::from_values([
-                    (
-                        "color_checked".to_string(),
-                        StyleVal::Color(Color::from_rgb8(130, 130, 230)),
-                    ),
-                    (
-                        "color_unchecked".to_string(),
-                        StyleVal::Color(Color::from_rgb8(170, 170, 250)),
-                    ),
-                ])),
-
-                "Slider" => Some(Style::from_values([
-                    (
-                        "color".to_string(),
-                        StyleVal::Color(Color::from_rgb8(130, 130, 230)),
-                    ),
-                    (
-                        "color_ball".to_string(),
-                        StyleVal::Color(Color::from_rgb8(170, 170, 250)),
-                    ),
-                ])),
-
+                "Text" => Some(Style::from_values(light::TEXT)),
+                "Button" => Some(Style::from_values(light::BUTTON)),
+                "Checkbox" => Some(Style::from_values(light::CHECKBOX)),
+                "Slider" => Some(Style::from_values(light::SLIDER)),
                 _ => None,
             },
             _ => None,
@@ -115,4 +73,49 @@ impl Theme for CelesteTheme {
             CelesteTheme::Light(globals) => globals,
         }
     }
+}
+
+mod light {
+    use crate::style::StyleVal;
+    use peniko::Color;
+    use peniko::color::palette;
+
+    pub const TEXT: [(&'static str, StyleVal); 2] = [
+        ("color", StyleVal::Color(palette::css::BLACK)),
+        ("color_invert", StyleVal::Color(palette::css::WHITE)),
+    ];
+
+    pub const BUTTON: [(&'static str, StyleVal); 3] = [
+        (
+            "color_idle",
+            StyleVal::Color(Color::from_rgb8(150, 170, 250)),
+        ),
+        (
+            "color_pressed",
+            StyleVal::Color(Color::from_rgb8(130, 150, 230)),
+        ),
+        (
+            "color_hovered",
+            StyleVal::Color(Color::from_rgb8(140, 160, 240)),
+        ),
+    ];
+
+    pub const CHECKBOX: [(&'static str, StyleVal); 2] = [
+        (
+            "color_checked",
+            StyleVal::Color(Color::from_rgb8(130, 130, 230)),
+        ),
+        (
+            "color_unchecked",
+            StyleVal::Color(Color::from_rgb8(170, 170, 250)),
+        ),
+    ];
+
+    pub const SLIDER: [(&'static str, StyleVal); 2] = [
+        ("color", StyleVal::Color(Color::from_rgb8(130, 130, 230))),
+        (
+            "color_ball",
+            StyleVal::Color(Color::from_rgb8(170, 170, 250)),
+        ),
+    ];
 }

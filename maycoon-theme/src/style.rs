@@ -1,10 +1,10 @@
-use indexmap::IndexMap;
 use peniko::{Brush, Color, Gradient};
+use rpds::HashTrieMap;
 
 /// Styling map for defining widget appearance.
 #[derive(Clone, Debug)]
 pub struct Style {
-    map: IndexMap<String, StyleVal>,
+    map: HashTrieMap<&'static str, StyleVal>,
 }
 
 impl Style {
@@ -12,90 +12,36 @@ impl Style {
     #[inline(always)]
     pub fn new() -> Self {
         Self {
-            map: IndexMap::with_capacity(16),
+            map: HashTrieMap::new(),
         }
     }
 
     /// Create a style from an array of strings and style values.
     #[inline(always)]
-    pub fn from_values(values: impl IntoIterator<Item = (String, StyleVal)>) -> Self {
+    pub fn from_values(values: impl IntoIterator<Item = (&'static str, StyleVal)>) -> Self {
         Self {
-            map: IndexMap::from_iter(values),
+            map: HashTrieMap::from_iter(values),
         }
     }
 
-    /// Removes the style value from the map with the give name.
+    /// Insert a style value with the given name into the style map and return the new style.
     #[inline(always)]
-    pub fn remove(&mut self, name: impl ToString) {
-        self.map.swap_remove(&name.to_string());
-    }
-
-    /// Insert a style value with the given name into the style map.
-    #[inline(always)]
-    pub fn with_value(mut self, name: impl ToString, value: StyleVal) -> Self {
-        self.map.insert(name.to_string(), value);
-        self
-    }
-
-    /// Set a style value by name.
-    #[inline(always)]
-    pub fn set(&mut self, name: impl ToString, value: StyleVal) {
-        self.map.insert(name.to_string(), value);
-    }
-
-    /// Set a color style value by name.
-    #[inline(always)]
-    pub fn set_color(&mut self, name: impl ToString, color: Color) {
-        self.map.insert(name.to_string(), StyleVal::Color(color));
-    }
-
-    /// Set a gradient style value by name.
-    #[inline(always)]
-    pub fn set_gradient(&mut self, name: impl ToString, gradient: Gradient) {
-        self.map
-            .insert(name.to_string(), StyleVal::Gradient(gradient));
-    }
-
-    /// Set a bool style value by name.
-    #[inline(always)]
-    pub fn set_bool(&mut self, name: impl ToString, value: bool) {
-        self.map.insert(name.to_string(), StyleVal::Bool(value));
-    }
-
-    /// Set a brush style value by name.
-    #[inline(always)]
-    pub fn set_brush(&mut self, name: impl ToString, brush: Brush) {
-        self.map.insert(name.to_string(), StyleVal::Brush(brush));
-    }
-
-    /// Set a float style value by name.
-    #[inline(always)]
-    pub fn set_float(&mut self, name: impl ToString, value: f32) {
-        self.map.insert(name.to_string(), StyleVal::Float(value));
-    }
-
-    /// Set an int style value by name.
-    #[inline(always)]
-    pub fn set_int(&mut self, name: impl ToString, value: i32) {
-        self.map.insert(name.to_string(), StyleVal::Int(value));
-    }
-
-    /// Set an unsized int style value by name.
-    #[inline(always)]
-    pub fn set_uint(&mut self, name: impl ToString, value: u32) {
-        self.map.insert(name.to_string(), StyleVal::UInt(value));
+    pub fn with_value(self, name: &'static str, value: StyleVal) -> Self {
+        Self {
+            map: self.map.insert(name, value),
+        }
     }
 
     /// Get a style value by name. Returns [None] if the value name does not exist.
     #[inline(always)]
-    pub fn get(&self, name: impl ToString) -> Option<StyleVal> {
-        self.map.get(&name.to_string()).cloned()
+    pub fn get(&self, name: &'static str) -> Option<StyleVal> {
+        self.map.get(name).cloned()
     }
 
     /// Get a color style value by name. Returns [None] if the value name does not exist.
     #[inline(always)]
-    pub fn get_color(&self, name: impl ToString) -> Option<Color> {
-        if let Some(val) = self.map.get(&name.to_string()) {
+    pub fn get_color(&self, name: &'static str) -> Option<Color> {
+        if let Some(val) = self.map.get(name) {
             match val {
                 StyleVal::Color(color) => Some(*color),
                 _ => None,
@@ -107,8 +53,8 @@ impl Style {
 
     /// Get a gradient style value by name. Returns [None] if the value name does not exist.
     #[inline(always)]
-    pub fn get_gradient(&self, name: impl ToString) -> Option<Gradient> {
-        if let Some(val) = self.map.get(&name.to_string()) {
+    pub fn get_gradient(&self, name: &'static str) -> Option<Gradient> {
+        if let Some(val) = self.map.get(name) {
             match val {
                 StyleVal::Gradient(gradient) => Some(gradient.clone()),
                 _ => None,
@@ -120,8 +66,8 @@ impl Style {
 
     /// Get a brush style value by name. Returns [None] if the value name does not exist.
     #[inline(always)]
-    pub fn get_brush(&self, name: impl ToString) -> Option<Brush> {
-        if let Some(val) = self.map.get(&name.to_string()) {
+    pub fn get_brush(&self, name: &'static str) -> Option<Brush> {
+        if let Some(val) = self.map.get(name) {
             match val {
                 StyleVal::Brush(brush) => Some(brush.clone()),
                 _ => None,
@@ -133,8 +79,8 @@ impl Style {
 
     /// Get a float style value by name. Returns [None] if the value name does not exist.
     #[inline(always)]
-    pub fn get_float(&self, name: impl ToString) -> Option<f32> {
-        if let Some(val) = self.map.get(&name.to_string()) {
+    pub fn get_float(&self, name: &'static str) -> Option<f32> {
+        if let Some(val) = self.map.get(name) {
             match val {
                 StyleVal::Float(float) => Some(*float),
                 _ => None,
@@ -146,8 +92,8 @@ impl Style {
 
     /// Get an int style value by name. Returns [None] if the value name does not exist.
     #[inline(always)]
-    pub fn get_int(&self, name: impl ToString) -> Option<i32> {
-        if let Some(val) = self.map.get(&name.to_string()) {
+    pub fn get_int(&self, name: &'static str) -> Option<i32> {
+        if let Some(val) = self.map.get(name) {
             match val {
                 StyleVal::Int(int) => Some(*int),
                 _ => None,
@@ -159,8 +105,8 @@ impl Style {
 
     /// Get an unsized int style value by name. Returns [None] if the value name does not exist.
     #[inline(always)]
-    pub fn get_uint(&self, name: impl ToString) -> Option<u32> {
-        if let Some(val) = self.map.get(&name.to_string()) {
+    pub fn get_uint(&self, name: &'static str) -> Option<u32> {
+        if let Some(val) = self.map.get(name) {
             match val {
                 StyleVal::UInt(uint) => Some(*uint),
                 _ => None,
@@ -172,8 +118,8 @@ impl Style {
 
     /// Get a bool style value by name. Returns [None] if the value name does not exist.
     #[inline(always)]
-    pub fn get_bool(&self, name: impl ToString) -> Option<bool> {
-        if let Some(val) = self.map.get(&name.to_string()) {
+    pub fn get_bool(&self, name: &'static str) -> Option<bool> {
+        if let Some(val) = self.map.get(name) {
             match val {
                 StyleVal::Bool(bool) => Some(*bool),
                 _ => None,

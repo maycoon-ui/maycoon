@@ -1,5 +1,5 @@
-use indexmap::IndexMap;
 use peniko::FontData;
+use rpds::HashTrieMap;
 
 /// A font manager for maycoon applications.
 ///
@@ -9,7 +9,7 @@ use peniko::FontData;
 #[derive(Clone, Debug)]
 pub struct FontContext {
     default: String,
-    fonts: IndexMap<String, FontData>,
+    fonts: HashTrieMap<String, FontData>,
 }
 
 impl FontContext {
@@ -21,18 +21,28 @@ impl FontContext {
     pub fn new(default: impl ToString) -> Self {
         Self {
             default: default.to_string(),
-            fonts: IndexMap::new(),
+            fonts: HashTrieMap::new(),
         }
     }
 
-    /// Loads a font with a custom name into the font context.
+    /// Loads a font with a custom name into the font context and return itself.
     ///
-    /// If the font with the same name already exists, it will be overwritten and the old font will be returned.
+    /// If the font with the same name already exists, [None] is returned.
     #[inline(always)]
     #[tracing::instrument(level = "trace", skip_all, fields(name = name.to_string()))]
-    pub fn load(&mut self, name: impl ToString, font: FontData) -> Option<FontData> {
-        tracing::trace!("loading font named {}", name.to_string());
-        self.fonts.insert(name.to_string(), font)
+    pub fn load(self, name: impl ToString, font: FontData) -> Option<Self> {
+        let name = name.to_string();
+
+        tracing::trace!("loading font named {}", name);
+
+        if self.fonts.contains_key(&name) {
+            return None;
+        }
+
+        Some(Self {
+            fonts: self.fonts.insert(name, font),
+            default: self.default,
+        })
     }
 
     /// Set the default font.
@@ -51,8 +61,15 @@ impl FontContext {
 
     /// Removes a font by the given name and returns it or [None] if the font could not be found.
     #[inline(always)]
-    pub fn remove(&mut self, name: impl ToString) -> Option<FontData> {
-        self.fonts.swap_remove(&name.to_string())
+    pub fn remove(self, name: impl AsRef<str>) -> Option<Self> {
+        if self.fonts.contains_key(name.as_ref()) {
+            return None;
+        }
+
+        Some(Self {
+            fonts: self.fonts.remove(name.as_ref()),
+            default: self.default,
+        })
     }
 
     /// Returns the default font. [Roboto](https://fonts.google.com/specimen/Roboto) by default.
@@ -67,17 +84,16 @@ impl FontContext {
 impl Default for FontContext {
     #[inline(always)]
     fn default() -> Self {
-        let mut ctx = FontContext::new("Noto Sans".to_string());
-
         tracing::debug!("loading noto sans system font");
-        ctx.load(
-            "Noto Sans",
-            FontData::new(
-                peniko::Blob::new(std::sync::Arc::new(crate::DEFAULT_FONT)),
-                0,
-            ),
-        );
 
-        ctx
+        FontContext::new("Noto Sans".to_string())
+            .load(
+                "Noto Sans",
+                FontData::new(
+                    peniko::Blob::new(std::sync::Arc::new(crate::DEFAULT_FONT)),
+                    0,
+                ),
+            )
+            .unwrap()
     }
 }

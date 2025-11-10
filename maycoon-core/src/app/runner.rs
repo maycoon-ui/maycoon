@@ -33,9 +33,11 @@ impl<T: Theme, V: VectorGraphicsInterface> MayRunner<T, V> {
     ///
     /// See [FontContext::load] for more.
     #[inline(always)]
-    pub fn with_font(mut self, name: impl ToString, font: FontData) -> Self {
-        self.font_ctx.load(name, font);
-        self
+    pub fn with_font(self, name: impl ToString, font: FontData) -> Self {
+        Self {
+            config: self.config,
+            font_ctx: self.font_ctx.load(name, font).expect("Font already loaded"),
+        }
     }
 
     /// Set the font context. Can be used to configure fonts.

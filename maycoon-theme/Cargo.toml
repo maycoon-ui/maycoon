@@ -11,5 +11,5 @@ repository.workspace = true
 homepage.workspace = true
 
 [dependencies]
-indexmap = { workspace = true }
+rpds = { workspace = true }
 peniko = { workspace = true }

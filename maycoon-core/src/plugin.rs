@@ -2,8 +2,11 @@ use crate::app::info::AppInfo;
 use crate::app::update::UpdateManager;
 use crate::config::MayConfig;
 use crate::vgi::VectorGraphicsInterface;
-use indexmap::IndexMap;
 use maycoon_theme::theme::Theme;
+use rpds::HashTrieMap;
+use std::cell::RefCell;
+use std::ops::DerefMut;
+use std::rc::Rc;
 use std::sync::Arc;
 use std::time::Instant;
 use taffy::{NodeId, TaffyTree};
@@ -110,7 +113,7 @@ pub trait Plugin<T: Theme, V: VectorGraphicsInterface>: 'static {
 
 /// A plugin manager for maycoon applications.
 pub struct PluginManager<T: Theme, V: VectorGraphicsInterface> {
-    plugins: IndexMap<&'static str, Box<dyn Plugin<T, V>>>,
+    plugins: HashTrieMap<&'static str, Rc<RefCell<dyn Plugin<T, V>>>>,
 }
 
 impl<T: Theme, V: VectorGraphicsInterface> PluginManager<T, V> {
@@ -118,44 +121,60 @@ impl<T: Theme, V: VectorGraphicsInterface> PluginManager<T, V> {
     #[inline(always)]
     pub fn new() -> Self {
         Self {
-            plugins: IndexMap::new(),
+            plugins: HashTrieMap::new(),
         }
     }
 
-    /// Registers a new plugin.
+    /// Registers a new plugin and returns itself.
     #[inline(always)]
-    pub fn register(&mut self, mut plugin: impl Plugin<T, V>) {
-        plugin.on_register(self);
+    pub fn register(mut self, mut plugin: impl Plugin<T, V>) -> Self {
+        plugin.on_register(&mut self);
 
-        self.plugins.insert(plugin.name(), Box::new(plugin));
+        Self {
+            plugins: self
+                .plugins
+                .insert(plugin.name(), Rc::new(RefCell::new(plugin))),
+        }
     }
 
-    /// Unregisters a plugin.
+    /// Unregisters a plugin and returns itself.
     #[cold]
-    pub fn unregister(&mut self, name: &'static str) {
-        let mut pl = self.plugins.swap_remove(name).expect("Plugin not found");
+    pub fn unregister(mut self, name: &'static str) -> Self {
+        let plugins = self.plugins.clone();
 
-        pl.on_unregister(self);
+        plugins
+            .get(name)
+            .expect("Plugin not found")
+            .borrow_mut()
+            .on_unregister(&mut self);
+
+        Self {
+            plugins: self.plugins.remove(name),
+        }
     }
 
     /// Unregisters all plugins.
     #[cold]
     pub fn clear(&mut self) {
-        let plugins = self.plugins.keys().cloned().collect::<Vec<_>>();
+        let plugins = self.plugins.clone();
 
-        for name in plugins {
-            self.unregister(name);
+        for (_, pl) in plugins.iter() {
+            pl.borrow_mut().on_unregister(self);
         }
+
+        self.plugins = HashTrieMap::new();
     }
 
     /// Runs a closure on all plugins.
     #[inline(always)]
     pub fn run<F>(&mut self, mut op: F)
     where
-        F: FnMut(&mut Box<dyn Plugin<T, V>>),
+        F: FnMut(&mut dyn Plugin<T, V>),
     {
-        for pl in self.plugins.values_mut() {
-            op(pl);
+        for (_, plugin) in self.plugins.iter() {
+            let mut plugin = plugin.borrow_mut();
+
+            op(plugin.deref_mut());
         }
     }
 }
