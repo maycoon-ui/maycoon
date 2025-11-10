@@ -3,7 +3,6 @@ use crate::app::update::{Update, UpdateManager};
 use crate::signal::Signal;
 use crate::signal::eval::EvalSignal;
 use crate::signal::fixed::FixedSignal;
-use crate::signal::listener::Listener;
 use crate::signal::memoized::MemoizedSignal;
 use crate::signal::state::StateSignal;
 
@@ -43,24 +42,14 @@ impl AppContext {
         self.update.insert(Update::EXIT);
     }
 
-    /// Hook the given [Signal] to the [UpdateManager] of this application.
+    /// Hook the given [Signal] to the [UpdateManager] of this application and return it.
     ///
     /// This makes the signal reactive, so it will notify the renderer when the inner value changes.
     #[inline(always)]
-    #[tracing::instrument(level = "trace", skip_all, fields(signal = std::any::type_name::<T>()))]
-    pub fn hook_signal<T: 'static, S: Signal<T>>(&self, signal: &mut S) {
+    pub fn use_signal<T: 'static, S: Signal<T>>(&self, signal: S) -> S {
         let update = self.update();
-        signal.listen(Listener::new(move |_| update.insert(Update::EVAL)));
-    }
 
-    /// Hook the given [Signal] to the [UpdateManager] of this application and return it.
-    ///
-    /// See [AppContext::hook_signal] for more.
-    #[inline(always)]
-    pub fn use_signal<T: 'static, S: Signal<T>>(&self, mut signal: S) -> S {
-        self.hook_signal(&mut signal);
-
-        signal
+        signal.listen(Box::new(move |_| update.insert(Update::EVAL)))
     }
 
     /// Shortcut for creating and hooking a [StateSignal] into the application lifecycle.

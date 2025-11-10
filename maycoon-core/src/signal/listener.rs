@@ -1,4 +1,5 @@
 use crate::reference::Ref;
+use rpds::{Vector, VectorSync};
 use std::rc::Rc;
 use std::sync::Arc;
 
@@ -6,7 +7,7 @@ use std::sync::Arc;
 ///
 /// This is basically just a wrapper around `Vec<Listener<T>>>`.
 pub struct ListenerRegister<T> {
-    listeners: Vec<Listener<T>>,
+    listeners: Vector<Listener<T>>,
 }
 
 impl<T> ListenerRegister<T> {
@@ -17,22 +18,16 @@ impl<T> ListenerRegister<T> {
     #[inline(always)]
     pub fn new() -> Self {
         Self {
-            listeners: Vec::with_capacity(1),
-        }
-    }
-
-    /// Create an empty listener register.
-    #[inline(always)]
-    pub fn empty() -> Self {
-        Self {
-            listeners: Vec::new(),
+            listeners: Vector::new(),
         }
     }
 
     /// Register a new listener.
     #[inline(always)]
-    pub fn register(&mut self, listener: Listener<T>) {
-        self.listeners.push(listener);
+    pub fn register(self, listener: Listener<T>) -> Self {
+        Self {
+            listeners: self.listeners.push_back(listener),
+        }
     }
 
     /// Notify all listeners with the values produced by `factory`.
@@ -67,7 +62,7 @@ impl<T> Clone for ListenerRegister<T> {
 ///
 /// This is basically just a wrapper around `Vec<SendListener<T>>>`.
 pub struct SendListenerRegistry<T> {
-    listeners: Vec<SendListener<T>>,
+    listeners: VectorSync<SendListener<T>>,
 }
 
 impl<T> SendListenerRegistry<T> {
@@ -78,14 +73,16 @@ impl<T> SendListenerRegistry<T> {
     #[inline(always)]
     pub fn new() -> Self {
         Self {
-            listeners: Vec::with_capacity(1),
+            listeners: VectorSync::new_sync(),
         }
     }
 
     /// Register a new listener.
     #[inline(always)]
-    pub fn register(&mut self, listener: SendListener<T>) {
-        self.listeners.push(listener);
+    pub fn register(self, listener: SendListener<T>) -> Self {
+        Self {
+            listeners: self.listeners.push_back(listener),
+        }
     }
 
     /// Notify all listeners with the values produced by `factory`.

@@ -49,8 +49,10 @@ pub trait Signal<T: 'static>: 'static {
     /// **NOTE:** This does not notify listeners, use [set] instead.
     fn set_value(&self, value: T);
 
-    /// Add a listener to the signal, which will be called when the inner value changes.
-    fn listen(&mut self, listener: Listener<T>);
+    /// Add a listener to the signal, which will be called when the inner value changes and returns the signal.
+    fn listen(self, listener: Box<dyn Fn(Ref<'_, T>)>) -> Self
+    where
+        Self: Sized;
 
     /// Notify listeners that the inner value has changed.
     /// May also be called manually to update listeners.

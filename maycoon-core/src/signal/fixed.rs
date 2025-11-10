@@ -1,4 +1,4 @@
-use crate::signal::{Listener, Ref, Signal};
+use crate::signal::{Ref, Signal};
 use std::rc::Rc;
 
 /// A signal with a fixed value. Based on [Rc].
@@ -30,7 +30,12 @@ impl<T: 'static> Signal<T> for FixedSignal<T> {
     fn set_value(&self, _: T) {}
 
     #[inline(always)]
-    fn listen(&mut self, _: Listener<T>) {}
+    fn listen(self, _: Box<dyn Fn(Ref<'_, T>)>) -> Self
+    where
+        Self: Sized,
+    {
+        self
+    }
 
     #[inline(always)]
     fn notify(&self) {}

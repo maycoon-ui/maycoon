@@ -1,5 +1,5 @@
 use crate::reference::Ref;
-use crate::signal::{Listener, Signal};
+use crate::signal::Signal;
 use std::cell::OnceCell;
 use std::rc::Rc;
 
@@ -46,7 +46,12 @@ impl<T: 'static> Signal<T> for MemoizedSignal<T> {
     fn set_value(&self, _: T) {}
 
     #[inline(always)]
-    fn listen(&mut self, _: Listener<T>) {}
+    fn listen(self, _: Box<dyn Fn(Ref<'_, T>)>) -> Self
+    where
+        Self: Sized,
+    {
+        self
+    }
 
     #[inline(always)]
     fn notify(&self) {}

@@ -80,12 +80,12 @@ mod light {
     use peniko::Color;
     use peniko::color::palette;
 
-    pub const TEXT: [(&'static str, StyleVal); 2] = [
+    pub const TEXT: [(&str, StyleVal); 2] = [
         ("color", StyleVal::Color(palette::css::BLACK)),
         ("color_invert", StyleVal::Color(palette::css::WHITE)),
     ];
 
-    pub const BUTTON: [(&'static str, StyleVal); 3] = [
+    pub const BUTTON: [(&str, StyleVal); 3] = [
         (
             "color_idle",
             StyleVal::Color(Color::from_rgb8(150, 170, 250)),
@@ -100,7 +100,7 @@ mod light {
         ),
     ];
 
-    pub const CHECKBOX: [(&'static str, StyleVal); 2] = [
+    pub const CHECKBOX: [(&str, StyleVal); 2] = [
         (
             "color_checked",
             StyleVal::Color(Color::from_rgb8(130, 130, 230)),
@@ -111,7 +111,7 @@ mod light {
         ),
     ];
 
-    pub const SLIDER: [(&'static str, StyleVal); 2] = [
+    pub const SLIDER: [(&str, StyleVal); 2] = [
         ("color", StyleVal::Color(Color::from_rgb8(130, 130, 230))),
         (
             "color_ball",

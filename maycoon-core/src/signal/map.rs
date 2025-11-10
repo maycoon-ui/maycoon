@@ -1,4 +1,4 @@
-use crate::signal::{BoxedSignal, Listener, Ref, Signal};
+use crate::signal::{BoxedSignal, Ref, Signal};
 use std::rc::Rc;
 
 /// A signal wrapping another signal and applying a mapping function, when the inner value is requested.
@@ -46,7 +46,12 @@ impl<T: 'static, U: 'static> Signal<U> for MapSignal<T, U> {
     fn set_value(&self, _: U) {}
 
     #[inline(always)]
-    fn listen(&mut self, _: Listener<U>) {}
+    fn listen(self, _: Box<dyn Fn(Ref<'_, U>)>) -> Self
+    where
+        Self: Sized,
+    {
+        self
+    }
 
     #[inline(always)]
     fn notify(&self) {

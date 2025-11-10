@@ -47,8 +47,14 @@ impl<T: 'static> Signal<T> for StateSignal<T> {
     }
 
     #[inline(always)]
-    fn listen(&mut self, listener: Listener<T>) {
-        self.listeners.register(listener);
+    fn listen(self, listener: Box<dyn Fn(Ref<'_, T>)>) -> Self
+    where
+        Self: Sized,
+    {
+        Self {
+            listeners: self.listeners.register(Listener::new(listener)),
+            ..self
+        }
     }
 
     #[inline(always)]
