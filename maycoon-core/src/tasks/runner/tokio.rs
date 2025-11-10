@@ -149,7 +149,14 @@ impl<T: 'static> LocalTask<T> for LocalTokioTask<T> {
 
     #[inline(always)]
     fn take(&mut self) -> Option<T> {
-        todo!()
+        let pinned = Pin::new(&mut self.0);
+        let waker = noop_waker();
+        let mut ctx = Context::from_waker(&waker);
+
+        match pinned.poll(&mut ctx) {
+            Poll::Ready(value) => Some(value.expect("Failed to poll tokio task")),
+            Poll::Pending => None,
+        }
     }
 }
 
