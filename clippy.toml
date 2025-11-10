@@ -1,2 +1,11 @@
 type-complexity-threshold = 300
 too-many-arguments-threshold = 15
+disallowed-types = [
+    { path = "std::collections::HashMap", reason = "slow std implementation" },
+    { path = "std::collections::HashSet", reason = "slow std implementation" },
+    { path = "std::collections::BTreeMap", reason = "slow std implementation" },
+    { path = "std::collections::BTreeSet", reason = "slow std implementation" },
+    { path = "std::collections::LinkedList", reason = "slow std implementation" },
+    { path = "std::collections::BinaryHeap", reason = "slow std implementation" },
+]
+
