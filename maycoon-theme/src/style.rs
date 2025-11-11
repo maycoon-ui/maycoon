@@ -148,7 +148,7 @@ pub struct DefaultStyles {
 impl DefaultStyles {
     /// Create new default styles with given styles.
     #[inline(always)]
-    pub fn new(
+    pub const fn new(
         text: DefaultTextStyles,
         container: DefaultContainerStyles,
         interactive: DefaultInteractiveStyles,
@@ -162,19 +162,19 @@ impl DefaultStyles {
 
     /// Get the default styles for text widgets.
     #[inline(always)]
-    pub fn text(&self) -> &DefaultTextStyles {
+    pub const fn text(&self) -> &DefaultTextStyles {
         &self.text
     }
 
     /// Get the default styles for container widgets.
     #[inline(always)]
-    pub fn container(&self) -> &DefaultContainerStyles {
+    pub const fn container(&self) -> &DefaultContainerStyles {
         &self.container
     }
 
     /// Get the default styles for interactive widgets.
     #[inline(always)]
-    pub fn interactive(&self) -> &DefaultInteractiveStyles {
+    pub const fn interactive(&self) -> &DefaultInteractiveStyles {
         &self.interactive
     }
 }
@@ -189,7 +189,7 @@ pub struct DefaultTextStyles {
 impl DefaultTextStyles {
     /// Create new default text styles with given colors.
     #[inline(always)]
-    pub fn new(foreground: Color, background: Color) -> Self {
+    pub const fn new(foreground: Color, background: Color) -> Self {
         Self {
             foreground,
             background,
@@ -198,13 +198,13 @@ impl DefaultTextStyles {
 
     /// Get the default foreground color.
     #[inline(always)]
-    pub fn foreground(&self) -> Color {
+    pub const fn foreground(&self) -> Color {
         self.foreground
     }
 
     /// Get the default background color.
     #[inline(always)]
-    pub fn background(&self) -> Color {
+    pub const fn background(&self) -> Color {
         self.background
     }
 }
@@ -219,7 +219,7 @@ pub struct DefaultContainerStyles {
 impl DefaultContainerStyles {
     /// Create new default container styles with given colors.
     #[inline(always)]
-    pub fn new(foreground: Color, background: Color) -> Self {
+    pub const fn new(foreground: Color, background: Color) -> Self {
         Self {
             foreground,
             background,
@@ -228,13 +228,13 @@ impl DefaultContainerStyles {
 
     /// Get the default foreground color.
     #[inline(always)]
-    pub fn foreground(&self) -> Color {
+    pub const fn foreground(&self) -> Color {
         self.foreground
     }
 
     /// Get the default background color.
     #[inline(always)]
-    pub fn background(&self) -> Color {
+    pub const fn background(&self) -> Color {
         self.background
     }
 }
@@ -251,7 +251,7 @@ pub struct DefaultInteractiveStyles {
 impl DefaultInteractiveStyles {
     /// Create new default interactive styles with given colors.
     #[inline(always)]
-    pub fn new(active: Color, inactive: Color, hover: Color, disabled: Color) -> Self {
+    pub const fn new(active: Color, inactive: Color, hover: Color, disabled: Color) -> Self {
         Self {
             active,
             inactive,
@@ -262,25 +262,25 @@ impl DefaultInteractiveStyles {
 
     /// Get the default active widget color.
     #[inline(always)]
-    pub fn active(&self) -> Color {
+    pub const fn active(&self) -> Color {
         self.active
     }
 
     /// Get the default inactive widget color.
     #[inline(always)]
-    pub fn inactive(&self) -> Color {
+    pub const fn inactive(&self) -> Color {
         self.inactive
     }
 
     /// Get the default on-hover widget color.
     #[inline(always)]
-    pub fn hover(&self) -> Color {
+    pub const fn hover(&self) -> Color {
         self.hover
     }
 
     /// Get the default disabled widget color.
     #[inline(always)]
-    pub fn disabled(&self) -> Color {
+    pub const fn disabled(&self) -> Color {
         self.disabled
     }
 }

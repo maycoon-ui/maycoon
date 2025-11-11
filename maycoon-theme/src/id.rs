@@ -23,19 +23,19 @@ impl WidgetId {
     /// let id = WidgetId::new("my_crate", "MyWidget");
     /// ```
     #[inline(always)]
-    pub fn new(namespace: &'static str, id: &'static str) -> Self {
+    pub const fn new(namespace: &'static str, id: &'static str) -> Self {
         Self { namespace, id }
     }
 
     /// Returns the namespace of the widget id.
     #[inline(always)]
-    pub fn namespace(&self) -> &'static str {
+    pub const fn namespace(&self) -> &'static str {
         self.namespace
     }
 
     /// Returns the actual widget id.
     #[inline(always)]
-    pub fn id(&self) -> &'static str {
+    pub const fn id(&self) -> &'static str {
         self.id
     }
 }

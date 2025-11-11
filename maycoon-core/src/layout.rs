@@ -34,7 +34,7 @@ pub const LAYOUT_EPSILON: f32 = 0.5;
 /// assert!(layout::equal(10.0, 10.005));
 /// ```
 #[inline(always)]
-pub fn equal(x: f32, y: f32) -> bool {
+pub const fn equal(x: f32, y: f32) -> bool {
     (x - y).abs() < LAYOUT_EPSILON
 }
 
@@ -159,7 +159,7 @@ impl Default for LayoutStyle {
     #[inline(always)]
     fn default() -> Self {
         LayoutStyle {
-            display: Display::default(),
+            display: Display::Flex,
             overflow: (Overflow::Visible, Overflow::Visible),
             scrollbar_width: 0.0,
             position: Position::Relative,

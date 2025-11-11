@@ -26,7 +26,7 @@ impl AppContext {
 
     /// Get the [Diagnostics] of the application.
     #[inline(always)]
-    pub fn diagnostics(&self) -> Diagnostics {
+    pub const fn diagnostics(&self) -> Diagnostics {
         self.diagnostics
     }
 

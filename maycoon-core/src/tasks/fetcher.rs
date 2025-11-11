@@ -19,7 +19,10 @@ pub struct Fetcher<I: Send + 'static, O> {
 impl<I: Send + 'static, O> Fetcher<I, O> {
     /// Create a new task fetcher with the given task and factory function.
     #[inline(always)]
-    pub fn new(task: Box<dyn Task<I>>, factory: Box<dyn Fn(Option<I>) -> O + 'static>) -> Self {
+    pub const fn new(
+        task: Box<dyn Task<I>>,
+        factory: Box<dyn Fn(Option<I>) -> O + 'static>,
+    ) -> Self {
         Self {
             task: Some(task),
             factory,
@@ -62,7 +65,7 @@ impl<I: Send + 'static, O> Fetcher<I, O> {
     ///
     /// This is mostly used internally and will return the cached output value.
     #[inline(always)]
-    pub fn value_mut(&mut self) -> Option<&mut O> {
+    pub const fn value_mut(&mut self) -> Option<&mut O> {
         self.value.as_mut()
     }
 
@@ -70,7 +73,7 @@ impl<I: Send + 'static, O> Fetcher<I, O> {
     ///
     /// This is mostly used internally and will return the cached output value.
     #[inline(always)]
-    pub fn value_ref(&self) -> Option<&O> {
+    pub const fn value_ref(&self) -> Option<&O> {
         self.value.as_ref()
     }
 
@@ -85,7 +88,7 @@ impl<I: Send + 'static, O> Fetcher<I, O> {
 
     /// Returns whether the inner task has finished and the value has been computed.
     #[inline(always)]
-    pub fn is_fetched(&self) -> bool {
+    pub const fn is_fetched(&self) -> bool {
         self.task.is_none() && self.value.is_some()
     }
 

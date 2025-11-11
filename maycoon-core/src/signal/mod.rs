@@ -113,7 +113,7 @@ pub enum MaybeSignal<T: 'static> {
 impl<T: 'static> MaybeSignal<T> {
     /// Wrap a [Signal] inside a [MaybeSignal].
     #[inline(always)]
-    pub fn signal(signal: BoxedSignal<T>) -> Self {
+    pub const fn signal(signal: BoxedSignal<T>) -> Self {
         Self::Signal(signal)
     }
 

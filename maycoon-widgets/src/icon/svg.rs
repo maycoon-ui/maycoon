@@ -22,7 +22,7 @@ impl SvgIcon {
 
     /// Returns the underlying [Tree].
     #[inline(always)]
-    pub fn tree(&self) -> &Tree {
+    pub const fn tree(&self) -> &Tree {
         &self.0
     }
 }
