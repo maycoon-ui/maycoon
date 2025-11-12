@@ -7,6 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.2](https://github.com/maycoon-ui/maycoon/compare/maycoon-widgets-v0.5.1...maycoon-widgets-v0.5.2) - 2025-11-12
+
+### Added
+
+- Maximum text width
+- Switch Widget
+
+### Fixed
+
+- Typos in checkbox.rs
+
+### Other
+
+- `const`-ify possible functions
+- Add aggressive inlining
+- Use layout::intersects instead of manual hover check
+- Document `WidgetId` of Widgets
+- Merge branch 'master' of https://github.com/maycoon-ui/maycoon
+
 ## [0.5.1](https://github.com/maycoon-ui/maycoon/compare/maycoon-widgets-v0.5.0...maycoon-widgets-v0.5.1) - 2025-11-07
 
 ### Fixed

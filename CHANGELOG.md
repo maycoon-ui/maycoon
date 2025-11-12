@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.2](https://github.com/maycoon-ui/maycoon/compare/maycoon-v0.5.1...maycoon-v0.5.2) - 2025-11-12
+
+### Other
+
+- Add tests
+- `const`-ify possible functions
+- Make Listener use rpds::Vector instead of Vec
+- Replace indexmap with rpds
+- Add disallowed types to clippy.toml
+
 ## [0.5.1](https://github.com/maycoon-ui/maycoon/compare/maycoon-v0.5.0...maycoon-v0.5.1) - 2025-11-07
 
 ### Added
