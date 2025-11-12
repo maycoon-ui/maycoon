@@ -54,3 +54,35 @@ impl<T: 'static> Clone for EvalSignal<T> {
         }
     }
 }
+
+#[cfg(all(test, feature = "test"))]
+mod tests {
+    use crate::signal::Signal;
+    use crate::signal::eval::EvalSignal;
+    use std::cell::RefCell;
+    use std::rc::Rc;
+
+    /// Tests the [EvalSignal] implementation of [Signal].
+    #[test]
+    fn test_eval_signal() {
+        let value = Rc::new(RefCell::new(0));
+
+        let value_clone = value.clone();
+        let signal = EvalSignal::new(move || {
+            *value_clone.borrow_mut() += 1;
+            *value_clone.borrow()
+        });
+
+        // signal = value = 1
+        assert_eq!(*signal.get(), 1);
+        assert_eq!(*value.borrow(), 1);
+
+        // signal = value = 2
+        assert_eq!(*signal.get(), 2);
+        assert_eq!(*value.borrow(), 2);
+
+        // signal = value = 3
+        assert_eq!(*signal.get(), 3);
+        assert_eq!(*value.borrow(), 3);
+    }
+}

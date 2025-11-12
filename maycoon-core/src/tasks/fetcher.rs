@@ -122,3 +122,43 @@ impl<I: Send + 'static, O> Fetcher<I, O> {
         self.value_mut().unwrap()
     }
 }
+
+#[cfg(all(test, feature = "test"))]
+mod tests {
+    use crate::tasks::fetcher::Fetcher;
+    use std::time::Duration;
+
+    #[test]
+    fn test_fetcher_spawn() {
+        init();
+
+        let mut fetcher = Fetcher::spawn(
+            async { tokio::time::sleep(Duration::from_millis(10)).await },
+            |_| 1,
+        );
+
+        std::thread::sleep(Duration::from_millis(20));
+
+        assert_eq!(fetcher.fetch(), &1);
+    }
+
+    #[test]
+    fn test_fetcher_spawn_blocking() {
+        init();
+
+        let mut fetcher =
+            Fetcher::spawn_blocking(|| std::thread::sleep(Duration::from_millis(10)), |_| 1);
+
+        std::thread::sleep(Duration::from_millis(20));
+
+        assert_eq!(fetcher.fetch(), &1);
+    }
+
+    fn init() {
+        crate::tasks::try_init(crate::tasks::TaskRunner::Tokio(
+            crate::tasks::runner::tokio::TaskRunner::new(
+                false, None, None, None, None, None, None, None,
+            ),
+        ));
+    }
+}

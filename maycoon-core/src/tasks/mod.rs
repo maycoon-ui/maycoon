@@ -17,6 +17,11 @@ pub mod fetcher;
 /// The global task runner.
 static RUNNER: OnceLock<TaskRunner> = OnceLock::new();
 
+/// Tries to initialize the task runner, if it isn't yet.
+pub fn try_init(runner: TaskRunner) {
+    RUNNER.get_or_init(move || runner);
+}
+
 /// Initializes the global task runner.
 ///
 /// Panics if the task runner is already initialized.

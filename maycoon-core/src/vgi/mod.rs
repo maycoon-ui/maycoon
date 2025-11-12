@@ -22,6 +22,11 @@ pub use usvg as svg;
 #[cfg(feature = "vello-vg")]
 pub mod vello;
 
+/// Contains the [dummy::DummyGraphics] & [dummy::DummyGraphics] structs.
+///
+/// Useful for testing.
+pub mod dummy;
+
 /// The default graphics backend for maycoon.
 ///
 /// See [vello::VectorGraphicsInterface] for more.

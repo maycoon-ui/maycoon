@@ -17,6 +17,7 @@ peniko = "0.5.0"
 nalgebra = { version = "0.34.1", default-features = false, features = ["std"] }
 tracing = "0.1.41"
 cfg_aliases = "0.2.1"
+test-case = "3.3.1"
 rpds = "1.2.0"
 maycoon-core = { version = "0.5.1", path = "maycoon-core" }
 maycoon-macros = { version = "0.5.1", path = "maycoon-macros" }

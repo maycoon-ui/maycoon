@@ -1,5 +1,6 @@
 use crate::reference::Ref;
 use crate::signal::Signal;
+use crate::signal::listener::{Listener, ListenerRegister};
 use std::cell::OnceCell;
 use std::rc::Rc;
 
@@ -11,6 +12,7 @@ use std::rc::Rc;
 pub struct MemoizedSignal<T: 'static> {
     inner: Rc<OnceCell<T>>,
     factory: Rc<dyn Fn() -> T>,
+    listeners: ListenerRegister<T>,
 }
 
 impl<T: 'static> MemoizedSignal<T> {
@@ -20,11 +22,12 @@ impl<T: 'static> MemoizedSignal<T> {
         Self {
             inner: Rc::new(OnceCell::new()),
             factory: Rc::new(factory),
+            listeners: ListenerRegister::new(),
         }
     }
 
-    #[inline(always)]
     /// Returns if the value has been initialized or not.
+    #[inline(always)]
     pub fn is_init(&self) -> bool {
         self.inner.get().is_some()
     }
@@ -46,15 +49,21 @@ impl<T: 'static> Signal<T> for MemoizedSignal<T> {
     fn set_value(&self, _: T) {}
 
     #[inline(always)]
-    fn listen(self, _: Box<dyn Fn(Ref<'_, T>)>) -> Self
+    fn listen(self, listener: Box<dyn Fn(Ref<'_, T>)>) -> Self
     where
         Self: Sized,
     {
-        self
+        Self {
+            inner: self.inner,
+            factory: self.factory,
+            listeners: self.listeners.register(Listener::new(listener)),
+        }
     }
 
     #[inline(always)]
-    fn notify(&self) {}
+    fn notify(&self) {
+        self.listeners.notify(|| self.get());
+    }
 
     #[inline(always)]
     fn dyn_clone(&self) -> Box<dyn Signal<T>> {
@@ -68,6 +77,45 @@ impl<T: 'static> Clone for MemoizedSignal<T> {
         Self {
             inner: self.inner.clone(),
             factory: self.factory.clone(),
+            listeners: self.listeners.clone(),
         }
+    }
+}
+
+#[cfg(all(test, feature = "test"))]
+mod tests {
+    use crate::signal::Signal;
+    use crate::signal::memoized::MemoizedSignal;
+    use std::cell::RefCell;
+    use std::rc::Rc;
+
+    /// Tests the [MemoizedSignal] implementation of [Signal].
+    #[test]
+    fn test_memoized_signal() {
+        let sum = Rc::new(RefCell::new(0));
+        let diff = Rc::new(RefCell::new(0));
+
+        let sum_clone = sum.clone();
+        let diff_clone = diff.clone();
+        let signal = MemoizedSignal::new(|| 1)
+            .listen(Box::new(move |val| {
+                *sum_clone.borrow_mut() += *val;
+            }))
+            .listen(Box::new(move |val| {
+                *diff_clone.borrow_mut() -= *val;
+            }));
+
+        // sum = 0
+        assert_eq!(*sum.borrow(), 0);
+        // diff = 0
+        assert_eq!(*diff.borrow(), 0);
+
+        // signal = 1
+        assert_eq!(*signal.get(), 1);
+
+        // sum = sum + signal = 0 + 1 = 1
+        assert_eq!(*sum.borrow(), 1);
+        // diff = diff - signal = 0 - 1 = -1
+        assert_eq!(*diff.borrow(), -1);
     }
 }

@@ -31,6 +31,8 @@ rpds = { workspace = true }
 peniko = { workspace = true }
 tracing = { workspace = true }
 
+test-case = { workspace = true, optional = true }
+
 [target.'cfg(target_arch = "wasm32")'.dependencies]
 web-time = "1.1.0"
 
@@ -43,6 +45,9 @@ tokio-runner = ["tokio"]
 dummy-runner = []
 svg = ["usvg"]
 vello-vg = ["vello", "vello_svg", "skrifa", "bytemuck", "wgpu-types"]
+
+# Enable all features for tests
+test = ["tokio-runner", "dummy-runner", "svg", "test-case", "vello-vg"]
 
 [package.metadata.docs.rs]
 features = ["dummy-runner"]

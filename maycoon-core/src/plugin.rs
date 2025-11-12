@@ -185,3 +185,102 @@ impl<T: Theme, V: VectorGraphicsInterface> Default for PluginManager<T, V> {
         Self::new()
     }
 }
+
+#[cfg(all(test, feature = "test"))]
+mod tests {
+    use crate::plugin::{Plugin, PluginManager};
+    use crate::vgi::dummy::DummyGraphics;
+    use maycoon_theme::theme::dummy::DummyTheme;
+    use std::sync::atomic::{AtomicU32, Ordering};
+
+    static A: AtomicU32 = AtomicU32::new(0);
+    static B: AtomicU32 = AtomicU32::new(0);
+    static C: AtomicU32 = AtomicU32::new(0);
+
+    /// Tests if plugin manager operates correctly on multiple plugins.
+    #[test]
+    fn test_plugin_manager() {
+        let mut plugins = PluginManager::<DummyTheme, DummyGraphics>::new()
+            .register(TestPluginA)
+            .register(TestPluginB)
+            .register(TestPluginC);
+
+        let mut run_a = 0;
+        let mut run_b = 0;
+        let mut run_c = 0;
+
+        plugins.run(|pl| match pl.name() {
+            "Test Plugin A" => run_a += 1,
+            "Test Plugin B" => run_b += 1,
+            "Test Plugin C" => run_c += 1,
+            _ => panic!(),
+        });
+
+        assert_eq!(run_a, 1);
+        assert_eq!(run_b, 1);
+        assert_eq!(run_c, 1);
+
+        plugins
+            .unregister(<TestPluginA as Plugin<DummyTheme, DummyGraphics>>::name(
+                &TestPluginA,
+            ))
+            .unregister(<TestPluginB as Plugin<DummyTheme, DummyGraphics>>::name(
+                &TestPluginB,
+            ))
+            .unregister(<TestPluginC as Plugin<DummyTheme, DummyGraphics>>::name(
+                &TestPluginC,
+            ));
+
+        assert_eq!(A.load(Ordering::Relaxed), 11);
+        assert_eq!(B.load(Ordering::Relaxed), 11);
+        assert_eq!(C.load(Ordering::Relaxed), 11);
+    }
+
+    struct TestPluginA;
+
+    impl Plugin<DummyTheme, DummyGraphics> for TestPluginA {
+        fn name(&self) -> &'static str {
+            "Test Plugin A"
+        }
+
+        fn on_register(&mut self, _manager: &mut PluginManager<DummyTheme, DummyGraphics>) {
+            A.fetch_add(1, Ordering::Relaxed);
+        }
+
+        fn on_unregister(&mut self, _manager: &mut PluginManager<DummyTheme, DummyGraphics>) {
+            A.fetch_add(10, Ordering::Relaxed);
+        }
+    }
+
+    struct TestPluginB;
+
+    impl Plugin<DummyTheme, DummyGraphics> for TestPluginB {
+        fn name(&self) -> &'static str {
+            "Test Plugin B"
+        }
+
+        fn on_register(&mut self, _manager: &mut PluginManager<DummyTheme, DummyGraphics>) {
+            B.fetch_add(1, Ordering::Relaxed);
+        }
+
+        fn on_unregister(&mut self, _manager: &mut PluginManager<DummyTheme, DummyGraphics>) {
+            B.fetch_add(10, Ordering::Relaxed);
+        }
+    }
+
+    struct TestPluginC;
+
+    impl Plugin<DummyTheme, DummyGraphics> for TestPluginC {
+        fn name(&self) -> &'static str {
+            "Test Plugin C"
+        }
+
+        fn on_register(&mut self, _manager: &mut PluginManager<DummyTheme, DummyGraphics>) {
+            C.fetch_add(1, Ordering::Relaxed);
+        }
+
+        fn on_unregister(&mut self, _manager: &mut PluginManager<DummyTheme, DummyGraphics>) {
+            C.fetch_add(10, Ordering::Relaxed);
+        }
+    }
+}

@@ -73,3 +73,21 @@ impl<T: 'static, U: 'static> Clone for MapSignal<T, U> {
         }
     }
 }
+
+#[cfg(all(test, feature = "test"))]
+mod tests {
+    use crate::reference::Ref;
+    use crate::signal::Signal;
+    use crate::signal::fixed::FixedSignal;
+
+    /// Tests the [MapSignal] implementation of [Signal].
+    #[test]
+    fn test_map_signal() {
+        let signal = FixedSignal::new(0)
+            .map(|i| Ref::Owned(i.to_string()))
+            .map(|s| Ref::Owned(s.len()))
+            .map(|len| Ref::Owned(len.to_string()));
+
+        assert_eq!(*signal.get(), "1".to_string());
+    }
+}

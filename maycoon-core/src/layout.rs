@@ -263,3 +263,39 @@ pub struct StyleNode {
     /// The children of this node.
     pub children: Vec<StyleNode>,
 }
+
+#[cfg(all(test, feature = "test"))]
+mod tests {
+    use crate::layout::{equal, intersects};
+    use nalgebra::Vector2;
+    use taffy::{Layout, Point, Size};
+
+    /// Test the [equal] function.
+    #[test_case::test_case(1.0, 1.0, true; "when equal and true")]
+    #[test_case::test_case(12.0, 12.4, true; "when positive and true")]
+    #[test_case::test_case(123.0, 123.5, false; "when positive and false")]
+    #[test_case::test_case(-1234.0, -1234.4, true; "when negative and true")]
+    #[test_case::test_case(-10.0, -10.5, false; "when negative and false")]
+    #[test_case::test_case(-1.0, 0.3, false; "when different and true")]
+    #[test_case::test_case(-0.25, 0.25, false; "when different and false")]
+    fn test_equal(x: f32, y: f32, eq: bool) {
+        assert_eq!(equal(x, y), eq);
+    }
+
+    /// Test the [intersects] function.
+    #[test_case::test_case(100.0, 500.0, true; "when point is on border")]
+    #[test_case::test_case(150.0, 550.0, true; "when point is inside")]
+    #[test_case::test_case(700.0, 700.0, false; "when point is outside")]
+    fn test_intersects(x: f32, y: f32, eq: bool) {
+        let layout = Layout {
+            location: Point { x: 100.0, y: 500.0 },
+            size: Size {
+                width: 500.0,
+                height: 100.0,
+            },
+            ..Default::default()
+        };
+
+        assert_eq!(intersects(Vector2::new(x, y), &layout), eq);
+    }
+}

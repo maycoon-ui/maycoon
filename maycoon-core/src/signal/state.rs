@@ -43,7 +43,7 @@ impl<T: 'static> Signal<T> for StateSignal<T> {
 
     #[inline(always)]
     fn set_value(&self, value: T) {
-        self.mutate(move |old| *old = value);
+        *self.value.borrow_mut() = value;
     }
 
     #[inline(always)]
@@ -75,5 +75,52 @@ impl<T: 'static> Clone for StateSignal<T> {
             value: self.value.clone(),
             listeners: self.listeners.clone(),
         }
+    }
+}
+
+#[cfg(all(test, feature = "test"))]
+mod tests {
+    use crate::signal::Signal;
+    use crate::signal::state::StateSignal;
+    use std::cell::RefCell;
+    use std::rc::Rc;
+
+    /// Tests the [StateSignal] implementation of [Signal].
+    #[test]
+    fn test_state_signal() {
+        let sum = Rc::new(RefCell::new(0));
+        let diff = Rc::new(RefCell::new(0));
+
+        let sum_clone = sum.clone();
+        let diff_clone = diff.clone();
+        let signal = StateSignal::new(0)
+            .listen(Box::new(move |val| {
+                *sum_clone.borrow_mut() += *val;
+            }))
+            .listen(Box::new(move |val| {
+                *diff_clone.borrow_mut() -= *val;
+            }));
+
+        let value = *signal.get();
+
+        // value = value + 1 = 0 + 1 = 1
+        signal.set(value + 1);
+
+        // sum = sum + value = 0 + 1 = 1
+        assert_eq!(*sum.borrow(), 1);
+
+        // diff = sum - value = 0 - 1 = -1
+        assert_eq!(*diff.borrow(), -1);
+
+        // value = value - 1 = 1 - 1 = 0
+        signal.mutate(|val| {
+            *val -= 1;
+        });
+
+        // sum = sum + value = 1 + 0 = 1
+        assert_eq!(*sum.borrow(), 1);
+
+        // diff = diff + value = -1 + 0 = -1
+        assert_eq!(*diff.borrow(), -1);
     }
 }

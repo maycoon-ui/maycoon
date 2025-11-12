@@ -8,6 +8,9 @@ use crate::style::{DefaultStyles, Style};
 /// The Celeste Theme.
 pub mod celeste;
 
+/// A dummy theme for testing purposes.
+pub mod dummy;
+
 /// Base trait for all themes.
 pub trait Theme: Debug + 'static {
     /// Return the [Style] of the given widget using its ID.
