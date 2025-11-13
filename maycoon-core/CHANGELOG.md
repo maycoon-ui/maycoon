@@ -7,6 +7,35 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.2](https://github.com/maycoon-ui/maycoon/compare/maycoon-core-v0.5.1...maycoon-core-v0.5.2) - 2025-11-12
+
+### Added
+
+- intersects layout function
+- Maximum text width
+- Equality layout function
+- first_run to Diagnostics
+
+### Fixed
+
+- Broken doctest in layout.rs
+- Native task runner functions not configured for native
+- Unimplemented LocalTask::take in tokio
+- Updates not reaching app until new event
+
+### Other
+
+- Add tests
+- `const`-ify possible functions
+- Make Listener use rpds::Vector instead of Vec
+- Replace indexmap with rpds
+- Add #[cold] close function to handler.rs
+- Add aggressive inlining
+- Use layout::intersects instead of manual hover check
+- Make DEFAULT_FONT public
+- Remove unnecessary update call
+- Make UpdateManager default to Update::Force
+
 ## [0.5.1](https://github.com/maycoon-ui/maycoon/compare/maycoon-core-v0.5.0...maycoon-core-v0.5.1) - 2025-11-07
 
 ### Added
