@@ -1,16 +1,19 @@
 use crate::tasks::runner::TaskRunnerImpl;
 use crate::tasks::task::{LocalTask, Task};
 use crate::tasks::waker::noop_waker;
+use fragile::Fragile;
 use std::pin::Pin;
 use std::task::{Context, Poll};
 use std::time::Duration;
 use tokio::runtime::{Builder, Runtime};
-use tokio::task::JoinHandle;
+use tokio::task::{JoinHandle, LocalSet};
 
 /// A [TaskRunnerImpl] implementation that uses [tokio].
 #[derive(Debug)]
 pub struct TaskRunner {
     rt: Runtime,
+    local: Fragile<LocalSet>,
+    tick_period: Duration,
 }
 
 impl TaskRunner {
@@ -20,6 +23,7 @@ impl TaskRunner {
     #[inline(always)]
     pub fn new(
         io: bool,
+        tick_period: Duration,
         stack_size: Option<usize>,
         workers: Option<usize>,
         max_io_events_per_tick: Option<usize>,
@@ -67,6 +71,8 @@ impl TaskRunner {
                 .enable_time()
                 .build()
                 .expect("Failed to build tokio runtime"),
+            local: Fragile::new(LocalSet::new()),
+            tick_period,
         }
     }
 }
@@ -84,6 +90,19 @@ impl TaskRunnerImpl for TaskRunner {
         TokioTask(self.rt.spawn(future))
     }
 
+    fn spawn_local<Fut>(&self, future: Fut) -> Self::LocalTask<Fut::Output>
+    where
+        Fut: Future + 'static,
+        Fut::Output: 'static,
+    {
+        LocalTokioTask(
+            self.local
+                .try_get()
+                .expect("`spawn_local` must be called from the main thread")
+                .spawn_local(future),
+        )
+    }
+
     #[inline(always)]
     fn spawn_blocking<R, F>(&self, func: F) -> Self::Task<R>
     where
@@ -99,6 +118,18 @@ impl TaskRunnerImpl for TaskRunner {
         Fut: Future,
     {
         self.rt.block_on(future)
+    }
+
+    fn tick(&self) {
+        self.block_on(async {
+            self.local
+                .try_get()
+                .expect("`tick` must be called from the main thread")
+                .run_until(async {
+                    tokio::time::sleep(self.tick_period).await;
+                })
+                .await;
+        });
     }
 }
 

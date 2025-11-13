@@ -1,5 +1,5 @@
 use crate::tasks::runner::TaskRunner;
-use crate::tasks::task::Task;
+use crate::tasks::task::{LocalTask, Task};
 use std::sync::OnceLock;
 
 /// Contains the [TaskRunner] and related structures.
@@ -56,6 +56,19 @@ where
     Fut::Output: Send + 'static,
 {
     runner().spawn(future)
+}
+
+/// Spawns a local task on the global task runner.
+///
+/// The local task will run on the current thread
+/// and will be executed by the application event loop.
+#[inline(always)]
+pub fn spawn_local<Fut>(future: Fut) -> Box<dyn LocalTask<Fut::Output>>
+where
+    Fut: Future + 'static,
+    Fut::Output: 'static,
+{
+    runner().spawn_local(future)
 }
 
 /// Spawns a blocking task on the global task runner.

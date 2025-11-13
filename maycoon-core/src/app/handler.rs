@@ -190,6 +190,9 @@ where
     #[inline(always)]
     #[tracing::instrument(level = "trace", skip_all)]
     fn update(&mut self, event_loop: &ActiveEventLoop) {
+        // tick the task runner
+        crate::tasks::runner().tick();
+
         // update plugins
         tracing::trace!("updating plugins");
         self.plugins.run(|pl| {

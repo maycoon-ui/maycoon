@@ -25,7 +25,7 @@ impl TaskRunner {
     ///
     /// Returns a task handle to the future.
     ///
-    /// Panics, when no task runner feature is enabled.
+    /// Panics, when no valid task runner is enabled.
     #[inline(always)]
     #[tracing::instrument(skip_all)]
     pub fn spawn<Fut>(&self, _future: Fut) -> Box<dyn Task<Fut::Output>>
@@ -49,11 +49,39 @@ impl TaskRunner {
         }
     }
 
+    /// Spawns a local task, that will run on the current thread.
+    ///
+    /// Returns a task handle to the future.
+    ///
+    /// Panics, when no valid task runner is enabled.
+    #[inline(always)]
+    #[tracing::instrument(skip_all)]
+    pub fn spawn_local<Fut>(&self, _future: Fut) -> Box<dyn LocalTask<Fut::Output>>
+    where
+        Fut: Future + 'static,
+        Fut::Output: 'static,
+    {
+        match self {
+            #[cfg(feature = "tokio-runner")]
+            TaskRunner::Tokio(rt) => Box::new(rt.spawn_local(_future)),
+
+            _ => {
+                panic!(
+                    "No valid task runner feature selected. Please select a `-runner` feature (e.g. `tokio-runner`)."
+                );
+
+                // Required for code to compile
+                #[allow(unreachable_code)]
+                Box::new(crate::tasks::task::LocalNeverTask::new())
+            },
+        }
+    }
+
     /// Spawns a blocking task in the background.
     ///
     /// Returns a task handle to the operation.
     ///
-    /// Panics, when no task runner feature is enabled.
+    /// Panics, when no valid task runner is enabled.
     #[inline(always)]
     #[cfg(native)]
     #[tracing::instrument(skip_all)]
@@ -80,7 +108,7 @@ impl TaskRunner {
 
     /// Blocks on the given future, until it's completed.
     ///
-    /// Panics, when no task runner feature is enabled.
+    /// Panics, when no valid task runner is enabled.
     #[inline(always)]
     #[cfg(native)]
     #[tracing::instrument(skip_all)]
@@ -91,6 +119,23 @@ impl TaskRunner {
         match self {
             #[cfg(feature = "tokio-runner")]
             TaskRunner::Tokio(rt) => rt.block_on(_future),
+
+            _ => panic!(
+                "No valid task runner feature selected. Please select a `-runner` feature (e.g. `tokio-runner`)."
+            ),
+        }
+    }
+
+    /// Allows the task runner to perform work on the current thread for one tick.
+    ///
+    /// The task runner should return as soon as possible (after the first `await` point is reached),
+    /// to avoid blocks and freezes.
+    #[inline(always)]
+    #[tracing::instrument(skip_all)]
+    pub fn tick(&self) {
+        match self {
+            #[cfg(feature = "tokio-runner")]
+            TaskRunner::Tokio(rt) => rt.tick(),
 
             _ => panic!(
                 "No valid task runner feature selected. Please select a `-runner` feature (e.g. `tokio-runner`)."
@@ -115,6 +160,16 @@ pub trait TaskRunnerImpl: Debug + 'static {
         Fut: Future + Send + 'static,
         Fut::Output: Send + 'static;
 
+    /// Spawns a local task, that will run on the current thread.
+    ///
+    /// The task will be executed by the application event loop via [TaskRunnerImpl::tick].
+    ///
+    /// Returns a task handle to the future.
+    fn spawn_local<Fut>(&self, future: Fut) -> Self::LocalTask<Fut::Output>
+    where
+        Fut: Future + 'static,
+        Fut::Output: 'static;
+
     /// Spawns a blocking task in the background.
     ///
     /// Returns a task handle to the operation.
@@ -129,4 +184,10 @@ pub trait TaskRunnerImpl: Debug + 'static {
     fn block_on<Fut>(&self, future: Fut) -> Fut::Output
     where
         Fut: Future;
+
+    /// Allows the task runner to perform work on the current thread for one tick.
+    ///
+    /// The task runner should return as soon as possible (after the first `await` point is reached),
+    /// to avoid blocks and freezes.
+    fn tick(&self);
 }

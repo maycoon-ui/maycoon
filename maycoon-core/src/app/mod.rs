@@ -71,7 +71,15 @@ pub trait Application: Sized {
             tracing::info!("initializing tokio task runner");
             crate::tasks::init(crate::tasks::runner::TaskRunner::Tokio(
                 crate::tasks::runner::tokio::TaskRunner::new(
-                    true, None, None, None, None, None, None, None,
+                    true,
+                    std::time::Duration::from_millis(8),
+                    None,
+                    None,
+                    None,
+                    None,
+                    None,
+                    None,
+                    None,
                 ),
             ));
         }
