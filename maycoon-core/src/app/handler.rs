@@ -1,6 +1,5 @@
 use nalgebra::Vector2;
 use std::sync::Arc;
-use std::time::{Duration, Instant};
 use taffy::{
     AvailableSpace, Dimension, NodeId, PrintTree, Size, Style, TaffyResult, TaffyTree,
     TraversePartialTree,
@@ -40,7 +39,6 @@ where
     widget: Option<W>,
     info: AppInfo,
     update: UpdateManager,
-    last_update: Instant,
     plugins: PluginManager<T, V>,
     graphics: V,
 }
@@ -92,7 +90,6 @@ where
             builder,
             state: Some(state),
             update,
-            last_update: Instant::now(),
             plugins,
             graphics: V::new(graphics).expect("Failed to create vector graphics interface"),
         }
@@ -204,7 +201,6 @@ where
                 self.window_node,
                 &mut self.info,
                 &self.update,
-                &mut self.last_update,
                 event_loop,
             )
         });
@@ -244,7 +240,7 @@ where
         );
 
         // check if app should re-evaluate layout
-        if self.update.get().intersects(Update::LAYOUT | Update::FORCE) {
+        if self.update.is_set(Update::LAYOUT | Update::FORCE) {
             tracing::trace_span!("layout").in_scope(|| {
                 // clear all nodes (except root window node)
                 self.taffy
@@ -268,7 +264,10 @@ where
         }
 
         // check if app should redraw
-        if self.update.get().intersects(Update::FORCE | Update::DRAW) {
+        if self
+            .update
+            .is_set(Update::DRAW | Update::LAYOUT | Update::FORCE)
+        {
             tracing::trace_span!("draw").in_scope(|| {
                 // clear scene
                 tracing::trace!("resetting vector graphics interface scene");
@@ -298,13 +297,12 @@ where
         }
 
         // check if app should re-evaluate
-        if self.update.get().intersects(Update::EVAL | Update::FORCE) {
+        if self.update.is_set(Update::EVAL) {
             tracing::trace!("re-evaluating application state");
-            self.request_redraw();
         }
 
         // update the app if requested
-        if self.update.get().intersects(Update::EXIT) {
+        if self.update.is_set(Update::EXIT) {
             tracing::trace!("exiting event loop");
             event_loop.exit();
             return;
@@ -316,25 +314,8 @@ where
         self.update.clear();
 
         // update diagnostics
-        tracing::trace!("updating diagnostics");
-
         self.info.diagnostics.first_run = false;
-
-        if self.last_update.elapsed() >= Duration::from_secs(1) {
-            self.last_update = Instant::now();
-
-            // calc avg updates per sec through updates per sec NOW divided by 2
-            self.info.diagnostics.updates_per_sec =
-                (self.info.diagnostics.updates_per_sec + self.info.diagnostics.updates) / 2;
-
-            // reset current updates per seconds
-            self.info.diagnostics.updates = 0;
-        } else {
-            // increase updates per sec NOW by 1
-            self.info.diagnostics.updates += 1;
-        }
-
-        tracing::debug!("updates per sec: {}", self.info.diagnostics.updates_per_sec);
+        self.info.diagnostics.do_update();
     }
 
     #[cold]
@@ -371,7 +352,6 @@ where
                 self.window_node,
                 &mut self.info,
                 &self.update,
-                &mut self.last_update,
                 event_loop,
             )
         });
@@ -433,7 +413,6 @@ where
                 self.window_node,
                 &mut self.info,
                 &self.update,
-                &mut self.last_update,
                 event_loop,
             )
         });
@@ -472,9 +451,8 @@ where
                         self.info.size =
                             Vector2::new(new_size.width as f64, new_size.height as f64);
 
-                        self.request_redraw();
-
-                        self.update.insert(Update::DRAW | Update::LAYOUT);
+                        self.update
+                            .insert(Update::EVAL | Update::DRAW | Update::LAYOUT);
                     } else {
                         tracing::trace!("window size is 0x0, ignoring resize event");
                     }
@@ -486,17 +464,31 @@ where
 
                 WindowEvent::RedrawRequested => {
                     window.request_redraw();
-                    self.update(event_loop);
+
+                    // update diagnostics frames
+                    self.info.diagnostics.do_frame();
+
+                    if self.update.is_set(Update::EVAL) {
+                        self.update.remove(Update::EVAL);
+                        self.update(event_loop);
+                    }
+
+                    // update diagnostics computations
+                    tracing::trace!("updating diagnostics");
+                    self.info.diagnostics.tick();
+
+                    tracing::debug!("updates per sec {}", self.info.diagnostics.updates_per_sec);
+                    tracing::debug!("frames per sec {}", self.info.diagnostics.frames_per_sec);
                 },
 
                 WindowEvent::CursorLeft { .. } => {
                     self.info.cursor_pos = None;
-                    self.request_redraw();
+                    self.update.insert(Update::EVAL);
                 },
 
                 WindowEvent::CursorMoved { position, .. } => {
                     self.info.cursor_pos = Some(Vector2::new(position.x as f32, position.y as f32));
-                    self.request_redraw();
+                    self.update.insert(Update::EVAL);
                 },
 
                 WindowEvent::KeyboardInput {
@@ -508,7 +500,7 @@ where
                         tracing::trace!("keyboard input {event:?}");
 
                         self.info.keys.push((device_id, event));
-                        self.request_redraw();
+                        self.update.insert(Update::EVAL);
                     }
                 },
 
@@ -520,13 +512,13 @@ where
                     tracing::trace!("mouse input {button:?} {state:?}");
 
                     self.info.buttons.push((device_id, button, state));
-                    self.request_redraw();
+                    self.update.insert(Update::EVAL);
                 },
 
                 WindowEvent::MouseWheel { delta, .. } => {
                     tracing::trace!("mouse wheel {delta:?}");
                     self.info.mouse_scroll_delta = Some(delta);
-                    self.request_redraw();
+                    self.update.insert(Update::EVAL);
                 },
 
                 WindowEvent::Destroyed => tracing::info!("window destroyed"),
@@ -557,7 +549,6 @@ where
                 self.window_node,
                 &mut self.info,
                 &self.update,
-                &mut self.last_update,
                 event_loop,
             )
         });

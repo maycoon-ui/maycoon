@@ -7,7 +7,6 @@ use maycoon::core::vgi::VectorGraphicsInterface;
 use maycoon::core::window::{ActiveEventLoop, Window, WindowEvent};
 use maycoon::theme::theme::Theme;
 use std::sync::Arc;
-use std::time::Instant;
 
 pub struct MyPlugin;
 
@@ -34,7 +33,6 @@ impl<T: Theme, V: VectorGraphicsInterface> Plugin<T, V> for MyPlugin {
         _window_node: NodeId,
         _info: &mut AppInfo,
         _update: &UpdateManager,
-        _last_update: &mut Instant,
         _event_loop: &ActiveEventLoop,
     ) {
         if let WindowEvent::DroppedFile(path) = event {

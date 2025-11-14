@@ -45,14 +45,12 @@ impl UpdateManager {
     /// Inserts the given `Update` into the `UpdateManager` using bitwise OR.
     #[inline(always)]
     pub fn insert(&self, update: Update) {
-        tracing::debug!("inserting update {update:?}");
         self.update.fetch_or(update.bits(), Ordering::AcqRel);
     }
 
     /// Removes the given `Update` from the `UpdateManager` using bitwise AND.
     #[inline(always)]
     pub fn remove(&self, update: Update) {
-        tracing::debug!("removing update {update:?}");
         self.update.fetch_and(!update.bits(), Ordering::AcqRel);
     }
 
@@ -66,7 +64,6 @@ impl UpdateManager {
     /// Sets the current `Update` of the `UpdateManager`.
     #[inline(always)]
     pub fn set(&self, update: Update) {
-        tracing::debug!("setting update {update:?}");
         self.update.store(update.bits(), Ordering::Release);
     }
 
@@ -74,6 +71,14 @@ impl UpdateManager {
     #[inline(always)]
     pub fn clear(&self) {
         self.update.store(0, Ordering::Release);
+    }
+
+    /// Checks if the given [Update] flag is set.
+    ///
+    /// Equivalent to `UpdateManager.get().intersects(flag)`.
+    #[inline(always)]
+    pub fn is_set(&self, flag: Update) -> bool {
+        self.get().intersects(flag)
     }
 }
 

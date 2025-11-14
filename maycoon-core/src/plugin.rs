@@ -8,7 +8,6 @@ use std::cell::RefCell;
 use std::ops::DerefMut;
 use std::rc::Rc;
 use std::sync::Arc;
-use std::time::Instant;
 use taffy::{NodeId, TaffyTree};
 use winit::event::WindowEvent;
 use winit::event_loop::{ActiveEventLoop, EventLoop};
@@ -56,7 +55,6 @@ pub trait Plugin<T: Theme, V: VectorGraphicsInterface>: 'static {
         _window_node: NodeId,
         _info: &mut AppInfo,
         _update: &UpdateManager,
-        _last_update: &mut Instant,
         _event_loop: &ActiveEventLoop,
     ) {
     }
@@ -73,7 +71,6 @@ pub trait Plugin<T: Theme, V: VectorGraphicsInterface>: 'static {
         _window_node: NodeId,
         _info: &mut AppInfo,
         _update: &UpdateManager,
-        _last_update: &mut Instant,
         _event_loop: &ActiveEventLoop,
     ) {
     }
@@ -90,7 +87,6 @@ pub trait Plugin<T: Theme, V: VectorGraphicsInterface>: 'static {
         _window_node: NodeId,
         _info: &mut AppInfo,
         _update: &UpdateManager,
-        _last_update: &mut Instant,
         _event_loop: &ActiveEventLoop,
     ) {
     }
@@ -105,7 +101,6 @@ pub trait Plugin<T: Theme, V: VectorGraphicsInterface>: 'static {
         _window_node: NodeId,
         _info: &mut AppInfo,
         _update: &UpdateManager,
-        _last_update: &mut Instant,
         _event_loop: &ActiveEventLoop,
     ) {
     }

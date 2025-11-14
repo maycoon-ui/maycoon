@@ -6,7 +6,7 @@ use maycoon::core::widget::Widget;
 use maycoon::theme::theme::celeste::CelesteTheme;
 use maycoon::widgets::text::Text;
 use tracing_flame::FlameLayer;
-use tracing_subscriber::filter::FilterFn;
+use tracing_subscriber::filter::{FilterFn, LevelFilter};
 use tracing_subscriber::layer::SubscriberExt;
 use tracing_subscriber::util::SubscriberInitExt;
 use tracing_subscriber::{Layer, fmt};
@@ -27,7 +27,12 @@ fn main() {
     let (flame, guard) = FlameLayer::with_file("tracing.folded").unwrap();
 
     tracing_subscriber::registry()
-        .with(fmt::layer().compact().with_filter(filter.clone()))
+        .with(
+            fmt::layer()
+                .compact()
+                .with_filter(filter.clone())
+                .with_filter(LevelFilter::DEBUG),
+        )
         .with(flame.with_file_and_line(false).with_filter(filter))
         .init();
 
