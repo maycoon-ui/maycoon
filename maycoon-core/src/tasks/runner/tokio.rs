@@ -2,6 +2,7 @@ use crate::tasks::runner::TaskRunnerImpl;
 use crate::tasks::task::{LocalTask, Task};
 use crate::tasks::waker::noop_waker;
 use fragile::Fragile;
+use std::future::ready;
 use std::pin::Pin;
 use std::task::{Context, Poll};
 use std::time::Duration;
@@ -13,7 +14,6 @@ use tokio::task::{JoinHandle, LocalSet};
 pub struct TaskRunner {
     rt: Runtime,
     local: Fragile<LocalSet>,
-    tick_period: Duration,
 }
 
 impl TaskRunner {
@@ -23,7 +23,6 @@ impl TaskRunner {
     #[inline(always)]
     pub fn new(
         io: bool,
-        tick_period: Duration,
         stack_size: Option<usize>,
         workers: Option<usize>,
         max_io_events_per_tick: Option<usize>,
@@ -72,7 +71,6 @@ impl TaskRunner {
                 .build()
                 .expect("Failed to build tokio runtime"),
             local: Fragile::new(LocalSet::new()),
-            tick_period,
         }
     }
 }
@@ -125,9 +123,7 @@ impl TaskRunnerImpl for TaskRunner {
             self.local
                 .try_get()
                 .expect("`tick` must be called from the main thread")
-                .run_until(async {
-                    tokio::time::sleep(self.tick_period).await;
-                })
+                .run_until(async { ready(()).await })
                 .await;
         });
     }
