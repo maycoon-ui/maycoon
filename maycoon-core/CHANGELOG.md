@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.3](https://github.com/maycoon-ui/maycoon/compare/maycoon-core-v0.5.2...maycoon-core-v0.5.3) - 2025-11-16
+
+### Added
+
+- Local task running
+
+### Fixed
+
+- Updates always triggering and rework diagnostics
+
+### Other
+
+- Use a ready task for ticking instead of timeout
+- Merge branch 'master' of https://github.com/maycoon-ui/maycoon
+
 ## [0.5.2](https://github.com/maycoon-ui/maycoon/compare/maycoon-core-v0.5.1...maycoon-core-v0.5.2) - 2025-11-12
 
 ### Added
