@@ -1,0 +1,15 @@
+[run]
+workspace = false
+packages = [
+    "maycoon-core",
+    "maycoon-widgets",
+    "maycoon-theme",
+    "maycoon-macros"
+]
+all-features = true
+force-clean = false
+skip-clean = true
+timeout = "5m"
+
+[report]
+out = ["Json"]
