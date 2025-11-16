@@ -12,4 +12,4 @@ skip-clean = true
 timeout = "5m"
 
 [report]
-out = ["Json"]
+out = ["Json", "Xml", "Html"]
