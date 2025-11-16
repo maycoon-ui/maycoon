@@ -2,7 +2,7 @@
 members = ["maycoon-core", "maycoon-macros", "maycoon-theme", "maycoon-widgets", "examples/*"]
 
 [workspace.package]
-version = "0.5.2"
+version = "0.5.3"
 edition = "2024"
 authors = ["Mikail Plotzky <mp@ypon.com>", "Maycoon Contributors"]
 license = "MIT OR Apache-2.0"
@@ -19,10 +19,10 @@ tracing = "0.1.41"
 cfg_aliases = "0.2.1"
 test-case = "3.3.1"
 rpds = "1.2.0"
-maycoon-core = { version = "0.5.2", path = "maycoon-core" }
-maycoon-macros = { version = "0.5.2", path = "maycoon-macros" }
-maycoon-theme = { version = "0.5.2", path = "maycoon-theme" }
-maycoon-widgets = { version = "0.5.2", path = "maycoon-widgets" }
+maycoon-core = { version = "0.5.3", path = "maycoon-core" }
+maycoon-macros = { version = "0.5.3", path = "maycoon-macros" }
+maycoon-theme = { version = "0.5.3", path = "maycoon-theme" }
+maycoon-widgets = { version = "0.5.3", path = "maycoon-widgets" }
 
 [package]
 name = "maycoon"
