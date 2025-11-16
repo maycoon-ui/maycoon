@@ -7,6 +7,7 @@
 ![Crates.io Version](https://img.shields.io/crates/v/maycoon)
 ![License](https://img.shields.io/crates/l/maycoon)
 ![docs.rs](https://img.shields.io/docsrs/maycoon)
+![Coverage](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2Fmaycoon-ui%2Fmaycoon-coverage%2Frefs%2Fheads%2Fmaster%2Fcoverage-percentage.json&query=coverage&suffix=%25&label=coverage&color=beige)
 
 **Modern and Innovative UI Framework written in Rust**
 
